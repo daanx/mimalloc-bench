@@ -1,0 +1,13 @@
+ide/vs2017/*.db
+ide/vs2017/*.opendb
+ide/vs2017/*.user
+ide/vs2017/.vs
+out/
+bench/doc/
+bench/ebizzy/
+bench/malloc-test/
+bench/shbench/sh6bench.c
+bench/shbench/sh6bench-new.c
+bench/shbench/SH8BENCH.C
+bench/shbench/sh8bench-new.c
+*.zip
