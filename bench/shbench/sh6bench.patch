@@ -1,0 +1,52 @@
+113c113,114
+< #include "smrtheap.h"
+---
+> // #include "smrtheap.h"
+> 
+155c156
+< unsigned long ulCallCount = 1000;
+---
+> unsigned long ulCallCount = 10000;
+198c199,208
+< 
+---
+> #ifdef BENCH
+> 	fin = stdin;
+> 	fout = stdout;
+>   unsigned int defaultThreadCount = GetNumProcessors();
+> 	if (argc==2) {
+> 		char* end;
+> 		long l = strtol(argv[1],&end,10);
+> 		if (l > 0) defaultThreadCount = l;
+> 	}
+> #else
+207c217
+< 
+---
+> #endif
+223c233
+< 		unsigned uCPUs = promptAndRead("CPUs (0 for all)", 0, 'u');
+---
+> 		unsigned uCPUs = promptAndRead("CPUs (0 for all)", PROCS, 'u');
+256c266
+< 		uThreadCount = (int)promptAndRead("threads", GetNumProcessors(), 'u');
+---
+> 		uThreadCount = (int)promptAndRead("threads", defaultThreadCount, 'u');
+259a270,276
+> 
+> 		if (uThreadCount==1) {
+> 			startCPU = clock();
+> 			startTime = time(NULL);
+> 			doBench(NULL);
+> 		}
+> 		else {
+277a295
+> 	}
+301a320
+> 	exit(0);
+341a361
+> 				char* p = mp[-1]; p[0] = 0; p[size-1] = 0;
+389a410
+> #ifndef BENCH
+397a419
+> #endif
