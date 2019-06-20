@@ -1,6 +1,6 @@
-xmalloc-test.c: is known as "malloc-test"
+xmalloc-test.c: is also known as "malloc-test"
 
-Originally by C. Lever and D. Boreham, Christian Eder ( ederc@mathematik.uni-kl.de) for xmalloc,
+Originally by C. Lever and D. Boreham, Christian Eder ( ederc@mathematik.uni-kl.de) for [xmalloc](https://github.com/ederc/xmalloc),
 and modified by Bradley C. Kuzmaul for SuperMalloc <https://github.com/kuszmaul/SuperMalloc>
 
 ```

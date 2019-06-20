@@ -1,7 +1,10 @@
+Made by OLogN Technologies and described on their
+[blog](http://ithare.com/testing-memory-allocators-ptmalloc2-tcmalloc-hoard-jemalloc-while-trying-to-simulate-real-world-loads). Original repository at <https://github.com/node-dot-cpp/alloc-test>.
+
+```
 Copyright (c) 2018, OLogN Technologies AG
 All rights reserved.
 
-```
 *
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
