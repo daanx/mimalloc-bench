@@ -19,6 +19,8 @@ please do so!.
 Enjoy,
   Daan
 
+\
+
 
 Note that all the code in the `bench` directory is not part of
 _mimalloc-bench_ as such, and all programs in the `bench` directory are
