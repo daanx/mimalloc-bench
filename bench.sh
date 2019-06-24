@@ -28,6 +28,7 @@ run_lean_mathlib=0
 run_alloc_test=0
 run_malloc_test=0
 run_xmalloc_test=0
+run_malloc_large=0
 run_cthrash=0
 run_cscratch=0
 run_z3=0
@@ -67,6 +68,8 @@ pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 lib_mi="$localdevdir/mimalloc/out/release/libmimalloc.so"
 lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug.so"
 lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure.so"
+lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc.so"
+
 lib_hd="$localdevdir/Hoard/src/libhoard.so"
 lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
 lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc.so"
@@ -148,6 +151,8 @@ while : ; do
         run_dmi=1;;
     smi)
         run_smi=1;;
+    xmi)
+        run_xmi=1;;
     hd)
         run_hd=1;;
     tbb)
@@ -184,6 +189,8 @@ while : ; do
         run_malloc_test=1;;
     xmalloc-test)
         run_xmalloc_test=1;;
+    malloc-large)
+        run_malloc_large=1;;
     mathlib)
         run_lean_mathlib=1;;
     redis)
@@ -339,6 +346,11 @@ function run_smi_test {
   fi
 }
 
+function run_xmi_test {
+  if test "$run_xmi" = "1"; then
+    run_testx $1 "xmi" "${ldpreload}=$lib_xmi" "$2"
+  fi
+}
 
 function run_je_test {
   if test "$run_je" = "1"; then
@@ -395,6 +407,7 @@ function run_test {
   run_mi_test $1 "$2"
   run_dmi_test $1 "$2"
   run_smi_test $1 "$2"
+  run_xmi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
   run_sn_test $1 "$2"
@@ -473,9 +486,16 @@ if test "$run_cscratch" = "1"; then
     run_test "cache-scratchN" "./cache-scratch $procs 1000 1 2000000 $procs"
   fi
 fi
+
 if test "$run_malloc_test" = "1"; then
   run_test "malloc-test" "./malloc-test"
 fi
+
+if test "$run_malloc_large" = "1"; then
+  run_test "malloc-large" "./malloc-large"
+fi
+
+
 if test "$run_z3" = "1"; then
   run_test "z3" "z3 -smt2 $benchdir/z3/test1.smt2"
 fi

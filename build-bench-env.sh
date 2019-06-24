@@ -11,6 +11,7 @@ setup_rp=0
 setup_hd=0
 setup_sm=0
 setup_tbb=0
+setup_ch=0
 
 # bigger benchmarks
 setup_lean=0
@@ -46,6 +47,7 @@ while : ; do
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
+        #setup_ch=$flag_arg
         setup_bench=$flag_arg
         setup_packages=$flag_arg
         ;;
@@ -69,6 +71,8 @@ while : ; do
         setup_lean=$flag_arg;;
     redis)
         setup_redis=$flag_arg;;
+    ch)
+        setup_ch=$flag_arg;;
     bench)
         setup_bench=$flag_arg;;
     packages)
@@ -288,6 +292,23 @@ if test "$setup_redis" = "1"; then
   popd
 fi
 
+if test "$setup_ch" = "1"; then
+  phase "build ClickHouse v19.8.3.8-stable"
+
+  pushd $devdir
+  if test -d "ClickHouse"; then
+    echo "$devdir/ClickHouse already exists; no need to git clone"
+  else
+    sudo apt-get install git pbuilder debhelper lsb-release fakeroot sudo debian-archive-keyring debian-keyring
+    git clone --recursive https://github.com/yandex/ClickHouse.git
+  fi
+  cd ClickHouse
+  git checkout mimalloc
+  ./release
+  popd
+fi
+
+sudo apt-get install git pbuilder debhelper lsb-release fakeroot sudo debian-archive-keyring debian-keyring
 if test "$setup_mi" = "1"; then
   phase "build mimalloc variants"
 

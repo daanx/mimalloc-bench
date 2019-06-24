@@ -80,3 +80,6 @@ target_link_libraries(cache-thrash pthread)
 
 add_executable(xmalloc-test xmalloc-test/xmalloc-test.c)
 target_link_libraries(xmalloc-test pthread)
+
+add_executable(malloc-large malloc-large/malloc-large.cpp)
+target_link_libraries(malloc-large pthread)
