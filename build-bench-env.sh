@@ -308,7 +308,6 @@ if test "$setup_ch" = "1"; then
   popd
 fi
 
-sudo apt-get install git pbuilder debhelper lsb-release fakeroot sudo debian-archive-keyring debian-keyring
 if test "$setup_mi" = "1"; then
   phase "build mimalloc variants"
 
