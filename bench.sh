@@ -89,7 +89,7 @@ if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"; then
 fi
 
 
-spec_dir="$localdevdir/spec2017"
+spec_dir="$localdevdir/../../spec2017"
 spec_base="base"
 spec_bench="refspeed"
 spec_config="malloc-test-m64"
