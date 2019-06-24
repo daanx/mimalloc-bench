@@ -9,7 +9,6 @@ run_mi=0
 run_dmi=0
 run_smi=0
 run_tc=0
-run_jx=0
 run_hd=0
 run_sys=0
 run_rp=0
@@ -45,7 +44,15 @@ case "$OSTYPE" in
 esac
 
 curdir=`pwd`
-pushd "../../.." # up 3 levels from `mimalloc-bench/out/bench`
+if test -f ../../build-bench-env.sh; then
+  echo "use '-h' to see all options"
+  echo ""
+else
+  echo "error: you must run this script from the 'out/bench' directory!"
+  exit 1
+fi
+
+pushd "../../extern" # up from `mimalloc-bench/out/bench`
 localdevdir=`pwd`
 popd
 pushd "../../bench"
@@ -60,19 +67,17 @@ pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 lib_mi="$localdevdir/mimalloc/out/release/libmimalloc.so"
 lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug.so"
 lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure.so"
-lib_jx="/usr/lib/libjemalloc.so"
-lib_tc="/usr/lib/libtcmalloc.so"
-lib_hd="/usr/lib/libhoard.so"
+lib_hd="$localdevdir/Hoard/src/libhoard.so"
 lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
 lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc.so"
 #lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc_pthread.so"
 lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
 lib_rp="${localdevdir}/rpmalloc/bin/linux/release/x86-64/librpmalloc.so"
+
+#todo: install and build these in the extern directory
+lib_tc="/usr/lib/libtcmalloc.so"
 lib_tbb="/usr/lib/libtbbmalloc_proxy.so"
 
-if test -f "/usr/lib/x86_64-linux-gnu/libjemalloc.so"; then
-  lib_jx="/usr/lib/x86_64-linux-gnu/libjemalloc.so"
-fi
 if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc.so"; then
   lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc.so"
 fi
@@ -99,7 +104,6 @@ while : ; do
     "") break;;
     alla)
         run_je=1
-        #run_jx=1
         run_mi=1
         #run_dmi=1
         #run_smi=1
@@ -130,8 +134,6 @@ while : ; do
         ;;
     je)
         run_je=1;;
-    jx)
-        run_jx=1;;
     rp)
         run_rp=1;;
     sm)
@@ -209,7 +211,6 @@ while : ; do
         echo "  rp                           use rpmalloc"
         echo "  tbb                          use Intel TBB malloc"
         echo "  mc                           use system malloc (glibc)"
-        echo "  jx                           use OS bundled jemalloc "
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
         echo ""
@@ -345,14 +346,6 @@ function run_je_test {
   fi
 }
 
-function run_jx_test {
-  if test "$run_jx" = "1"; then
-    if test -f $lib_jx; then
-      run_testx $1 "jx" "${ldpreload}=$lib_jx" "$2"
-    fi
-  fi
-}
-
 function run_tc_test {
   if test "$run_tc" = "1"; then
     run_testx $1 "tc" "${ldpreload}=$lib_tc" "$2"
@@ -404,7 +397,6 @@ function run_test {
   run_smi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
-  run_jx_test $1 "$2"
   run_sn_test $1 "$2"
   run_tbb_test $1 "$2"
   run_rp_test $1 "$2"

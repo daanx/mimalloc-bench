@@ -30,14 +30,13 @@ their `README.md` (or `license.txt`) files. They are just included here for conv
 
 # Benchmarking
 
-The `build-bench-env.sh` script will automatically pull all needed benchmarks
-and allocators and build them on Linux systems with `apt-get`:
+The `build-bench-env.sh` script with the `all` argument will automatically pull
+all needed benchmarks and allocators and build them in the `extern` directory:
 ```
-~/dev/mimalloc-bench> ./build-bench-env.sh
+~/dev/mimalloc-bench> ./build-bench-env.sh all
 ```
 It starts installing packages and you will need to enter the sudo password.
-All other programs will be build as a peer to `mimalloc-bench`, e.g. `~/dev/Hoard`,
-`~/dev/jemalloc`, and `~/dev/lean`.
+All other programs are build in the `mimalloc-bench/extern` directory.
 
 If everything succeeded, you can run the full benchmark suite (from `out/bench`) as:
 

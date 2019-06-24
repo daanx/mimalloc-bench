@@ -1,7 +1,4 @@
-ide/vs2017/*.db
-ide/vs2017/*.opendb
-ide/vs2017/*.user
-ide/vs2017/.vs
+extern/
 out/
 bench/doc/
 bench/ebizzy/
