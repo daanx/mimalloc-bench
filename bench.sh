@@ -34,7 +34,7 @@ run_cscratch=0
 run_z3=0
 run_redis=0
 run_gs=0
-
+run_rbstress=0
 run_spec=0
 run_spec_bench=0
 
@@ -75,7 +75,8 @@ lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
 lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc.so"
 #lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc_pthread.so"
 lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
-lib_rp="${localdevdir}/rpmalloc/bin/linux/release/x86-64/librpmalloc.so"
+lib_rp="${localdevdir}/rpmalloc/bin/linux/release/x86-64/librpmallocwrap.so"
+#lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
 
 #todo: install and build these in the extern directory
 lib_tc="/usr/lib/libtcmalloc.so"
@@ -112,7 +113,7 @@ while : ; do
         #run_smi=1
         run_tc=1
         run_hd=1
-        run_rp=1
+        #run_rp=1
         #run_sm=1
         run_sn=1
         run_tbb=1
@@ -195,6 +196,8 @@ while : ; do
         run_lean_mathlib=1;;
     redis)
         run_redis=1;;
+    rbstress)
+        run_rbstress=1;;
     spec=*)
         run_spec=1
         run_spec_bench="$flag_arg";;
@@ -500,6 +503,12 @@ if test "$run_z3" = "1"; then
   run_test "z3" "z3 -smt2 $benchdir/z3/test1.smt2"
 fi
 
+if test "$run_rbstress" = "1"; then
+  run_test "rbstress1" "ruby $benchdir/rbstress/stress_mem.rb 1"
+  if test "$procs" != "1"; then
+    run_test "rbstressN" "ruby $benchdir/rbstress/stress_mem.rb $procs"
+  fi
+fi
 
 if test "$run_spec" = "1"; then
   case "$run_spec_bench" in
