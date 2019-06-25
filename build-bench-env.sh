@@ -164,7 +164,7 @@ if test "$setup_tbb" = "1"; then
     git clone https://github.com/intel/tbb
   fi
   cd tbb
-  git checkout 2019-U8  
+  git checkout 2019_U8
   make tbbmalloc
   popd
 fi
