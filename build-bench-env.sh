@@ -12,6 +12,7 @@ setup_hd=0
 setup_sm=0
 setup_tbb=0
 setup_ch=0
+setup_mesh=0
 
 # bigger benchmarks
 setup_lean=0
@@ -44,6 +45,7 @@ while : ; do
         setup_hd=$flag_arg
         setup_sm=$flag_arg
         setup_tbb=$flag_arg
+        setup_mesh=$flag_arg
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
@@ -67,6 +69,8 @@ while : ; do
         setup_hd=$flag_arg;;
     tbb)
         setup_tbb=$flag_arg;;
+    mesh)
+        setup_mesh=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
     redis)
@@ -95,6 +99,7 @@ while : ; do
         echo "  sn                           setup snmalloc"
         echo "  rp                           setup rpmalloc"
         echo "  tbb                          setup Intel TBB malloc"
+        echo "  mesh                         setup mesh allocator"
         echo ""
         echo "  lean                         setup lean 3 benchmark"
         echo "  redis                        setup redis benchmark"
@@ -254,6 +259,22 @@ if test "$setup_sm" = "1"; then
   git checkout 709663fb
   sed -i "s/-Werror//" Makefile.include
   cd release
+  make
+  popd
+fi
+
+if test "$setup_mesh" = "1"; then
+  phase "build Mesh (commit aeb626e7 on master)"
+
+  pushd $devdir
+  if test -d mesh; then
+    echo "$devdir/mesh already exists; no need to git clone"
+  else
+    git clone --recurse-submodules https://github.com/plasma-umass/mesh
+  fi
+  cd mesh
+  git checkout aeb626e7
+  ./configure
   make
   popd
 fi

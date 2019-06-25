@@ -15,6 +15,7 @@ run_rp=0
 run_sm=0
 run_sn=0
 run_tbb=0
+run_mesh=0
 
 run_cfrac=0
 run_larson=0
@@ -77,6 +78,7 @@ lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc.so"
 lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
 lib_rp="${localdevdir}/rpmalloc/bin/linux/release/x86-64/librpmallocwrap.so"
 #lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
+lib_mesh="${localdevdir}/mesh/libmesh.so"
 
 #todo: install and build these in the extern directory
 lib_tc="/usr/lib/libtcmalloc.so"
@@ -158,6 +160,8 @@ while : ; do
         run_hd=1;;
     tbb)
         run_tbb=1;;
+    mesh)
+        run_mesh=1;;
     sys|mc)
         run_sys=1;;
     cfrac)
@@ -223,6 +227,7 @@ while : ; do
         echo "  mc                           use system malloc (glibc)"
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
+        echo "  mesh                         use mesh git#aeb626e7"
         echo ""
         echo "  cfrac                        run cfrac"
         echo "  espresso                     run espresso"
@@ -373,6 +378,12 @@ function run_hd_test {
   fi
 }
 
+function run_mesh_test {
+  if test "$run_mesh" = "1"; then
+    run_testx $1 "mesh" "${ldpreload}=$lib_mesh" "$2"
+  fi
+}
+
 function run_rp_test {
   if test "$run_rp" = "1"; then
     run_testx $1 "rp" "${ldpreload}=$lib_rp" "$2"
@@ -417,6 +428,7 @@ function run_test {
   run_tbb_test $1 "$2"
   run_rp_test $1 "$2"
   run_hd_test $1 "$2"
+  run_mesh_test $1 "$2"
   run_sm_test $1 "$2"
   run_sys_test $1 "$2"
 }
