@@ -82,7 +82,7 @@ lib_mesh="${localdevdir}/mesh/libmesh.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
 
-if "$use_packages" = "1"; then
+if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc.so"
   lib_tbb="/usr/lib/libtbbmalloc_proxy.so"
 
