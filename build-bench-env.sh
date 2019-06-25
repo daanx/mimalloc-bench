@@ -244,7 +244,7 @@ if test "$setup_rp" = "1"; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
     git checkout 1.3.1
-    python configure.py
+    python2 configure.py
   fi
   ninja
   popd
