@@ -92,7 +92,7 @@ while : ; do
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo ""
         echo "  je                           setup jemalloc 5.2.0"
-        echo "  tc                           install tcmalloc (latest package)"
+        echo "  tc                           setup tcmalloc 2.7"
         echo "  mi                           setup mimalloc"
         echo "  hd                           setup hoard 3.13"
         echo "  sm                           setup supermalloc"
@@ -155,14 +155,42 @@ fi
 
 if test "$setup_tbb" = "1"; then
   #todo: build from source
-  phase "tbb as a package"
-  aptinstall "libtbb-dev"
+  phase "build the Intel tbb allocator (2019-U8)"
+  # aptinstall "libtbb-dev"
+  pushd $devdir
+  if test -d tbb; then
+    echo "$devdir/tbb already exists; no need to git clone"
+  else
+    git clone https://github.com/intel/tbb
+  fi
+  cd tbb
+  git checkout 2019-U8  
+  make tbbmalloc
+  popd
 fi
 
 if test "$setup_tc" = "1"; then
   # todo: build from source
-  phase "tcmalloc as a package"
-  aptinstall "libgoogle-perftools-dev"
+  phase "build tcmalloc 2.7"
+  # aptinstall "libgoogle-perftools-dev"
+  pushd $devdir
+  if test -d gperftools; then
+    echo "$devdir/gperftools already exists; no need to git clone"
+  else
+    git clone https://github.com/gperftools/gperftools
+  fi
+  cd gperftools
+  git checkout gperftools-2.7
+  if test -f configure; then
+    echo "already configured"
+  else
+    ./autogen.sh
+    ./configure --enable-minimal
+  fi
+  make # ends with error on benchmark, but thats ok.
+  echo ""
+  echo "(note: the error 'Makefile:3912: recipe for target 'malloc_bench' failed' is expected)"
+  popd
 fi
 
 if test "$setup_hd" = "1"; then

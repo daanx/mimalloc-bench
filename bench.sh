@@ -79,16 +79,19 @@ lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
 lib_rp="${localdevdir}/rpmalloc/bin/linux/release/x86-64/librpmallocwrap.so"
 #lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
 lib_mesh="${localdevdir}/mesh/libmesh.so"
+lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
+lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
 
-#todo: install and build these in the extern directory
-lib_tc="/usr/lib/libtcmalloc.so"
-lib_tbb="/usr/lib/libtbbmalloc_proxy.so"
+if "$use_packages" = "1"; then
+  lib_tc="/usr/lib/libtcmalloc.so"
+  lib_tbb="/usr/lib/libtbbmalloc_proxy.so"
 
-if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc.so"; then
-  lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc.so"
-fi
-if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"; then
-  lib_tbb="/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"
+  if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc.so"; then
+    lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc.so"u
+  fi
+  if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"; then
+    lib_tbb="/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"
+  fi
 fi
 
 
