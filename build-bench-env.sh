@@ -334,7 +334,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/debug
   cd out/debug
-  cmake ../.. -DCHECK_FULL=ON
+  cmake ../.. -DMI_CHECK_FULL=ON
   make
   cd ../..
 
