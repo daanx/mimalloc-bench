@@ -81,6 +81,7 @@ lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap.so`"
 lib_mesh="${localdevdir}/mesh/libmesh.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
+lib_tbb+=":`find $localdevdir/tbb/build -name libtbbmalloc.so.*`"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc.so"
