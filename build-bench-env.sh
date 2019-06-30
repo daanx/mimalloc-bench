@@ -1,6 +1,8 @@
 procs=4
 verbose="no"
 curdir=`pwd`
+rebuild=0
+all=0
 
 # allocators
 setup_je=0
@@ -37,6 +39,7 @@ while : ; do
   case "$flag" in
     "") break;;
     all|none)
+        all=$flag_arg
         setup_je=$flag_arg
         setup_tc=$flag_arg
         setup_sn=$flag_arg
@@ -81,6 +84,8 @@ while : ; do
         setup_bench=$flag_arg;;
     packages)
         setup_packages=$flag_arg;;
+    -r|--rebuild)
+        rebuild=1;;
     -j=*|--procs=*)
         procs=$flag_arg;;
     -verbose|--verbose)
@@ -90,6 +95,7 @@ while : ; do
         echo "  all                          setup and build everything"
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
+        echo "  --rebuild                    force re-clone and re-build (only for 'all' and 'mi')"
         echo ""
         echo "  je                           setup jemalloc 5.2.0"
         echo "  tc                           setup tcmalloc 2.7"
@@ -142,6 +148,15 @@ function aptinstall {
   sudo apt install $1
 }
 
+if test "$all" = "1"; then
+  if test "$rebuild" = "1"; then
+    phase "clean $devdir for a full rebuild"
+    pushd "$devdir"
+    rm -r *
+    popd
+  fi
+fi
+
 
 if test "$setup_packages" = "1"; then
   phase "install packages"
@@ -164,7 +179,7 @@ if test "$setup_tbb" = "1"; then
     git clone https://github.com/intel/tbb
   fi
   cd tbb
-  git checkout 2019-U8  
+  git checkout 2019-U8
   make tbbmalloc
   popd
 fi
@@ -361,6 +376,9 @@ if test "$setup_mi" = "1"; then
   phase "build mimalloc variants"
 
   pushd "$devdir"
+  if test "$rebuild" = "1"; then
+    rm -r "mimalloc"
+  fi
   if test -d "mimalloc"; then
     echo "$devdir/mimalloc already exists; no need to download it"
   else
@@ -379,7 +397,7 @@ if test "$setup_mi" = "1"; then
   cd ../..
 
   echo ""
-  echo "- build mimalloc debug"
+  echo "- build mimalloc debug with full checking"
 
   mkdir -p out/debug
   cd out/debug

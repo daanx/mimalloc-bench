@@ -8,6 +8,9 @@ run_je=0
 run_mi=0
 run_dmi=0
 run_smi=0
+run_xmi=0
+run_xdmi=0
+
 run_tc=0
 run_hd=0
 run_sys=0
@@ -69,7 +72,8 @@ pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 lib_mi="$localdevdir/mimalloc/out/release/libmimalloc.so"
 lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug.so"
 lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure.so"
-lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc.so"
+lib_xmi="$localdevdir/../../../Dropbox/dev/mimalloc/out/release/libmimalloc.so"
+lib_xdmi="$localdevdir/../../../Dropbox/dev/mimalloc/out/debug/libmimalloc-debug.so"
 
 lib_hd="$localdevdir/Hoard/src/libhoard.so"
 lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
@@ -159,6 +163,8 @@ while : ; do
         run_smi=1;;
     xmi)
         run_xmi=1;;
+    xdmi)
+        run_xdmi=1;;
     hd)
         run_hd=1;;
     tbb)
@@ -363,6 +369,12 @@ function run_xmi_test {
   fi
 }
 
+function run_xdmi_test {
+  if test "$run_xdmi" = "1"; then
+    run_testx $1 "xdmi" "${ldpreload}=$lib_xdmi" "$2"
+  fi
+}
+
 function run_je_test {
   if test "$run_je" = "1"; then
     run_testx $1 "je" "${ldpreload}=$lib_je" "$2"
@@ -425,6 +437,7 @@ function run_test {
   run_dmi_test $1 "$2"
   run_smi_test $1 "$2"
   run_xmi_test $1 "$2"
+  run_xdmi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
   run_sn_test $1 "$2"
