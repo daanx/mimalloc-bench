@@ -1,3 +1,4 @@
+// Benchmark supplied by Danila Kutenin (danlark1 @github) and modified by Daan Leijen
 #include <memory>
 #include <thread>
 #include <vector>
