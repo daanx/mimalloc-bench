@@ -382,7 +382,7 @@ if test "$setup_mi" = "1"; then
   if test -d "mimalloc"; then
     echo "$devdir/mimalloc already exists; no need to download it"
   else
-    git clone https://github.com/microsoft/mimalloc
+    git clone https://github.com/microsoft/mimalloc -b master
   fi
   cd mimalloc
   git checkout
