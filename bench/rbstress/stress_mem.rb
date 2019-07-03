@@ -2,8 +2,8 @@
 
 STRING_SIZES = 5
 LARGE_CHUNK_SIZES = 10
-RAND = Random.new(SEED)
 SEED=1
+RAND = Random.new(SEED)
 
 
 def stress(allocate_count, retain_count, chunk_size)
