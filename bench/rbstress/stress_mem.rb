@@ -1,7 +1,9 @@
 @retained = []
 
-STRING_SIZES = 5
-LARGE_CHUNK_SIZES = 10
+STRING_UNIT=10
+STRING_SIZES=10
+LARGE_UNIT=100
+LARGE_CHUNK_SIZES = 1000
 SEED=1
 RAND = Random.new(SEED)
 
@@ -10,13 +12,13 @@ def stress(allocate_count, retain_count, chunk_size)
   chunk = []
   while retain_count > 0 || allocate_count > 0
     if retain_count == 0 || (RAND.rand < 0.5 && allocate_count > 0)
-      chunk << " " * (10*RAND.rand(STRING_SIZES))
+      chunk << " " * (STRING_UNIT*RAND.rand(STRING_SIZES))
       allocate_count -= 1
       if chunk.length > chunk_size
-        chunk = [" " * 10000 * LARGE_CHUNK_SIZES]
+        chunk = [" " * LARGE_UNIT * LARGE_CHUNK_SIZES]
       end
     else
-      @retained << " " * (10*RAND.rand(STRING_SIZES))
+      @retained << " " * (STRING_UNIT*RAND.rand(STRING_SIZES))
       retain_count -= 1
     end
   end

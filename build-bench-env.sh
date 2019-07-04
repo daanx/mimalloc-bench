@@ -163,9 +163,8 @@ if test "$setup_packages" = "1"; then
   echo "updating package database... (sudo apt update)"
   sudo apt update
 
-  aptinstall "g++ clang unzip dos2unix linuxinfo bc"
-  aptinstall "cmake python ninja-build autoconf"
-  aptinstall "libgmp-dev"
+  aptinstall "g++ clang unzip dos2unix linuxinfo bc libgmp-dev"
+  aptinstall "cmake python ruby ninja-build   libtool autoconf"
 fi
 
 if test "$setup_tbb" = "1"; then

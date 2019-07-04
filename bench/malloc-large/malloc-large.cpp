@@ -3,7 +3,7 @@
 #include <thread>
 #include <vector>
 
-const size_t N = 1000;
+const size_t N = 5000;
 
 void Foo() {
     for (size_t i = 0; i < N; ++i) {
