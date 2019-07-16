@@ -268,6 +268,9 @@ if test "$setup_sn" = "1"; then
   phase "build snmalloc, commit 0b64536b"
 
   pushd $devdir
+  if test "$rebuild" = "1"; then
+    rm -r "snmalloc"
+  fi
   if test -d snmalloc; then
     echo "$devdir/snmalloc already exists; no need to git clone"
   else
