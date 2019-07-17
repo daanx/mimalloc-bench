@@ -8,7 +8,6 @@ terms of the MIT license.
    transferring objects between threads. This is not a typical workload
    but uses a random linear size distribution. Do not use this test as a benchmark!
 */
-
 #ifdef _WIN32
 #include <alloc-bench-main.h>
 #else
@@ -32,7 +31,6 @@ static int THREADS  = 4;
 static int N        = 200;  // scaling factor
 
 #define TRANSFERS     (1000)
-
 static volatile void* transfer[TRANSFERS];
 
 #if (INTPTR_MAX != UINT32_MAX)

@@ -83,3 +83,11 @@ target_link_libraries(xmalloc-test pthread)
 
 add_executable(malloc-large malloc-large/malloc-large.cpp)
 target_link_libraries(malloc-large pthread)
+
+add_executable(mstress mstress/mstress.c)
+target_link_libraries(mstress pthread)
+
+add_executable(rptest rptest/rptest.c rptest/thread.c rptest/timer.c)
+target_compile_options(rptest PRIVATE -fpermissive)
+target_include_directories(rptest PRIVATE rptest)
+target_link_libraries(rptest pthread m)
