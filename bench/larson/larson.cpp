@@ -1,11 +1,4 @@
-
-#if defined(USE_HOARD) && defined(_WIN32)
-#pragma comment(lib, "libhoard.lib")
-#endif
-
-#if defined(USE_RX) && defined(_WIN32)
-#pragma comment(lib, "libmi.lib")
-#endif
+#include <alloc-bench-main.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -302,6 +295,7 @@ int main (int argc, char *argv[])
   printf("random seed:    ") ; scanf("%d", &seed) ;
 
  DoneWithInput:
+  bench_start_program();
 
   if( num_chunks > MAX_BLOCKS ){
     printf("Max %d chunks - exiting\n", MAX_BLOCKS ) ;
@@ -345,6 +339,7 @@ int main (int argc, char *argv[])
  }
 #endif
 
+  bench_end_program();
   return(0) ;
 
 } /* main */
@@ -551,7 +546,8 @@ void runthreads(long sleep_cnt, int min_threads, int max_threads, int chperthrea
 
       double throughput = (double)sum_allocs/duration;
       double rtime      = 1.0e9 / throughput;
-      printf ("Throughput = %8.0f operations per second, relative time: %.3fs.\n", throughput, rtime);
+      printf ("Throughput = %8.0f operations per second.\n"
+              "relative time: *** %.3fs ****\n", throughput, rtime);
 
 
 #if 0
@@ -582,6 +578,7 @@ static void * exercise_heap( void *pinput)
   int           range ;
 
   if( stopflag ) return 0;
+  bench_start_thread();
 
   pdea = (thread_data *)pinput ;
   pdea->finished = FALSE ;
@@ -642,6 +639,7 @@ static void * exercise_heap( void *pinput)
 
 	//end_thread();
 
+  bench_end_thread();
 #ifndef _WIN32
   pthread_exit (NULL);
 #endif

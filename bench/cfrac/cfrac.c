@@ -1,3 +1,4 @@
+#include <alloc-bench-main.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>			/* for findk */
@@ -220,6 +221,10 @@ usage: fprintf(stderr,
 
    if (argc < 1 || argc > 3) goto usage;
 
+
+   bench_start_program();
+
+
    pset(&n, atop(*argv++));  --argc;
    if (argc) { m = atoi(*argv++);  --argc; }
    if (argc) { k = atoi(*argv++);  --argc; }
@@ -234,7 +239,7 @@ usage: fprintf(stderr,
 	 fprintf(stdout, "k = %u\n", k);
       }
    }
-
+   
    count = maxCount;
 
    pcfracInit(m, k, aborts);
@@ -264,5 +269,6 @@ usage: fprintf(stderr,
    pdestroy(f);
    pdestroy(n);
 
+   bench_end_program();
    return 0;
 }

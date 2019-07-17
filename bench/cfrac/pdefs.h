@@ -17,7 +17,7 @@
 /*
  * Optional alternate memory allocator
  */
-
+#include <alloc-bench.h>
 #ifndef MYALLOC
 
 #    if defined(BWGC)

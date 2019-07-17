@@ -35,6 +35,7 @@
 #ifndef NEW_DELETE_ALLOCATOR_H
 #define NEW_DELETE_ALLOCATOR_H
 
+#include <alloc-bench.h>
 #include "test_common.h"
 
 
@@ -49,8 +50,8 @@ public:
 	static constexpr const char* name() { return "new-delete allocator"; }
 
 	void init() {}
-	void* allocate( size_t sz ) { return new uint8_t[ sz ]; }
-	void deallocate( void* ptr ) { delete [] reinterpret_cast<uint8_t*>(ptr); }
+	void* allocate( size_t sz ) { return CUSTOM_MALLOC(sz); } //new uint8_t[ sz ]; }
+	void deallocate( void* ptr ) { CUSTOM_FREE(ptr); } // delete [] reinterpret_cast<uint8_t*>(ptr); }
 	void deinit() {}
 
 	// next calls are to get additional stats of the allocator, etc, if desired
