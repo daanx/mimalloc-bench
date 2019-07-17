@@ -26,9 +26,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
-
-/* This is a stress test for the allocator, using multiple threads and
-   transferring objects between threads. This is not a typical workload
-   but uses a random size distribution. Do not use this test as a benchmark!
-*/   

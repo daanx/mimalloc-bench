@@ -2,6 +2,7 @@ extern/
 out/
 ide/vs2017/.vs
 ide/vs2017/x64
+ide/vs2017/*.txt
 bench/doc/
 bench/ebizzy/
 bench/malloc-test/

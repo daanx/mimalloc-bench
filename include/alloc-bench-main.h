@@ -18,6 +18,7 @@ static inline void bench_end_thread() {
 static double time_start = 0;
 
 static inline void bench_start_program() {
+  printf("%s allocator.\n", ALLOCATOR);
   time_start = rx_clock_now();
 #ifdef USE_HOARD
   getCustomHeap();

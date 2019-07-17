@@ -2,7 +2,7 @@
 
 #define BENCH
 
-//#define USE_MIMALLOC
+#define USE_MIMALLOC
 //#define USE_RPMALLOC
 
 // TODO...
