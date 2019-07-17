@@ -41,6 +41,8 @@ run_gs=0
 run_rbstress=0
 run_spec=0
 run_spec_bench=0
+run_mstress=0
+run_rptest=0
 
 verbose="no"
 ldpreload="LD_PRELOAD"
@@ -122,8 +124,8 @@ while : ; do
         #run_smi=1
         run_tc=1
         run_hd=1
-        #run_rp=1
-        #run_sm=1
+        run_rp=1
+        run_sm=1
         run_sn=1
         run_tbb=1
         run_sys=1;;
@@ -211,6 +213,10 @@ while : ; do
         run_redis=1;;
     rbstress)
         run_rbstress=1;;
+    mstress)
+        run_mstress=1;;
+    rptest)
+        run_rptest=1;;
     spec=*)
         run_spec=1
         run_spec_bench="$flag_arg";;
@@ -242,17 +248,20 @@ while : ; do
         echo "  espresso                     run espresso"
         echo "  barnes                       run barnes"
         echo "  gs                           run ghostscript (~1:50s per test)"
-        echo "  lean                         run lean (~40s per test on 4 cores)"
+        echo "  lean                         run leanN (~40s per test on 4 cores)"
         echo "  math-lib                     run math-lib (~10 min per test on 4 cores)"
         echo "  redis                        run redis benchmark"
         echo "  spec                         run selected spec2017 benchmarks (if available)"
-        echo "  larson                       run larson"
-        echo "  alloc-test                   run alloc-test"
-        echo "  xmalloc-test                 run xmalloc-test"
-        echo "  sh6bench                     run sh6bench"
-        echo "  sh8bench                     run sh8bench"
+        echo "  larson                       run larsonN"
+        echo "  alloc-test                   run alloc-testN"
+        echo "  xmalloc-test                 run xmalloc-testN"
+        echo "  sh6bench                     run sh6benchN"
+        echo "  sh8bench                     run sh8benchN"
         echo "  cscratch                     run cache-scratch"
         echo "  cthrash                      run cache-thrash"
+        echo "  mstress                      run mstressN"
+        echo "  rbstress                     run rbstressN"
+        echo "  rptest                       run rptestN"
         exit 0;;
     *) echo "warning: unknown option \"$1\"." 1>&2
   esac
@@ -330,6 +339,11 @@ function run_testx {
     larson*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/.* time: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
+      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+    rptest*)
+      ops=`cat "$1-$2-out.txt" | sed -n 's/.*\.\.\.\([0-9]*\) memory ops.*/\1/p'`
+      rtime=`echo "scale=3; (2000000 / $ops)" | bc`
+      echo "$1,$2: ops/sec: $ops, relative time: ${rtime}s"
       sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     xmalloc*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
@@ -536,6 +550,15 @@ if test "$run_rbstress" = "1"; then
   if test "$procs" != "1"; then
     run_test "rbstressN" "ruby $benchdir/rbstress/stress_mem.rb $procs"
   fi
+fi
+
+if test "$run_mstress" = "1"; then
+  run_test "mstressN" "./mstress $procs 200"
+fi
+
+if test "$run_rptest" = "1"; then
+  run_test "rptestN" "./rptest 16 0 2 2 500 1000 200 8 64000"
+  # run_test "rptestN" "./rptest $procs 0 2 2 500 1000 200 16 1600000"
 fi
 
 if test "$run_spec" = "1"; then

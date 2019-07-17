@@ -3,7 +3,7 @@
 #define BENCH
 
 //#define USE_MIMALLOC
-//#define USE_RPMALLOC
+#define USE_RPMALLOC
 
 // TODO...
 //#define USE_HOARD
