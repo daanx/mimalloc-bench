@@ -1,5 +1,6 @@
 extern/
 out/
+ide/
 bench/doc/
 bench/ebizzy/
 bench/malloc-test/
