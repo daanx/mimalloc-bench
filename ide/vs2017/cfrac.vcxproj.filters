@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\include\alloc-bench.h" />
+    <ClInclude Include="..\..\bench\cfrac\asm16bit.h" />
+    <ClInclude Include="..\..\bench\cfrac\getopt.h" />
+    <ClInclude Include="..\..\bench\cfrac\pcvt.h" />
+    <ClInclude Include="..\..\bench\cfrac\pdefs.h" />
+    <ClInclude Include="..\..\bench\cfrac\precision.h" />
+    <ClInclude Include="..\..\bench\cfrac\primes.h" />
+    <ClInclude Include="..\..\bench\cfrac\seive.h" />
+    <ClInclude Include="..\..\include\alloc-bench-main.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\bench\cfrac\atop.c" />
+    <ClCompile Include="..\..\bench\cfrac\cfrac.c" />
+    <ClCompile Include="..\..\bench\cfrac\errorp.c" />
+    <ClCompile Include="..\..\bench\cfrac\getopt.c" />
+    <ClCompile Include="..\..\bench\cfrac\itop.c" />
+    <ClCompile Include="..\..\bench\cfrac\ltop.c" />
+    <ClCompile Include="..\..\bench\cfrac\pabs.c" />
+    <ClCompile Include="..\..\bench\cfrac\padd.c" />
+    <ClCompile Include="..\..\bench\cfrac\pcfrac.c" />
+    <ClCompile Include="..\..\bench\cfrac\pcmp.c" />
+    <ClCompile Include="..\..\bench\cfrac\pconst.c" />
+    <ClCompile Include="..\..\bench\cfrac\pdivmod.c" />
+    <ClCompile Include="..\..\bench\cfrac\pfloat.c" />
+    <ClCompile Include="..\..\bench\cfrac\pgcd.c" />
+    <ClCompile Include="..\..\bench\cfrac\phalf.c" />
+    <ClCompile Include="..\..\bench\cfrac\picmp.c" />
+    <ClCompile Include="..\..\bench\cfrac\pidiv.c" />
+    <ClCompile Include="..\..\bench\cfrac\pimod.c" />
+    <ClCompile Include="..\..\bench\cfrac\pio.c" />
+    <ClCompile Include="..\..\bench\cfrac\pmul.c" />
+    <ClCompile Include="..\..\bench\cfrac\pneg.c" />
+    <ClCompile Include="..\..\bench\cfrac\podd.c" />
+    <ClCompile Include="..\..\bench\cfrac\pops.c" />
+    <ClCompile Include="..\..\bench\cfrac\ppowmod.c" />
+    <ClCompile Include="..\..\bench\cfrac\primes.c" />
+    <ClCompile Include="..\..\bench\cfrac\psqrt.c" />
+    <ClCompile Include="..\..\bench\cfrac\psub.c" />
+    <ClCompile Include="..\..\bench\cfrac\ptoa.c" />
+    <ClCompile Include="..\..\bench\cfrac\ptob.c" />
+    <ClCompile Include="..\..\bench\cfrac\ptou.c" />
+    <ClCompile Include="..\..\bench\cfrac\utop.c" />
+  </ItemGroup>
+</Project>
