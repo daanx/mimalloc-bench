@@ -384,10 +384,10 @@ if test "$setup_mi" = "1"; then
   if test -d "mimalloc"; then
     echo "$devdir/mimalloc already exists; no need to download it"
   else
-    git clone https://github.com/microsoft/mimalloc -b master
+    git clone https://github.com/microsoft/mimalloc
   fi
   cd mimalloc
-  git checkout
+  git checkout master
 
   echo ""
   echo "- build mimalloc release"
@@ -395,7 +395,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/release
   cd out/release
   cmake ../..
-  make
+  make -j 4
   cd ../..
 
   echo ""
@@ -404,7 +404,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/debug
   cd out/debug
   cmake ../.. -DMI_CHECK_FULL=ON
-  make
+  make -j 4
   cd ../..
 
   echo ""
@@ -413,7 +413,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/secure
   cd out/secure
   cmake ../..
-  make
+  make -j 4
   cd ../..
   popd
 fi

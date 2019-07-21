@@ -138,11 +138,13 @@ while : ; do
         run_alloc_test=1
         run_xmalloc_test=1
         run_larson=1
-        # run_ebizzy=1
         run_sh6bench=1
         run_sh8bench=1
         run_cscratch=1
 	      run_redis=1
+        run_mstress=1
+        run_rptest=1
+        run_rbstress=1
         # run_gs=1
         # run_cthrash=1
         # run_malloc_test=1
