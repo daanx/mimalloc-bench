@@ -245,19 +245,19 @@ if test "$setup_je" = "1"; then
 fi
 
 if test "$setup_rp" = "1"; then
-  phase "build rpmalloc 1.3.1"
+  phase "build rpmalloc 1.4.0"
 
   pushd $devdir
   if test -d rpmalloc; then
     echo "$devdir/rpmalloc already exists; no need to git clone"
   else
-    git clone https://github.com/rampantpixels/rpmalloc.git
+    git clone https://github.com/mjansson/rpmalloc.git
   fi
   cd rpmalloc
   if test -f build.ninja; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
-    git checkout 1.3.1
+    git checkout 1.4.0
     python configure.py
   fi
   ninja
