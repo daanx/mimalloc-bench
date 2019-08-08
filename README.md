@@ -76,9 +76,9 @@ Supported allocators are:
 - **sn**: The [_snmalloc_](https://github.com/microsoft/snmalloc) allocator
   is a recent concurrent message passing
   allocator by Liétar et al. \[8]. Using `git-0b64536b`.
-- **rp**: The [_rpmalloc_](https://github.com/rampantpixels/rpmalloc) allocator
-   uses 32-byte aligned allocations and is developed by Mattias Jansson at Rampant Pixels.
-   Using version tag 1.3.1.
+- **rp**: The [_rpmalloc_](https://github.com/mjansson/rpmalloc) allocator
+   uses 16-byte aligned allocations and is developed by Mattias Jansson at Rampant Pixels.
+   Using version tag 1.4.0.
 - **hd**: The [_Hoard_](https://github.com/emeryberger/Hoard) allocator by
   Emery Berger \[1]. This is one of the first
   multi-thread scalable allocators. Using version tag 3.13.
