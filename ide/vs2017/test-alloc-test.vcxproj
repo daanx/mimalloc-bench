@@ -217,6 +217,9 @@
     <ProjectReference Include="..\..\extern\rpmalloc\build\msvs\rpmalloc.vcxproj">
       <Project>{65dc4291-954e-4b91-8889-4f3adcc9d2d5}</Project>
     </ProjectReference>
+    <ProjectReference Include="tbbmalloc.vcxproj">
+      <Project>{b15f131e-328a-4d42-adc2-9ff4ca6306d8}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\bench\alloc-test\allocator_tester.h" />

@@ -4,6 +4,7 @@
 
 #define USE_MIMALLOC
 //#define USE_RPMALLOC
+//#define USE_TBB
 
 // TODO...
 //#define USE_HOARD
@@ -24,6 +25,12 @@
 #define CUSTOM_REALLOC rprealloc
 #define CUSTOM_FREE    rpfree
 #define ALLOCATOR      "rp"
+#elif defined(USE_TBB)
+#include <../extern/tbb/include/tbb/scalable_allocator.h>
+#define CUSTOM_MALLOC  scalable_malloc
+#define CUSTOM_REALLOC scalable_realloc
+#define CUSTOM_FREE    scalable_free
+#define ALLOCATOR      "tbb"
 #elif defined(USE_JEMALLOC)
 #include <../extern/jmalloc/jemalloc.h>
 #define CUSTOM_MALLOC  je_malloc

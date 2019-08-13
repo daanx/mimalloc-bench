@@ -1,5 +1,5 @@
 #include "alloc-bench.h"
-
+#include <stdio.h>
 static void rx_process_info(double* utime, double* stime, size_t* peak_rss, size_t* page_faults, size_t* page_reclaim, size_t* peak_commit);
 static double rx_clock_now();
 
