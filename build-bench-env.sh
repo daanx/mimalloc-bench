@@ -152,7 +152,8 @@ if test "$all" = "1"; then
   if test "$rebuild" = "1"; then
     phase "clean $devdir for a full rebuild"
     pushd "$devdir"
-    rm -r *
+    cd ..
+    rm -rf "extern"
     popd
   fi
 fi
@@ -269,7 +270,7 @@ if test "$setup_sn" = "1"; then
 
   pushd $devdir
   if test "$rebuild" = "1"; then
-    rm -r "snmalloc"
+    rm -rf "snmalloc"
   fi
   if test -d snmalloc; then
     echo "$devdir/snmalloc already exists; no need to git clone"
@@ -375,11 +376,11 @@ if test "$setup_ch" = "1"; then
 fi
 
 if test "$setup_mi" = "1"; then
-  phase "build mimalloc variants"
+  phase "build mimalloc variants -- dev branch"
 
   pushd "$devdir"
   if test "$rebuild" = "1"; then
-    rm -r "mimalloc"
+    rm -rf "mimalloc"
   fi
   if test -d "mimalloc"; then
     echo "$devdir/mimalloc already exists; no need to download it"
@@ -387,7 +388,7 @@ if test "$setup_mi" = "1"; then
     git clone https://github.com/microsoft/mimalloc
   fi
   cd mimalloc
-  git checkout master
+  git checkout dev
 
   echo ""
   echo "- build mimalloc release"

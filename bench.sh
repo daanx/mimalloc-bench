@@ -449,11 +449,11 @@ function run_test {
   echo "      " >> $benchres
   echo ""
   echo "---- $1"
+  run_xmi_test $1 "$2"
+  run_xdmi_test $1 "$2"
   run_mi_test $1 "$2"
   run_dmi_test $1 "$2"
   run_smi_test $1 "$2"
-  run_xmi_test $1 "$2"
-  run_xdmi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
   run_sn_test $1 "$2"

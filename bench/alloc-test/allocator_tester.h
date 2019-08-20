@@ -136,7 +136,7 @@ inline void testDistribution()
 		size_t val = calcSizeWithStatsAdjustment( rng.rng64(), exp );
 //		assert( val <= (((size_t)1)<<exp) );
 		assert( val );
-		if ( val <=8 )
+		if ( val <= 8 )
 			bins[3] +=1;
 		else
 			for ( size_t j=4; j<=exp; ++j )
@@ -274,7 +274,7 @@ void randomPos_RandomSize( AllocatorUnderTest& allocatorUnderTest, size_t iterCo
 	assert( maxItems <= UINT32_MAX );
 	Pareto_80_20_6_Init( paretoData, (uint32_t)maxItems );
 
-	struct TestBin 
+	struct TestBin
 	{
 		uint8_t* ptr;
 		uint32_t sz;
