@@ -118,13 +118,12 @@ int main(int argc, char** argv)
 	memset( testResMyAlloc, 0, sizeof( testResMyAlloc ) );
 	memset( testResVoidAlloc, 0, sizeof( testResVoidAlloc ) );
 
-	size_t maxItems = 1 << 20;
+	size_t maxItems = 1 << 18; // 512k objects
 	TestStartupParamsAndResults params;
 	params.startupParams.iterCount = 100000000;
-	params.startupParams.maxItemSize = 10;
-//		params.startupParams.maxItems = 23 << 20;
+	params.startupParams.maxItemSize = 10;  // 1k
 	params.startupParams.mat = MEM_ACCESS_TYPE::full;
-  params.startupParams.rndSeed = 42;
+  params.startupParams.rndSeed = 41;
 
 	size_t threadMin = 1;
 	size_t threadMax = 6;
