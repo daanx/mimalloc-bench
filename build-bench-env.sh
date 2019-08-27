@@ -473,8 +473,8 @@ phase "done in $curdir"
 
 echo "run the cfrac benchmarks as:"
 echo "> cd out/bench"
-echo "> ../../bench/bench.sh alla cfrac"
+echo "> ../../bench.sh alla cfrac"
 echo
 echo "to see all options use:"
-echo "> ../../bench/bench.sh help"
+echo "> ../../bench.sh help"
 echo
