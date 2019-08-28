@@ -152,7 +152,8 @@ if test "$all" = "1"; then
   if test "$rebuild" = "1"; then
     phase "clean $devdir for a full rebuild"
     pushd "$devdir"
-    rm -r *
+    cd ..
+    rm -rf "extern"
     popd
   fi
 fi
@@ -245,19 +246,19 @@ if test "$setup_je" = "1"; then
 fi
 
 if test "$setup_rp" = "1"; then
-  phase "build rpmalloc 1.3.1"
+  phase "build rpmalloc 1.4.0"
 
   pushd $devdir
   if test -d rpmalloc; then
     echo "$devdir/rpmalloc already exists; no need to git clone"
   else
-    git clone https://github.com/rampantpixels/rpmalloc.git
+    git clone https://github.com/mjansson/rpmalloc.git
   fi
   cd rpmalloc
   if test -f build.ninja; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
-    git checkout 1.3.1
+    git checkout 1.4.0
     python configure.py
   fi
   ninja
@@ -269,7 +270,7 @@ if test "$setup_sn" = "1"; then
 
   pushd $devdir
   if test "$rebuild" = "1"; then
-    rm -r "snmalloc"
+    rm -rf "snmalloc"
   fi
   if test -d snmalloc; then
     echo "$devdir/snmalloc already exists; no need to git clone"
@@ -375,19 +376,19 @@ if test "$setup_ch" = "1"; then
 fi
 
 if test "$setup_mi" = "1"; then
-  phase "build mimalloc variants"
+  phase "build mimalloc variants -- dev branch"
 
   pushd "$devdir"
   if test "$rebuild" = "1"; then
-    rm -r "mimalloc"
+    rm -rf "mimalloc"
   fi
   if test -d "mimalloc"; then
     echo "$devdir/mimalloc already exists; no need to download it"
   else
-    git clone https://github.com/microsoft/mimalloc -b master
+    git clone https://github.com/microsoft/mimalloc
   fi
   cd mimalloc
-  git checkout
+  git checkout dev
 
   echo ""
   echo "- build mimalloc release"
@@ -395,7 +396,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/release
   cd out/release
   cmake ../..
-  make
+  make -j 4
   cd ../..
 
   echo ""
@@ -404,7 +405,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/debug
   cd out/debug
   cmake ../.. -DMI_CHECK_FULL=ON
-  make
+  make -j 4
   cd ../..
 
   echo ""
@@ -413,7 +414,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/secure
   cd out/secure
   cmake ../..
-  make
+  make -j 4
   cd ../..
   popd
 fi
@@ -472,8 +473,8 @@ phase "done in $curdir"
 
 echo "run the cfrac benchmarks as:"
 echo "> cd out/bench"
-echo "> ../../bench/bench.sh alla cfrac"
+echo "> ../../bench.sh alla cfrac"
 echo
 echo "to see all options use:"
-echo "> ../../bench/bench.sh help"
+echo "> ../../bench.sh help"
 echo

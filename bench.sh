@@ -138,11 +138,13 @@ while : ; do
         run_alloc_test=1
         run_xmalloc_test=1
         run_larson=1
-        # run_ebizzy=1
         run_sh6bench=1
         run_sh8bench=1
         run_cscratch=1
 	      run_redis=1
+        run_mstress=1
+        run_rptest=1
+        run_rbstress=1
         # run_gs=1
         # run_cthrash=1
         # run_malloc_test=1
@@ -447,11 +449,11 @@ function run_test {
   echo "      " >> $benchres
   echo ""
   echo "---- $1"
+  run_xmi_test $1 "$2"
+  run_xdmi_test $1 "$2"
   run_mi_test $1 "$2"
   run_dmi_test $1 "$2"
   run_smi_test $1 "$2"
-  run_xmi_test $1 "$2"
-  run_xdmi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
   run_sn_test $1 "$2"

@@ -69,7 +69,7 @@ static bool chance( int perc, random_t r ) {
 }
 
 static void* alloc_items(size_t items, random_t r) {
-  if (chance(1,r)) items *= 100; // 1% huge objects;
+  if (chance(2,r)) items *= 100; // 1% huge objects;
   if (items==40) items++;              // pthreads uses that size for stack increases
   uintptr_t* p = (uintptr_t*)CUSTOM_MALLOC(items*sizeof(uintptr_t));
   for (uintptr_t i = 0; i < items; i++) p[i] = (items - i) ^ cookie;
@@ -109,18 +109,18 @@ static void stress(intptr_t tid) {
       // 50%+ alloc
       allocs--;
       if (data_top >= data_size) {
-        data_size += 100000;
+        data_size += 10000;
         data = (void**)CUSTOM_REALLOC(data, data_size*sizeof(void*));
       }
       data[data_top++] = alloc_items((pick(&r) % max_item) + 1, &r);
     }
     else {
-      // 25% retain
+      // retain
       retained[retain_top++] = alloc_items( 10*((pick(&r) % max_item_retained) + 1), &r );
       retain--;
     }
     if (chance(66,&r) && data_top > 0) {
-      // 66% free previous alloc
+      // free previous alloc
       size_t idx = pick(&r) % data_top;
       free_items(data[idx]);
       data[idx]=NULL;

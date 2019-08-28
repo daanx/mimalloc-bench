@@ -120,18 +120,17 @@ void runTest(TestStartupParamsAndResults* startupParams)
 
 int main(int argc, char** argv)
 {
-  TestRes testResMyAlloc[max_threads];
-  TestRes testResVoidAlloc[max_threads];
-  memset(testResMyAlloc, 0, sizeof(testResMyAlloc));
-  memset(testResVoidAlloc, 0, sizeof(testResVoidAlloc));
+	TestRes testResMyAlloc[max_threads];
+	TestRes testResVoidAlloc[max_threads];
+	memset( testResMyAlloc, 0, sizeof( testResMyAlloc ) );
+	memset( testResVoidAlloc, 0, sizeof( testResVoidAlloc ) );
 
-  size_t maxItems = 1 << 20;
-  TestStartupParamsAndResults params;
-  params.startupParams.iterCount = 100000000;
-  params.startupParams.maxItemSize = 8;
-//		params.startupParams.maxItems = 23 << 20;
-  params.startupParams.mat = MEM_ACCESS_TYPE::full;
-  params.startupParams.rndSeed = 42;
+	size_t maxItems = 1 << 18; // 512k objects
+	TestStartupParamsAndResults params;
+	params.startupParams.iterCount = 100000000;
+	params.startupParams.maxItemSize = 10;  // 1k
+	params.startupParams.mat = MEM_ACCESS_TYPE::full;
+  params.startupParams.rndSeed = 41;
 
   size_t threadMin = 1;
   size_t threadMax = (argc==2 ? atoi(argv[1]) : 1);
