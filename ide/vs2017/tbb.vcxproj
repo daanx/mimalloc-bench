@@ -20,30 +20,30 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{ABB8EAE7-B3E6-432E-B636-333449892EA6}</ProjectGuid>
-    <RootNamespace>alloc-test</RootNamespace>
+    <ProjectGuid>{ACB7EAE7-B3E6-432E-B636-333449892EA6}</ProjectGuid>
+    <RootNamespace>tbb</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
-    <ProjectName>test-alloc-test</ProjectName>
+    <ProjectName>tbb</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,31 +69,31 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetExt>.exe</TargetExt>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetExt>.exe</TargetExt>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetExt>.exe</TargetExt>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\..\out\msvc-$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetExt>.exe</TargetExt>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../extern/tbb/include;../../include;../../extern/Hoard/src/include;../../extern/Hoard/src/Heap-Layers;../../extern/Hoard/src/include/hoard;../../extern/Hoard/src/include/superblocks;../../extern/Hoard/src/include/util</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USEWINTHREAD;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <CompileAs>Default</CompileAs>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -111,10 +111,10 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../extern/tbb/include;../../include;../../extern/Hoard/src/include;../../extern/Hoard/src/Heap-Layers;../../extern/Hoard/src/include/hoard;../../extern/Hoard/src/include/superblocks;../../extern/Hoard/src/include/util</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USEWINTHREAD;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <CompileAs>Default</CompileAs>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -140,10 +140,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../extern/tbb/include;../../include;../../extern/Hoard/src/include;../../extern/Hoard/src/Heap-Layers;../../extern/Hoard/src/include/hoard;../../extern/Hoard/src/include/superblocks;../../extern/Hoard/src/include/util</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USEWINTHREAD;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -173,10 +173,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../extern/tbb/include;../../include;../../extern/Hoard/src/include;../../extern/Hoard/src/Heap-Layers;../../extern/Hoard/src/include/hoard;../../extern/Hoard/src/include/superblocks;../../extern/Hoard/src/include/util</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USEWINTHREAD;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -207,27 +207,13 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\bench\alloc-test\allocator_tester.cpp" />
-    <ClCompile Include="..\..\bench\alloc-test\test_common.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\extern\mimalloc\ide\vs2017\mimalloc.vcxproj">
-      <Project>{abb5eae7-b3e6-432e-b636-333449892ea6}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\extern\rpmalloc\build\msvs\rpmalloc.vcxproj">
-      <Project>{65dc4291-954e-4b91-8889-4f3adcc9d2d5}</Project>
-    </ProjectReference>
-    <ProjectReference Include="tbbmalloc.vcxproj">
-      <Project>{b15f131e-328a-4d42-adc2-9ff4ca6306d8}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\bench\alloc-test\allocator_tester.h" />
-    <ClInclude Include="..\..\bench\alloc-test\new_delete_allocator.h" />
-    <ClInclude Include="..\..\bench\alloc-test\selector.h" />
-    <ClInclude Include="..\..\bench\alloc-test\test_common.h" />
-    <ClInclude Include="..\..\bench\alloc-test\void_allocator.h" />
-    <ClInclude Include="..\..\include\alloc-bench.h" />
+    <ClCompile Include="..\..\extern\tbb\src\tbbmalloc\backend.cpp" />
+    <ClCompile Include="..\..\extern\tbb\src\tbbmalloc\backref.cpp" />
+    <ClCompile Include="..\..\extern\tbb\src\tbbmalloc\frontend.cpp" />
+    <ClCompile Include="..\..\extern\tbb\src\tbbmalloc\large_objects.cpp" />
+    <ClCompile Include="..\..\extern\tbb\src\tbbmalloc\proxy.cpp" />
+    <ClCompile Include="..\..\extern\tbb\src\tbbmalloc\tbbmalloc.cpp" />
+    <ClCompile Include="..\..\extern\tbb\src\tbbmalloc\tbb_function_replacement.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
