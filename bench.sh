@@ -10,6 +10,7 @@ run_dmi=0
 run_smi=0
 run_xmi=0
 run_xdmi=0
+run_xsmi=0
 
 run_tc=0
 run_hd=0
@@ -19,6 +20,7 @@ run_sm=0
 run_sn=0
 run_tbb=0
 run_mesh=0
+run_tlsf=0
 
 run_cfrac=0
 run_larson=0
@@ -76,6 +78,7 @@ lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug.so"
 lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure.so"
 lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc.so"
 lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug.so"
+lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure.so"
 
 lib_hd="$localdevdir/Hoard/src/libhoard.so"
 lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
@@ -85,6 +88,7 @@ lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
 lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap.so`"
 #lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
 lib_mesh="${localdevdir}/mesh/libmesh.so"
+lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
 
@@ -169,12 +173,16 @@ while : ; do
         run_xmi=1;;
     xdmi)
         run_xdmi=1;;
+    xsmi)
+        run_xsmi=1;;
     hd)
         run_hd=1;;
     tbb)
         run_tbb=1;;
     mesh)
         run_mesh=1;;
+    tlsf)
+        run_tlsf=1;;
     sys|mc)
         run_sys=1;;
     cfrac)
@@ -391,6 +399,12 @@ function run_xdmi_test {
   fi
 }
 
+function run_xsmi_test {
+  if test "$run_xsmi" = "1"; then
+    run_testx $1 "xsmi" "${ldpreload}=$lib_xsmi" "$2"
+  fi
+}
+
 function run_je_test {
   if test "$run_je" = "1"; then
     run_testx $1 "je" "${ldpreload}=$lib_je" "$2"
@@ -439,6 +453,12 @@ function run_tbb_test {
   fi
 }
 
+function run_tlsf_test {
+  if test "$run_tlsf" = "1"; then
+    run_testx $1 "tlsf" "${ldpreload}=$lib_tlsf" "$2"
+  fi
+}
+
 function run_sys_test {
   if test "$run_sys" = "1"; then
     run_testx $1 "mc" "SYSMALLOC=1" "$2"
@@ -451,6 +471,7 @@ function run_test {
   echo "---- $1"
   run_xmi_test $1 "$2"
   run_xdmi_test $1 "$2"
+  run_xsmi_test $1 "$2"
   run_mi_test $1 "$2"
   run_dmi_test $1 "$2"
   run_smi_test $1 "$2"
@@ -462,6 +483,7 @@ function run_test {
   run_hd_test $1 "$2"
   run_mesh_test $1 "$2"
   run_sm_test $1 "$2"
+  run_tlsf_test $1 "$2"
   run_sys_test $1 "$2"
 }
 
@@ -560,6 +582,7 @@ fi
 
 if test "$run_rptest" = "1"; then
   run_test "rptestN" "./rptest 16 0 2 2 500 1000 200 8 64000"
+  # run_test "rptestN" "./rptest $procs 0 1 2 1000 1000 500 8 64000"
   # run_test "rptestN" "./rptest $procs 0 2 2 500 1000 200 16 1600000"
 fi
 
