@@ -577,7 +577,7 @@ if test "$run_rbstress" = "1"; then
 fi
 
 if test "$run_mstress" = "1"; then
-  run_test "mstressN" "./mstress $procs 200"
+  run_test "mstressN" "./mstress $procs 100 5"
 fi
 
 if test "$run_rptest" = "1"; then
