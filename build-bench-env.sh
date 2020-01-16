@@ -153,7 +153,7 @@ if test "$all" = "1"; then
     phase "clean $devdir for a full rebuild"
     pushd "$devdir"
     cd ..
-    rm -rf "extern"
+    rm -rf "extern/*"
     popd
   fi
 fi

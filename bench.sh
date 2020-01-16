@@ -205,6 +205,8 @@ while : ; do
         run_cscratch=1;;
     lean)
         run_lean=1;;
+    no-lean)
+        run_lean=0;;        
     z3)
         run_z3=1;;
     gs)
@@ -277,7 +279,7 @@ while : ; do
   esac
   shift
 done
-echo "Running on $procs cores. Use '--help' for help on configuation options."
+echo "Running on $procs cores. Use '--help' for help on configuration options."
 export verbose
 
 benchres="$curdir/benchres.csv"
