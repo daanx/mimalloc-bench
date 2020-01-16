@@ -54,19 +54,20 @@ esac
 
 curdir=`pwd`
 if test -f ../../build-bench-env.sh; then
-  echo "use '-h' to see all options"
+  echo ""
+  echo "Use '-h' or '--help' for help on configuration options."
   echo ""
 else
   echo "error: you must run this script from the 'out/bench' directory!"
   exit 1
 fi
 
-pushd "../../extern" # up from `mimalloc-bench/out/bench`
+pushd "../../extern" > null # up from `mimalloc-bench/out/bench`
 localdevdir=`pwd`
-popd
-pushd "../../bench"
+popd > null
+pushd "../../bench" > null
 benchdir=`pwd`
-popd
+popd > null
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
@@ -238,15 +239,17 @@ while : ; do
         verbose="yes";;
     -h|--help|-\?|help|\?)
         echo "./bench [options]"
+        echo ""
         echo "  allt                         run all tests"
         echo "  alla                         run all allocators"
+        echo ""
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo ""
-        echo "  je                           use jemalloc 5.2.0"
-        echo "  tc                           use tcmalloc (as installed)"
+        echo "  je                           use jemalloc"
+        echo "  tc                           use tcmalloc"
         echo "  mi                           use mimalloc"
-        echo "  hd                           use hoard 3.13"
+        echo "  hd                           use hoard"
         echo "  sm                           use supermalloc"
         echo "  sn                           use snmalloc"
         echo "  rp                           use rpmalloc"
@@ -254,7 +257,7 @@ while : ; do
         echo "  mc                           use system malloc (glibc)"
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
-        echo "  mesh                         use mesh git#aeb626e7"
+        echo "  mesh                         use mesh"
         echo ""
         echo "  cfrac                        run cfrac"
         echo "  espresso                     run espresso"
@@ -263,7 +266,7 @@ while : ; do
         echo "  lean                         run leanN (~40s per test on 4 cores)"
         echo "  math-lib                     run math-lib (~10 min per test on 4 cores)"
         echo "  redis                        run redis benchmark"
-        echo "  spec                         run selected spec2017 benchmarks (if available)"
+        echo "  spec=<num>                   run selected spec2017 benchmarks (if available)"
         echo "  larson                       run larsonN"
         echo "  alloc-test                   run alloc-testN"
         echo "  xmalloc-test                 run xmalloc-testN"
@@ -274,12 +277,17 @@ while : ; do
         echo "  mstress                      run mstressN"
         echo "  rbstress                     run rbstressN"
         echo "  rptest                       run rptestN"
+        echo ""
+        echo "installed allocators:"
+        echo ""
+        cat ${localdevdir}/versions.txt | column -t
+        echo ""
         exit 0;;
     *) echo "warning: unknown option \"$1\"." 1>&2
   esac
   shift
 done
-echo "Running on $procs cores. Use '--help' for help on configuration options."
+echo "Running on $procs cores."
 export verbose
 
 benchres="$curdir/benchres.csv"
