@@ -1,6 +1,9 @@
 #!/bin/bash
 # Copyright 2018, Microsoft Research, Daan Leijen
 echo "--- Benchmarking ---"
+echo ""
+echo "Use '-h' or '--help' for help on configuration options."
+echo ""
 
 procs=4
 
@@ -54,11 +57,16 @@ esac
 
 curdir=`pwd`
 if test -f ../../build-bench-env.sh; then
-  echo ""
-  echo "Use '-h' or '--help' for help on configuration options."
-  echo ""
+  :
 else
   echo "error: you must run this script from the 'out/bench' directory!"
+  exit 1
+fi
+
+if test -d ../../extern; then
+  :
+else
+  echo "error: you must first run `./build-build/bench.sh` (in `../..`) to install benchmarks and allocators."
   exit 1
 fi
 
@@ -235,7 +243,7 @@ while : ; do
         run_spec_bench="$flag_arg";;
     -j=*|--procs=*)
         procs="$flag_arg";;
-    -verbose|--verbose)
+    -v|--verbose)
         verbose="yes";;
     -h|--help|-\?|help|\?)
         echo "./bench [options]"
@@ -278,10 +286,6 @@ while : ; do
         echo "  rbstress                     run rbstressN"
         echo "  rptest                       run rptestN"
         echo ""
-        echo "installed allocators:"
-        echo ""
-        cat ${localdevdir}/versions.txt | column -t
-        echo ""
         exit 0;;
     *) echo "warning: unknown option \"$1\"." 1>&2
   esac
@@ -289,6 +293,13 @@ while : ; do
 done
 echo "Running on $procs cores."
 export verbose
+
+if test "$verbose"="yes"; then
+  echo "Installed allocators:"
+  echo ""
+  cat ${localdevdir}/versions.txt | column -t
+  echo ""
+fi
 
 benchres="$curdir/benchres.csv"
 run_pre_cmd=""
@@ -608,5 +619,5 @@ fi
 
 sed -i "s/ 0:/ /" $benchres
 echo ""
-echo "--------------------------------------------------"
+echo "# --------------------------------------------------"
 cat $benchres
