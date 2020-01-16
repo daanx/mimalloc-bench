@@ -4,6 +4,17 @@ curdir=`pwd`
 rebuild=0
 all=0
 
+# allocator versions
+version_je=5.2.1
+version_tc=gperftools-2.7
+version_sn=0.3
+version_mi=master
+version_rp=1.4.0
+version_hd=3.13
+version_sm=709663f
+version_tbb=2020
+version_mesh=51222e7
+
 # allocators
 setup_je=0
 setup_tc=0
@@ -13,12 +24,12 @@ setup_rp=0
 setup_hd=0
 setup_sm=0
 setup_tbb=0
-setup_ch=0
 setup_mesh=0
 
 # bigger benchmarks
 setup_lean=0
 setup_redis=0
+setup_ch=0
 setup_bench=0
 
 # various
@@ -92,20 +103,22 @@ while : ; do
         verbose="yes";;
     -h|--help|-\?|help|\?)
         echo "./build-bench-env [options]"
+        echo ""
         echo "  all                          setup and build everything"
+        echo ""
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
-        echo "  --rebuild                    force re-clone and re-build (only for 'all' and 'mi')"
+        echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
-        echo "  je                           setup jemalloc 5.2.0"
-        echo "  tc                           setup tcmalloc 2.7"
-        echo "  mi                           setup mimalloc"
-        echo "  hd                           setup hoard 3.13"
-        echo "  sm                           setup supermalloc"
-        echo "  sn                           setup snmalloc"
-        echo "  rp                           setup rpmalloc"
-        echo "  tbb                          setup Intel TBB malloc"
-        echo "  mesh                         setup mesh allocator"
+        echo "  je                           setup jemalloc ($version_je)"
+        echo "  tc                           setup tcmalloc ($version_tc)"
+        echo "  mi                           setup mimalloc ($version_mi)"
+        echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
+        echo "  hd                           setup hoard ($version_hd)"
+        echo "  mesh                         setup mesh allocator ($version_mesh)"
+        echo "  sm                           setup supermalloc ($version_sm)"
+        echo "  sn                           setup snmalloc ($version_sn)"
+        echo "  rp                           setup rpmalloc ($version_rp)"
         echo ""
         echo "  lean                         setup lean 3 benchmark"
         echo "  redis                        setup redis benchmark"
@@ -120,8 +133,10 @@ while : ; do
 done
 
 if test -f ./build-bench-env.sh; then
+  echo ""
   echo "use '-h' to see all options"
   echo "building with $procs concurrency"
+  echo "--------------------------------------------"
   echo ""
 else
   echo "error: must run from the toplevel mimalloc-bench directory!"
@@ -140,6 +155,28 @@ function phase {
   echo "--------------------------------------------"
   echo
 }
+
+function write_version {  # name, git-tag, repo
+  commit=`git log -n 1 | sed -n 's/commit \([0-9A-Fa-f]\{7\}\).*/\1/p'`
+  echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
+}
+
+function checkout {  # name, git-tag, directory, git repo
+  phase "build $1: version $2"
+  pushd $devdir
+  if test "$rebuild" = "1"; then
+    rm -rf "$3"
+  fi
+  if test -d "$3"; then
+    echo "$devdir/$3 already exists; no need to git clone"
+  else
+    git clone $4
+  fi
+  cd "$3"
+  git checkout $2
+  write_version $1 $2 $4
+}
+
 
 function aptinstall {
   echo ""
@@ -169,33 +206,13 @@ if test "$setup_packages" = "1"; then
 fi
 
 if test "$setup_tbb" = "1"; then
-  #todo: build from source
-  phase "build the Intel tbb allocator (2019-U8)"
-  # aptinstall "libtbb-dev"
-  pushd $devdir
-  if test -d tbb; then
-    echo "$devdir/tbb already exists; no need to git clone"
-  else
-    git clone https://github.com/intel/tbb
-  fi
-  cd tbb
-  git checkout 2019-U8
+  checkout tbb $version_tbb tbb https://github.com/intel/tbb
   make tbbmalloc
   popd
 fi
 
 if test "$setup_tc" = "1"; then
-  # todo: build from source
-  phase "build tcmalloc 2.7"
-  # aptinstall "libgoogle-perftools-dev"
-  pushd $devdir
-  if test -d gperftools; then
-    echo "$devdir/gperftools already exists; no need to git clone"
-  else
-    git clone https://github.com/gperftools/gperftools
-  fi
-  cd gperftools
-  git checkout gperftools-2.7
+  checkout tc $version_tc gperftools https://github.com/gperftools/gperftools
   if test -f configure; then
     echo "already configured"
   else
@@ -209,16 +226,7 @@ if test "$setup_tc" = "1"; then
 fi
 
 if test "$setup_hd" = "1"; then
-  phase "build hoard 3.13"
-
-  pushd $devdir
-  if test -d Hoard; then
-    echo "$devdir/Hoard already exists; no need to git clone"
-  else
-    git clone https://github.com/emeryberger/Hoard.git
-  fi
-  cd Hoard
-  git checkout 3.13
+  checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard.git
   cd src
   make
   sudo make
@@ -226,19 +234,10 @@ if test "$setup_hd" = "1"; then
 fi
 
 if test "$setup_je" = "1"; then
-  phase "build jemalloc 5.2.0"
-
-  pushd $devdir
-  if test -d jemalloc; then
-    echo "$devdir/jemalloc already exists; no need to git clone"
-  else
-    git clone https://github.com/jemalloc/jemalloc.git
-  fi
-  cd jemalloc
+  checkout je $version_je jemalloc https://github.com/jemalloc/jemalloc.git
   if test -f config.status; then
     echo "$devdir/jemalloc is already configured; no need to reconfigure"
   else
-    git checkout 5.2.0
     ./autogen.sh
   fi
   make -j $procs
@@ -246,19 +245,10 @@ if test "$setup_je" = "1"; then
 fi
 
 if test "$setup_rp" = "1"; then
-  phase "build rpmalloc 1.4.0"
-
-  pushd $devdir
-  if test -d rpmalloc; then
-    echo "$devdir/rpmalloc already exists; no need to git clone"
-  else
-    git clone https://github.com/mjansson/rpmalloc.git
-  fi
-  cd rpmalloc
+  checkout rp $version_rp rpmalloc https://github.com/mjansson/rpmalloc.git
   if test -f build.ninja; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
-    git checkout 1.4.0
     python configure.py
   fi
   ninja
@@ -266,22 +256,10 @@ if test "$setup_rp" = "1"; then
 fi
 
 if test "$setup_sn" = "1"; then
-  phase "build snmalloc, commit 0b64536b"
-
-  pushd $devdir
-  if test "$rebuild" = "1"; then
-    rm -rf "snmalloc"
-  fi
-  if test -d snmalloc; then
-    echo "$devdir/snmalloc already exists; no need to git clone"
-  else
-    git clone https://github.com/Microsoft/snmalloc.git
-  fi
-  cd snmalloc
+  checkout sn $version_sn snmalloc https://github.com/Microsoft/snmalloc.git
   if test -f release/build.ninja; then
     echo "$devdir/snmalloc is already configured; no need to reconfigure"
   else
-    git checkout 0b64536b
     mkdir -p release
     cd release
     env CXX=clang++ cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
@@ -293,16 +271,7 @@ if test "$setup_sn" = "1"; then
 fi
 
 if test "$setup_sm" = "1"; then
-  phase "build SuperMalloc (commit 709663fb)"
-
-  pushd $devdir
-  if test -d SuperMalloc; then
-    echo "$devdir/SuperMalloc already exists; no need to git clone"
-  else
-    git clone https://github.com/kuszmaul/SuperMalloc.git
-  fi
-  cd SuperMalloc
-  git checkout 709663fb
+  checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc.git
   sed -i "s/-Werror//" Makefile.include
   cd release
   make
@@ -310,20 +279,47 @@ if test "$setup_sm" = "1"; then
 fi
 
 if test "$setup_mesh" = "1"; then
-  phase "build Mesh (commit aeb626e7 on master)"
-
-  pushd $devdir
-  if test -d mesh; then
-    echo "$devdir/mesh already exists; no need to git clone"
-  else
-    git clone --recurse-submodules https://github.com/plasma-umass/mesh
-  fi
-  cd mesh
-  git checkout aeb626e7
+  chekout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
   ./configure
   make
   popd
 fi
+
+
+if test "$setup_mi" = "1"; then
+  checkout mi $version_mi mimalloc https://github.com/microsoft/mimalloc
+
+  echo ""
+  echo "- build mimalloc release"
+
+  mkdir -p out/release
+  cd out/release
+  cmake ../..
+  make -j 4
+  cd ../..
+
+  echo ""
+  echo "- build mimalloc debug with full checking"
+
+  mkdir -p out/debug
+  cd out/debug
+  cmake ../.. -DMI_CHECK_FULL=ON
+  make -j 4
+  cd ../..
+
+  echo ""
+  echo "- build mimalloc secure"
+
+  mkdir -p out/secure
+  cd out/secure
+  cmake ../..
+  make -j 4
+  cd ../..
+  popd
+fi
+
+
+phase "install benchmarks"
 
 if test "$setup_lean" = "1"; then
   phase "build lean v3.4.1"
@@ -375,52 +371,6 @@ if test "$setup_ch" = "1"; then
   popd
 fi
 
-if test "$setup_mi" = "1"; then
-  phase "build mimalloc variants -- dev branch"
-
-  pushd "$devdir"
-  if test "$rebuild" = "1"; then
-    rm -rf "mimalloc"
-  fi
-  if test -d "mimalloc"; then
-    echo "$devdir/mimalloc already exists; no need to download it"
-  else
-    git clone https://github.com/microsoft/mimalloc
-  fi
-  cd mimalloc
-  git checkout dev
-
-  echo ""
-  echo "- build mimalloc release"
-
-  mkdir -p out/release
-  cd out/release
-  cmake ../..
-  make -j 4
-  cd ../..
-
-  echo ""
-  echo "- build mimalloc debug with full checking"
-
-  mkdir -p out/debug
-  cd out/debug
-  cmake ../.. -DMI_CHECK_FULL=ON
-  make -j 4
-  cd ../..
-
-  echo ""
-  echo "- build mimalloc secure"
-
-  mkdir -p out/secure
-  cd out/secure
-  cmake ../..
-  make -j 4
-  cd ../..
-  popd
-fi
-
-
-
 if test "$setup_bench" = "1"; then
   phase "patch shbench"
   pushd "bench/shbench"
@@ -468,9 +418,17 @@ if test "$setup_bench" = "1"; then
   cd ../..
 fi
 
-curdir=`pwd`
-phase "done in $curdir"
 
+curdir=`pwd`
+
+phase "installed allocators"
+echo "" > $devdir/versions.txt
+for f in $devdir/version_*.txt; do
+ cat $f >> $devdir/versions.txt
+done
+cat $devdir/versions.txt | column -t
+
+phase "done in $curdir"
 echo "run the cfrac benchmarks as:"
 echo "> cd out/bench"
 echo "> ../../bench.sh alla cfrac"

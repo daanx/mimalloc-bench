@@ -206,7 +206,7 @@ while : ; do
     lean)
         run_lean=1;;
     no-lean)
-        run_lean=0;;        
+        run_lean=0;;
     z3)
         run_z3=1;;
     gs)
