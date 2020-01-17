@@ -279,9 +279,9 @@ if test "$setup_sm" = "1"; then
 fi
 
 if test "$setup_mesh" = "1"; then
-  chekout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
+  checkout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
   ./configure
-  make
+  make lib
   popd
 fi
 
