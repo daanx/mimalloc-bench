@@ -544,7 +544,11 @@ fi
 if test "$run_alloc_test" = "1"; then
   run_test "alloc-test1" "./alloc-test 1"
   if test "$procs" != "1"; then
-    run_test "alloc-testN" "./alloc-test $procs"
+    if test $procs -gt 16; then
+      run_test "alloc-testN" "./alloc-test 16"  # 16 is the max for this test
+    else
+      run_test "alloc-testN" "./alloc-test $procs"
+    fi
   fi
 fi
 if test "$run_larson" = "1"; then
