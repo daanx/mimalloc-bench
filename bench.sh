@@ -70,12 +70,12 @@ else
   exit 1
 fi
 
-pushd "../../extern" > null # up from `mimalloc-bench/out/bench`
+pushd "../../extern" > /dev/null # up from `mimalloc-bench/out/bench`
 localdevdir=`pwd`
-popd > null
-pushd "../../bench" > null
+popd > /dev/null
+pushd "../../bench" > /dev/null
 benchdir=`pwd`
-popd > null
+popd > /dev/null
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
