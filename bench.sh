@@ -24,6 +24,7 @@ run_sn=0
 run_tbb=0
 run_mesh=0
 run_tlsf=0
+run_sc=0
 
 run_cfrac=0
 run_larson=0
@@ -100,6 +101,7 @@ lib_mesh="${localdevdir}/mesh/libmesh.so"
 lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
+lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc.so"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc.so"
@@ -170,6 +172,8 @@ while : ; do
         run_sm=1;;
     sn)
         run_sn=1;;
+    sc)
+        run_sc=1;;
     tc)
         run_tc=1;;
     mi)
@@ -260,6 +264,7 @@ while : ; do
         echo "  hd                           use hoard"
         echo "  sm                           use supermalloc"
         echo "  sn                           use snmalloc"
+        echo "  sc                           use scalloc"
         echo "  rp                           use rpmalloc"
         echo "  tbb                          use Intel TBB malloc"
         echo "  mc                           use system malloc (glibc)"
@@ -468,6 +473,12 @@ function run_sn_test {
   fi
 }
 
+function run_sc_test {
+  if test "$run_sc" = "1"; then
+    run_testx $1 "sc" "${ldpreload}=$lib_sc" "$2"
+  fi
+}
+
 function run_tbb_test {
   if test "$run_tbb" = "1"; then
     run_testx $1 "tbb" "${ldpreload}=$lib_tbb" "$2"
@@ -490,6 +501,7 @@ function run_test {
   echo "      " >> $benchres
   echo ""
   echo "---- $1"
+  run_sys_test $1 "$2"
   run_xmi_test $1 "$2"
   run_xdmi_test $1 "$2"
   run_xsmi_test $1 "$2"
@@ -502,10 +514,10 @@ function run_test {
   run_tbb_test $1 "$2"
   run_rp_test $1 "$2"
   run_hd_test $1 "$2"
+  run_sc_test $1 "$2"
   run_mesh_test $1 "$2"
   run_sm_test $1 "$2"
   run_tlsf_test $1 "$2"
-  run_sys_test $1 "$2"
 }
 
 echo "# benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres

@@ -8,12 +8,13 @@ all=0
 version_je=5.2.1
 version_tc=gperftools-2.7
 version_sn=0.3
-version_mi=master
+version_mi=dev
 version_rp=1.4.0
 version_hd=3.13
 version_sm=709663f
 version_tbb=2020
 version_mesh=51222e7
+version_sc=master
 
 # allocators
 setup_je=0
@@ -25,6 +26,7 @@ setup_hd=0
 setup_sm=0
 setup_tbb=0
 setup_mesh=0
+setup_sc=0
 
 # bigger benchmarks
 setup_lean=0
@@ -77,6 +79,8 @@ while : ; do
         setup_sm=$flag_arg;;
     sn)
         setup_sn=$flag_arg;;
+    sc)
+        setup_sc=$flag_arg;;
     mi)
         setup_mi=$flag_arg;;
     hd)
@@ -119,6 +123,7 @@ while : ; do
         echo "  sm                           setup supermalloc ($version_sm)"
         echo "  sn                           setup snmalloc ($version_sn)"
         echo "  rp                           setup rpmalloc ($version_rp)"
+        echo "  sc                           setup scalloc ($version_sc)"
         echo ""
         echo "  lean                         setup lean 3 benchmark"
         echo "  redis                        setup redis benchmark"
@@ -285,6 +290,21 @@ if test "$setup_mesh" = "1"; then
   popd
 fi
 
+if test "$setup_sc" = "1"; then
+  checkout sc $version_sc scalloc https://github.com/cksystemsgroup/scalloc
+  if test -f Makefile; then
+    echo "$devdir/scalloc is already configured; no need to reconfigure"
+  else
+    if test -f build/gyp/gyp; then
+      echo "$devdir/scalloc has the gyp tools installed; no need to re-download"
+    else
+      tools/make_deps.sh
+    fi
+    build/gyp/gyp --depth=. scalloc.gyp
+  fi
+  BUILDTYPE=Release make
+  popd
+fi
 
 if test "$setup_mi" = "1"; then
   checkout mi $version_mi mimalloc https://github.com/microsoft/mimalloc
