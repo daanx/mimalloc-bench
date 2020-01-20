@@ -1,6 +1,9 @@
 #!/bin/bash
 # Copyright 2018, Microsoft Research, Daan Leijen
 echo "--- Benchmarking ---"
+echo ""
+echo "Use '-h' or '--help' for help on configuration options."
+echo ""
 
 procs=4
 
@@ -10,6 +13,7 @@ run_dmi=0
 run_smi=0
 run_xmi=0
 run_xdmi=0
+run_xsmi=0
 
 run_tc=0
 run_hd=0
@@ -19,6 +23,8 @@ run_sm=0
 run_sn=0
 run_tbb=0
 run_mesh=0
+run_tlsf=0
+run_sc=0
 
 run_cfrac=0
 run_larson=0
@@ -52,19 +58,25 @@ esac
 
 curdir=`pwd`
 if test -f ../../build-bench-env.sh; then
-  echo "use '-h' to see all options"
-  echo ""
+  :
 else
   echo "error: you must run this script from the 'out/bench' directory!"
   exit 1
 fi
 
-pushd "../../extern" # up from `mimalloc-bench/out/bench`
+if test -d ../../extern; then
+  :
+else
+  echo "error: you must first run `./build-build/bench.sh` (in `../..`) to install benchmarks and allocators."
+  exit 1
+fi
+
+pushd "../../extern" > /dev/null # up from `mimalloc-bench/out/bench`
 localdevdir=`pwd`
-popd
-pushd "../../bench"
+popd > /dev/null
+pushd "../../bench" > /dev/null
 benchdir=`pwd`
-popd
+popd > /dev/null
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
@@ -76,6 +88,7 @@ lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug.so"
 lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure.so"
 lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc.so"
 lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug.so"
+lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure.so"
 
 lib_hd="$localdevdir/Hoard/src/libhoard.so"
 lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
@@ -85,8 +98,10 @@ lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
 lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap.so`"
 #lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
 lib_mesh="${localdevdir}/mesh/libmesh.so"
+lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
+lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc.so"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc.so"
@@ -157,6 +172,8 @@ while : ; do
         run_sm=1;;
     sn)
         run_sn=1;;
+    sc)
+        run_sc=1;;
     tc)
         run_tc=1;;
     mi)
@@ -169,12 +186,16 @@ while : ; do
         run_xmi=1;;
     xdmi)
         run_xdmi=1;;
+    xsmi)
+        run_xsmi=1;;
     hd)
         run_hd=1;;
     tbb)
         run_tbb=1;;
     mesh)
         run_mesh=1;;
+    tlsf)
+        run_tlsf=1;;
     sys|mc)
         run_sys=1;;
     cfrac)
@@ -197,6 +218,8 @@ while : ; do
         run_cscratch=1;;
     lean)
         run_lean=1;;
+    no-lean)
+        run_lean=0;;
     z3)
         run_z3=1;;
     gs)
@@ -224,27 +247,30 @@ while : ; do
         run_spec_bench="$flag_arg";;
     -j=*|--procs=*)
         procs="$flag_arg";;
-    -verbose|--verbose)
+    -v|--verbose)
         verbose="yes";;
     -h|--help|-\?|help|\?)
         echo "./bench [options]"
+        echo ""
         echo "  allt                         run all tests"
         echo "  alla                         run all allocators"
+        echo ""
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo ""
-        echo "  je                           use jemalloc 5.2.0"
-        echo "  tc                           use tcmalloc (as installed)"
+        echo "  je                           use jemalloc"
+        echo "  tc                           use tcmalloc"
         echo "  mi                           use mimalloc"
-        echo "  hd                           use hoard 3.13"
+        echo "  hd                           use hoard"
         echo "  sm                           use supermalloc"
         echo "  sn                           use snmalloc"
+        echo "  sc                           use scalloc"
         echo "  rp                           use rpmalloc"
         echo "  tbb                          use Intel TBB malloc"
         echo "  mc                           use system malloc (glibc)"
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
-        echo "  mesh                         use mesh git#aeb626e7"
+        echo "  mesh                         use mesh"
         echo ""
         echo "  cfrac                        run cfrac"
         echo "  espresso                     run espresso"
@@ -253,7 +279,7 @@ while : ; do
         echo "  lean                         run leanN (~40s per test on 4 cores)"
         echo "  math-lib                     run math-lib (~10 min per test on 4 cores)"
         echo "  redis                        run redis benchmark"
-        echo "  spec                         run selected spec2017 benchmarks (if available)"
+        echo "  spec=<num>                   run selected spec2017 benchmarks (if available)"
         echo "  larson                       run larsonN"
         echo "  alloc-test                   run alloc-testN"
         echo "  xmalloc-test                 run xmalloc-testN"
@@ -264,13 +290,21 @@ while : ; do
         echo "  mstress                      run mstressN"
         echo "  rbstress                     run rbstressN"
         echo "  rptest                       run rptestN"
+        echo ""
         exit 0;;
     *) echo "warning: unknown option \"$1\"." 1>&2
   esac
   shift
 done
-echo "Running on $procs cores. Use '--help' for help on configuation options."
+echo "Running on $procs cores."
 export verbose
+
+if test "$verbose"="yes"; then
+  echo "Installed allocators:"
+  echo ""
+  cat ${localdevdir}/versions.txt | column -t
+  echo ""
+fi
 
 benchres="$curdir/benchres.csv"
 run_pre_cmd=""
@@ -391,6 +425,12 @@ function run_xdmi_test {
   fi
 }
 
+function run_xsmi_test {
+  if test "$run_xsmi" = "1"; then
+    run_testx $1 "xsmi" "${ldpreload}=$lib_xsmi" "$2"
+  fi
+}
+
 function run_je_test {
   if test "$run_je" = "1"; then
     run_testx $1 "je" "${ldpreload}=$lib_je" "$2"
@@ -433,9 +473,21 @@ function run_sn_test {
   fi
 }
 
+function run_sc_test {
+  if test "$run_sc" = "1"; then
+    run_testx $1 "sc" "${ldpreload}=$lib_sc" "$2"
+  fi
+}
+
 function run_tbb_test {
   if test "$run_tbb" = "1"; then
     run_testx $1 "tbb" "${ldpreload}=$lib_tbb" "$2"
+  fi
+}
+
+function run_tlsf_test {
+  if test "$run_tlsf" = "1"; then
+    run_testx $1 "tlsf" "${ldpreload}=$lib_tlsf" "$2"
   fi
 }
 
@@ -449,8 +501,10 @@ function run_test {
   echo "      " >> $benchres
   echo ""
   echo "---- $1"
+  run_sys_test $1 "$2"
   run_xmi_test $1 "$2"
   run_xdmi_test $1 "$2"
+  run_xsmi_test $1 "$2"
   run_mi_test $1 "$2"
   run_dmi_test $1 "$2"
   run_smi_test $1 "$2"
@@ -460,9 +514,10 @@ function run_test {
   run_tbb_test $1 "$2"
   run_rp_test $1 "$2"
   run_hd_test $1 "$2"
+  run_sc_test $1 "$2"
   run_mesh_test $1 "$2"
   run_sm_test $1 "$2"
-  run_sys_test $1 "$2"
+  run_tlsf_test $1 "$2"
 }
 
 echo "# benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres
@@ -501,7 +556,11 @@ fi
 if test "$run_alloc_test" = "1"; then
   run_test "alloc-test1" "./alloc-test 1"
   if test "$procs" != "1"; then
-    run_test "alloc-testN" "./alloc-test $procs"
+    if test $procs -gt 16; then
+      run_test "alloc-testN" "./alloc-test 16"  # 16 is the max for this test
+    else
+      run_test "alloc-testN" "./alloc-test $procs"
+    fi
   fi
 fi
 if test "$run_larson" = "1"; then
@@ -518,7 +577,7 @@ if test "$run_sh8bench" = "1"; then
 fi
 if test "$run_xmalloc_test" = "1"; then
   tds=`echo "2*$procs" | bc`
-  run_test "xmalloc-testN" "./xmalloc-test -w $tds -t 5 -s '-1'"
+  run_test "xmalloc-testN" "./xmalloc-test -w $tds -t 5 -s 64"
   #run_test "xmalloc-fixedN" "./xmalloc-test -w 100 -t 5 -s 128"
 fi
 if test "$run_cthrash" = "1"; then
@@ -555,11 +614,12 @@ if test "$run_rbstress" = "1"; then
 fi
 
 if test "$run_mstress" = "1"; then
-  run_test "mstressN" "./mstress $procs 200"
+  run_test "mstressN" "./mstress $procs 100 5"
 fi
 
 if test "$run_rptest" = "1"; then
   run_test "rptestN" "./rptest 16 0 2 2 500 1000 200 8 64000"
+  # run_test "rptestN" "./rptest $procs 0 1 2 1000 1000 500 8 64000"
   # run_test "rptestN" "./rptest $procs 0 2 2 500 1000 200 16 1600000"
 fi
 
@@ -575,5 +635,5 @@ fi
 
 sed -i "s/ 0:/ /" $benchres
 echo ""
-echo "--------------------------------------------------"
+echo "# --------------------------------------------------"
 cat $benchres
