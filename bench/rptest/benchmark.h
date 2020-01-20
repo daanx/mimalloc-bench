@@ -45,6 +45,7 @@ benchmark_malloc(size_t alignment, size_t size) {
 		return calloc(1,size);
 	}
   */
+  if (size > 80 && size <= 96) size = 100;
   p = CUSTOM_MALLOC(size);
   if (p != NULL) memset(p, 0xCD, size);
   return p;

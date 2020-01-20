@@ -5,6 +5,7 @@
 #define USE_MIMALLOC
 //#define USE_RPMALLOC
 //#define USE_TBB
+//#define USE_DEBUG_MSVC
 
 // TODO...
 //#define USE_HOARD
@@ -52,6 +53,14 @@ void* xxrealloc(void * ptr, size_t sz);
 #define CUSTOM_REALLOC xxrealloc
 #define CUSTOM_FREE    xxfree
 #define ALLOCATOR      "hd"
+#elif defined(USE_DEBUG_MSVC)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define CUSTOM_MALLOC  malloc
+#define CUSTOM_REALLOC realloc
+#define CUSTOM_FREE    free
+#define ALLOCATOR      "debug-msvc"
 #else
 #include <stdlib.h>
 #include <stdbool.h>

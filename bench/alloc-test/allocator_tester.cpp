@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
 	size_t maxItems = 1 << 18; // 512k objects
 	TestStartupParamsAndResults params;
-	params.startupParams.iterCount = 100000000;
+	params.startupParams.iterCount = 1000000;
 	params.startupParams.maxItemSize = 10;  // 1k
 	params.startupParams.mat = MEM_ACCESS_TYPE::full;
   params.startupParams.rndSeed = 41;

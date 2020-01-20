@@ -18,7 +18,7 @@ static inline void bench_end_thread() {
 static double time_start = 0;
 
 static inline void bench_start_program() {
-  printf("%s allocator.\n", ALLOCATOR);
+  printf("%s allocator.\n----------------------\n", ALLOCATOR);
   time_start = rx_clock_now();
 #ifdef USE_HOARD
   getCustomHeap();
@@ -28,6 +28,9 @@ static inline void bench_start_program() {
 #ifdef USE_RPMALLOC
   rpmalloc_initialize();  
   rpmalloc_thread_initialize();
+#endif
+#if defined(USE_MIMALLOC) && !defined(NDEBUG)
+  mi_stats_reset();
 #endif
 }
 
@@ -40,6 +43,13 @@ static inline void bench_end_program() {
 #ifdef USE_RPMALLOC
   rpmalloc_thread_finalize();
   rpmalloc_finalize();
+#endif
+#ifdef USE_DEBUG_MSVC
+  _CrtDumpMemoryLeaks();
+#endif
+#if defined(USE_MIMALLOC) && !defined(NDEBUG)
+  mi_collect(true);
+  mi_stats_print(NULL);
 #endif
   double elapsed = rx_clock_now() - time_start;
   double utime, stime;
