@@ -159,7 +159,7 @@ while : ; do
 	      run_redis=1
         run_mstress=1
         run_rptest=1
-        run_rbstress=1
+        # run_rbstress=1
         # run_gs=1
         # run_cthrash=1
         # run_malloc_test=1
@@ -267,7 +267,7 @@ while : ; do
         echo "  sc                           use scalloc"
         echo "  rp                           use rpmalloc"
         echo "  tbb                          use Intel TBB malloc"
-        echo "  mc                           use system malloc (glibc)"
+        echo "  sys                          use system malloc (glibc)"
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
         echo "  mesh                         use mesh"
@@ -308,6 +308,12 @@ fi
 
 benchres="$curdir/benchres.csv"
 run_pre_cmd=""
+
+procs16=$procs
+if test $procs16 -lt 16; then
+  procs16=16
+fi
+
 
 function set_spec_bench_dir {
   if test -f "$1.0000/compare.out"; then
@@ -493,7 +499,7 @@ function run_tlsf_test {
 
 function run_sys_test {
   if test "$run_sys" = "1"; then
-    run_testx $1 "mc" "SYSMALLOC=1" "$2"
+    run_testx $1 "sys" "SYSMALLOC=1" "$2"
   fi
 }
 
@@ -614,13 +620,13 @@ if test "$run_rbstress" = "1"; then
 fi
 
 if test "$run_mstress" = "1"; then
-  run_test "mstressN" "./mstress $procs 100 5"
+  run_test "mstressN" "./mstress $procs16 100 5"
 fi
 
 if test "$run_rptest" = "1"; then
-  run_test "rptestN" "./rptest 16 0 2 2 500 1000 200 8 64000"
-  # run_test "rptestN" "./rptest $procs 0 1 2 1000 1000 500 8 64000"
-  # run_test "rptestN" "./rptest $procs 0 2 2 500 1000 200 16 1600000"
+  run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 8 64000"
+  # run_test "rptestN" "./rptest $procs16 0 1 2 1000 1000 500 8 64000"
+  # run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 16 1600000"
 fi
 
 if test "$run_spec" = "1"; then
