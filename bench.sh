@@ -524,10 +524,10 @@ echo "# benchmark allocator elapsed rss user sys page-faults page-reclaims" > $b
 
 
 if test "$run_cfrac" = "1"; then
-  run_test "cfrac" "./cfrac 175451865205073170563711388363274837927895"
+  run_test "cfrac" "./cfrac 17545186520507317056371138836327483792789528"
 fi
 if test "$run_espresso" = "1"; then
-  run_test "espresso" "./espresso -s ../../bench/espresso/largest.espresso"
+  run_test "espresso" "./espresso ../../bench/espresso/largest.espresso"
 fi
 if test "$run_barnes" = "1"; then
   run_test "barnes" "./barnes"

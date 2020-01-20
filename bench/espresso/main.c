@@ -14,9 +14,18 @@ static int input_type = FD_type;
 
 void gmalloc_exit(void);
 
-main(argc, argv)
-int argc;
-char *argv[];
+static int mainx(int argc, char* argv[]);
+
+int main(int argc, char* argv[]) {
+  int i;
+  extern int optind;
+  for(i = 0; i < 20; i++) {  // benchmark N iterations
+    optind = 0;
+    mainx(argc,argv);
+  }
+}
+
+static int mainx(int argc, char *argv[])
 {
     int i, j, first, last, strategy, out_type, option;
     pPLA PLA, PLA1;
