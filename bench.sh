@@ -5,7 +5,7 @@ echo ""
 echo "Use '-h' or '--help' for help on configuration options."
 echo ""
 
-procs=4
+procs=`nproc`
 
 run_je=0
 run_mi=0
@@ -515,7 +515,7 @@ function run_test {
   run_xsmi_test $1 "$2"
   run_mi_test $1 "$2"
   run_dmi_test $1 "$2"
-  run_smi_test $1 "$2"  
+  run_smi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
   run_tbb_test $1 "$2"
