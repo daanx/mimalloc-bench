@@ -133,16 +133,18 @@ while : ; do
   case "$flag" in
     "") break;;
     alla)
-        run_je=1
         run_mi=1
+        run_smi=1
         #run_dmi=1
-        #run_smi=1
         run_tc=1
-        run_hd=1
-        run_rp=1
-        run_sm=1
-        run_sn=1
+        run_je=1
         run_tbb=1
+        run_rp=1
+        #run_sm=1
+        #run_sc=1
+        run_sn=1
+        run_hd=1
+        run_mesh=1
         run_sys=1;;
     allt)
         run_cfrac=1
@@ -159,8 +161,8 @@ while : ; do
 	      run_redis=1
         run_mstress=1
         run_rptest=1
-        # run_rbstress=1
         # run_gs=1
+        # run_rbstress=1
         # run_cthrash=1
         # run_malloc_test=1
         ;;
