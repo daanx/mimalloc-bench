@@ -546,7 +546,7 @@ fi
 if test "$run_lean" = "1"; then
   pushd "$leandir/library"
   # run_test "lean1" "../bin/lean --make -j 1"
-  run_test "leanN" "../bin/lean --make -j $procs"
+  run_test "leanN" "../bin/lean --make -j 8" # more than 8 makes it slower
   popd
 fi
 if test "$run_lean_mathlib" = "1"; then
