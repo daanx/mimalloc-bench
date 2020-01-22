@@ -316,6 +316,8 @@ if test $procs16 -lt 16; then
   procs16=16
 fi
 
+procsx2=`echo "($procs*2)" | bc`
+procsx4=`echo "($procs*4)" | bc`
 
 function set_spec_bench_dir {
   if test -f "$1.0000/compare.out"; then
@@ -572,7 +574,7 @@ if test "$run_alloc_test" = "1"; then
   fi
 fi
 if test "$run_larson" = "1"; then
-  run_test "larsonN" "./larson 2.5 7 8 1000 10000 42 100"
+  run_test "larsonN" "./larson 2.5 8 1024 1000 200 42 $procsx2"
 fi
 if test "$run_ebizzy" = "1"; then
   run_test "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128"
