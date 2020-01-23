@@ -574,7 +574,7 @@ if test "$run_alloc_test" = "1"; then
   fi
 fi
 if test "$run_larson" = "1"; then
-  run_test "larsonN" "./larson 2.5 8 1024 1000 200 42 $procsx2"
+  run_test "larsonN" "./larson 2.5 8 1024 1000 200 42 $procs"
 fi
 if test "$run_ebizzy" = "1"; then
   run_test "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128"
