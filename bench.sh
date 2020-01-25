@@ -48,6 +48,7 @@ run_rbstress=0
 run_spec=0
 run_spec_bench=0
 run_mstress=0
+run_mleak=0
 run_rptest=0
 
 verbose="no"
@@ -242,6 +243,8 @@ while : ; do
         run_rbstress=1;;
     mstress)
         run_mstress=1;;
+    mleak)
+        run_mleak=1;;
     rptest)
         run_rptest=1;;
     spec=*)
@@ -292,6 +295,7 @@ while : ; do
         echo "  mstress                      run mstressN"
         echo "  rbstress                     run rbstressN"
         echo "  rptest                       run rptestN"
+        echo "  mleak                        run mleakN"
         echo ""
         exit 0;;
     *) echo "warning: unknown option \"$1\"." 1>&2
@@ -625,6 +629,11 @@ fi
 
 if test "$run_mstress" = "1"; then
   run_test "mstressN" "./mstress $procs16 100 5"
+fi
+
+if test "$run_mleak" = "1"; then
+  run_test "mleak10"  "./mleak 5"
+  run_test "mleak100" "./mleak 50"
 fi
 
 if test "$run_rptest" = "1"; then

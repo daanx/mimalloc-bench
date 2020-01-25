@@ -87,6 +87,9 @@ target_link_libraries(malloc-large pthread)
 add_executable(mstress mstress/mstress.c)
 target_link_libraries(mstress pthread)
 
+add_executable(mleak mleak/mleak.c)
+target_link_libraries(mleak pthread)
+
 add_executable(rptest rptest/rptest.c rptest/thread.c rptest/timer.c)
 target_compile_options(rptest PRIVATE -fpermissive)
 target_include_directories(rptest PRIVATE rptest)
