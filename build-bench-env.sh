@@ -1,3 +1,6 @@
+#!/bin/bash
+set -exo pipefail
+
 procs=4
 verbose="no"
 curdir=`pwd`
@@ -10,10 +13,11 @@ version_tc=gperftools-2.7
 version_sn=0.3
 version_mi=v1.4.0
 version_rp=1.4.0
-version_hd=3.13
+version_hd=9d137ef37
 version_sm=709663f
 version_tbb=2020
-version_mesh=51222e7
+version_mesh=67ff31acae
+version_nomesh=67ff31acae
 version_sc=master
 
 # allocators
@@ -26,6 +30,7 @@ setup_hd=0
 setup_sm=0
 setup_tbb=0
 setup_mesh=0
+setup_nomesh=0
 setup_sc=0
 
 # bigger benchmarks
@@ -62,12 +67,14 @@ while : ; do
         setup_sm=$flag_arg
         setup_tbb=$flag_arg
         setup_mesh=$flag_arg
+	# only run Mesh's 'nomesh' configuration if asked
+        #setup_nomesh=$flag_arg
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
         #setup_ch=$flag_arg
         setup_bench=$flag_arg
-        setup_packages=$flag_arg
+        #setup_packages=$flag_arg
         ;;
     je)
         setup_je=$flag_arg;;
@@ -89,6 +96,8 @@ while : ; do
         setup_tbb=$flag_arg;;
     mesh)
         setup_mesh=$flag_arg;;
+    nomesh)
+        setup_nomesh=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
     redis)
@@ -120,6 +129,7 @@ while : ; do
         echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
+        echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  sm                           setup supermalloc ($version_sm)"
         echo "  sn                           setup snmalloc ($version_sn)"
         echo "  rp                           setup rpmalloc ($version_rp)"
@@ -175,7 +185,7 @@ function checkout {  # name, git-tag, directory, git repo
   if test -d "$3"; then
     echo "$devdir/$3 already exists; no need to git clone"
   else
-    git clone $4
+    git clone $4 $3
   fi
   cd "$3"
   git checkout $2
@@ -234,7 +244,6 @@ if test "$setup_hd" = "1"; then
   checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard.git
   cd src
   make
-  sudo make
   popd
 fi
 
@@ -286,6 +295,13 @@ fi
 if test "$setup_mesh" = "1"; then
   checkout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
   ./configure
+  make lib
+  popd
+fi
+
+if test "$setup_nomesh" = "1"; then
+  checkout nomesh $version_nomesh nomesh https://github.com/plasma-umass/mesh
+  ./configure --disable-meshing
   make lib
   popd
 fi
