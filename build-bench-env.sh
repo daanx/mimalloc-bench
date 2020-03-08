@@ -190,6 +190,13 @@ function aptinstall {
   sudo apt install $1
 }
 
+function dnfinstall {
+  echo ""
+  echo "> sudo dnf install $1"
+  echo ""
+  sudo dnf install $1
+}
+
 if test "$all" = "1"; then
   if test "$rebuild" = "1"; then
     phase "clean $devdir for a full rebuild"
@@ -203,11 +210,17 @@ fi
 
 if test "$setup_packages" = "1"; then
   phase "install packages"
-  echo "updating package database... (sudo apt update)"
-  sudo apt update
+  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
+    # no 'apt update' equivalent needed on Fedora
+    dnfinstall "gcc-c++ clang unzip dos2unix bc gmp-devel"
+    dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
+  else
+    echo "updating package database... (sudo apt update)"
+    sudo apt update
 
-  aptinstall "g++ clang unzip dos2unix linuxinfo bc libgmp-dev"
-  aptinstall "cmake python ruby ninja-build   libtool autoconf"
+    aptinstall "g++ clang unzip dos2unix linuxinfo bc libgmp-dev"
+    aptinstall "cmake python ruby ninja-build libtool autoconf"
+  fi
 fi
 
 if test "$setup_tbb" = "1"; then
