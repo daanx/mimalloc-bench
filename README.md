@@ -11,7 +11,13 @@ automated scripts to pull specific versions of benchmark programs and
 allocators from Github and build them.
 
 Due to the large variance in programs and allocators, the suite is currently
-only developed for Linux-like systems, and specifically Ubuntu with `apt-get`.
+only developed for Linux-like systems, and specifically Ubuntu with `apt-get` or Fedora with `dnf`.
+The only system-installed allocator used is glibc's implementation that ships as part of Linux's libc.
+All other allocators are downloaded + built as part of `build-bench-env.sh` --
+if you are looking to run these benchmarks on a different Linux distribution look at
+the `setup_packages` function to see the packages required to build the full set of
+allocators.
+
 
 It is quite easy to add new benchmarks and allocator implementations --
 please do so!.
