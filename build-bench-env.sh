@@ -189,7 +189,6 @@ function checkout {  # name, git-tag, directory, git repo
   fi
   cd "$3"
   git checkout $2
-  git pull
   write_version $1 $2 $4
 }
 
