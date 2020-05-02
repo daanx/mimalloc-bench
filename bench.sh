@@ -373,12 +373,13 @@ function run_testx {
     redis*)
        echo "start server"
        /usr/bin/time -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
-       sleep 2s
+       sleep 1s
        $redis_dir/redis-cli flushall
-       sleep 2s
+       sleep 1s
        $4 >> "$outfile"
        sleep 1s
        $redis_dir/redis-cli flushall
+       sleep 1s
        $redis_dir/redis-cli shutdown
        sleep 1s
        ;;
@@ -577,7 +578,7 @@ if test "$run_redis" = "1"; then
   #redis_tail="2"
   #run_test "redis-incr" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t incr"
   redis_tail="1"
-  run_test "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -P 16 -q lpush a 1 2 3 4 5 6 7 8 9 10 lrange a 1 10"
+  run_test "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q lpush a 1 2 3 4 5 6 7 8 9 10 lrange a 1 10"
 fi
 
 if test "$run_alloc_test" = "1"; then
@@ -591,7 +592,7 @@ if test "$run_alloc_test" = "1"; then
   fi
 fi
 if test "$run_larson" = "1"; then
-  run_test "larsonN" "./larson 2.5 8 256 1000 200 42 $procs"
+  run_test "larsonN" "./larson 5 8 1000 5000 100 4141 $procs"
 fi
 if test "$run_ebizzy" = "1"; then
   run_test "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128"
@@ -641,7 +642,7 @@ if test "$run_rbstress" = "1"; then
 fi
 
 if test "$run_mstress" = "1"; then
-  run_test "mstressN" "./mstress $procs16 100 5"
+  run_test "mstressN" "./mstress $procs 100 10"
 fi
 
 if test "$run_mleak" = "1"; then
@@ -650,7 +651,8 @@ if test "$run_mleak" = "1"; then
 fi
 
 if test "$run_rptest" = "1"; then
-  run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 8 64000"
+  run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 500 8 128000"
+  # run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 8 64000"
   # run_test "rptestN" "./rptest $procs16 0 1 2 1000 1000 500 8 64000"
   # run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 16 1600000"
 fi
