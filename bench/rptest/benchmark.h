@@ -27,10 +27,9 @@ benchmark_thread_finalize(void) {
 
 void*
 benchmark_malloc(size_t alignment, size_t size) {
-	// memset/calloc to ensure the memory is touched!
+	// memset/calloc to ensure all memory is touched!
 	if (alignment != 0) {
-		void* ptr = 0;
-		posix_memalign(&ptr, alignment, size);
+		void* ptr = memalign(alignment, size);
 		if (ptr != NULL) memset(ptr,0xCD,size);
 		return ptr;
 	}
