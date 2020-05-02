@@ -23,6 +23,7 @@ run_sm=0
 run_sn=0
 run_tbb=0
 run_mesh=0
+run_nomesh=0
 run_tlsf=0
 run_sc=0
 
@@ -99,6 +100,7 @@ lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
 lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap.so`"
 #lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
 lib_mesh="${localdevdir}/mesh/libmesh.so"
+lib_nomesh="${localdevdir}/nomesh/libmesh.so"
 lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
@@ -146,6 +148,7 @@ while : ; do
         run_sn=1
         run_hd=1
         run_mesh=1
+        run_nomesh=1
         run_sys=1;;
     allt)
         run_cfrac=1
@@ -197,6 +200,8 @@ while : ; do
         run_tbb=1;;
     mesh)
         run_mesh=1;;
+    nomesh)
+        run_nomesh=1;;
     tlsf)
         run_tlsf=1;;
     sys|mc)
@@ -276,6 +281,7 @@ while : ; do
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
         echo "  mesh                         use mesh"
+        echo "  nomesh                       use mesh w/ meshing disabled"
         echo ""
         echo "  cfrac                        run cfrac"
         echo "  espresso                     run espresso"
@@ -469,6 +475,12 @@ function run_mesh_test {
   fi
 }
 
+function run_nomesh_test {
+  if test "$run_nomesh" = "1"; then
+    run_testx $1 "nomesh" "${ldpreload}=$lib_nomesh" "$2"
+  fi
+}
+
 function run_rp_test {
   if test "$run_rp" = "1"; then
     run_testx $1 "rp" "${ldpreload}=$lib_rp" "$2"
@@ -531,6 +543,7 @@ function run_test {
   run_rp_test $1 "$2"
   run_hd_test $1 "$2"
   run_mesh_test $1 "$2"
+  run_nomesh_test $1 "$2"
   run_tlsf_test $1 "$2"
 }
 
