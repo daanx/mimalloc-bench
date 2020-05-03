@@ -576,9 +576,9 @@ if test "$run_lean_mathlib" = "1"; then
 fi
 if test "$run_redis" = "1"; then
   #redis_tail="2"
-  #run_test "redis-incr" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t incr"
+  #run_test "redis-lpush" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t lpush"
   redis_tail="1"
-  run_test "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q lpush a 1 2 3 4 5 6 7 8 9 10 lrange a 1 10"
+  run_test "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5"
 fi
 
 if test "$run_alloc_test" = "1"; then
