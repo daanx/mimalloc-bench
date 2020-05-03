@@ -642,7 +642,7 @@ if test "$run_rbstress" = "1"; then
 fi
 
 if test "$run_mstress" = "1"; then
-  run_test "mstressN" "./mstress $procs 100 10"
+  run_test "mstressN" "./mstress $procs 150 10"
 fi
 
 if test "$run_mleak" = "1"; then
