@@ -282,7 +282,7 @@ while : ; do
         echo "  sc                           use scalloc"
         echo "  rp                           use rpmalloc"
         echo "  tbb                          use Intel TBB malloc"
-	echo "  ia                           use IsoAlloc"
+        echo "  ia                           use IsoAlloc"
         echo "  sys                          use system malloc (glibc)"
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
