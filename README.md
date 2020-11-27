@@ -97,7 +97,9 @@ Supported allocators are:
 - **tbb**: The Intel [TBB](https://github.com/intel/tbb) allocator that comes with
   the Thread Building Blocks (TBB) library \[7].
   Installed as package `libtbb-dev`, version `2017~U7-8`.
-
+- **ia**: [Isolation Alloc](https://github.com/struct/isoalloc) by Chris Rohlf
+  is a general purpose allocator that primarily relies on an isolation strategy to
+  mitigate memory safety vulnerabilities. Tests use git master.
 
 ## Current Benchmarks
 
