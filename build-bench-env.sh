@@ -67,7 +67,7 @@ while : ; do
         setup_rp=$flag_arg
         setup_hd=$flag_arg
         setup_sm=$flag_arg
-	setup_ia=$flag_arg
+        setup_ia=$flag_arg
         setup_tbb=$flag_arg
         setup_mesh=$flag_arg
 	# only run Mesh's 'nomesh' configuration if asked

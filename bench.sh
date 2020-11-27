@@ -147,7 +147,7 @@ while : ; do
         run_rp=1
         #run_sm=1
         #run_sc=1
-	run_ia=1
+        run_ia=1
         run_sn=1
         run_hd=1
         run_mesh=1
