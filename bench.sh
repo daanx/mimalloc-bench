@@ -14,6 +14,7 @@ run_smi=0
 run_xmi=0
 run_xdmi=0
 run_xsmi=0
+run_ia=0
 
 run_tc=0
 run_hd=0
@@ -105,6 +106,7 @@ lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
 lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc.so"
+lib_ia="$localdevdir/IsoAlloc/build/libisoalloc.so"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc.so"
@@ -145,6 +147,7 @@ while : ; do
         run_rp=1
         #run_sm=1
         #run_sc=1
+	run_ia=1
         run_sn=1
         run_hd=1
         run_mesh=1
@@ -198,6 +201,8 @@ while : ; do
         run_hd=1;;
     tbb)
         run_tbb=1;;
+    ia)
+        run_ia=1;;
     mesh)
         run_mesh=1;;
     nomesh)
@@ -277,6 +282,7 @@ while : ; do
         echo "  sc                           use scalloc"
         echo "  rp                           use rpmalloc"
         echo "  tbb                          use Intel TBB malloc"
+	echo "  ia                           use IsoAlloc"
         echo "  sys                          use system malloc (glibc)"
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
@@ -458,6 +464,12 @@ function run_je_test {
   fi
 }
 
+function run_ia_test {
+  if test "$run_ia" = "1"; then
+    run_testx $1 "ia" "${ldpreload}=$lib_ia" "$2"
+  fi
+}
+
 function run_tc_test {
   if test "$run_tc" = "1"; then
     run_testx $1 "tc" "${ldpreload}=$lib_tc" "$2"
@@ -537,6 +549,7 @@ function run_test {
   run_smi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
+  run_ia_test $1 "$2"
   run_tbb_test $1 "$2"
   run_sm_test $1 "$2"
   run_sc_test $1 "$2"

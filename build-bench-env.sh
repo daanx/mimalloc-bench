@@ -19,6 +19,7 @@ version_tbb=2020
 version_mesh=67ff31acae
 version_nomesh=67ff31acae
 version_sc=master
+version_ia=master
 
 # allocators
 setup_je=0
@@ -32,6 +33,7 @@ setup_tbb=0
 setup_mesh=0
 setup_nomesh=0
 setup_sc=0
+setup_ia=0
 
 # bigger benchmarks
 setup_lean=0
@@ -65,6 +67,7 @@ while : ; do
         setup_rp=$flag_arg
         setup_hd=$flag_arg
         setup_sm=$flag_arg
+	setup_ia=$flag_arg
         setup_tbb=$flag_arg
         setup_mesh=$flag_arg
 	# only run Mesh's 'nomesh' configuration if asked
@@ -94,6 +97,8 @@ while : ; do
         setup_hd=$flag_arg;;
     tbb)
         setup_tbb=$flag_arg;;
+    ia)
+        setup_ia=$flag_arg;;
     mesh)
         setup_mesh=$flag_arg;;
     nomesh)
@@ -134,6 +139,7 @@ while : ; do
         echo "  sn                           setup snmalloc ($version_sn)"
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
+        echo "  ia                           setup IsoAlloc ($version_ia)"
         echo ""
         echo "  lean                         setup lean 3 benchmark"
         echo "  redis                        setup redis benchmark"
@@ -302,6 +308,12 @@ if test "$setup_sm" = "1"; then
   sed -i "s/-Werror//" Makefile.include
   cd release
   make
+  popd
+fi
+
+if test "$setup_ia" = "1"; then
+  checkout ia $version_ia IsoAlloc https://github.com/struct/IsoAlloc.git
+  make library
   popd
 fi
 
