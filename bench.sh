@@ -288,7 +288,7 @@ while : ; do
         echo "  barnes                       run barnes"
         echo "  gs                           run ghostscript (~1:50s per test)"
         echo "  lean                         run leanN (~40s per test on 4 cores)"
-        echo "  math-lib                     run math-lib (~10 min per test on 4 cores)"
+        echo "  mathlib                      run mathlib (~10 min per test on 4 cores)"
         echo "  redis                        run redis benchmark"
         echo "  spec=<num>                   run selected spec2017 benchmarks (if available)"
         echo "  larson                       run larsonN"
