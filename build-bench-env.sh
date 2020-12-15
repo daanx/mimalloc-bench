@@ -68,7 +68,7 @@ while : ; do
         setup_sm=$flag_arg
         setup_tbb=$flag_arg
         setup_mesh=$flag_arg
-	# only run Mesh's 'nomesh' configuration if asked
+	   # only run Mesh's 'nomesh' configuration if asked
         #setup_nomesh=$flag_arg
         # bigger benchmarks
         setup_lean=$flag_arg
@@ -118,7 +118,7 @@ while : ; do
     -h|--help|-\?|help|\?)
         echo "./build-bench-env [options]"
         echo ""
-        echo "  all                          setup and build everything"
+        echo "  all                          setup and build (almost) everything"
         echo ""
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
