@@ -604,8 +604,8 @@ if test "$run_sh8bench" = "1"; then
   run_test "sh8benchN" "./sh8bench $procs"
 fi
 if test "$run_xmalloc_test" = "1"; then
-  tds=`echo "$procs/2" | bc`
-  run_test "xmalloc-testN" "./xmalloc-test -w $tds -t 5 -s 64"
+  #tds=`echo "$procs/2" | bc`
+  run_test "xmalloc-testN" "./xmalloc-test -w $procs -t 5 -s 64"
   #run_test "xmalloc-fixedN" "./xmalloc-test -w 100 -t 5 -s 128"
 fi
 if test "$run_cthrash" = "1"; then
