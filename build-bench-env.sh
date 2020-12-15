@@ -223,13 +223,13 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang unzip dos2unix bc gmp-devel"
+    dnfinstall "gcc-c++ clang llvm-dev unzip dos2unix bc gmp-devel"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
   else
     echo "updating package database... (sudo apt update)"
     sudo apt update
 
-    aptinstall "g++ clang unzip dos2unix linuxinfo bc libgmp-dev"
+    aptinstall "g++ clang llvm-dev unzip dos2unix linuxinfo bc libgmp-dev"
     aptinstall "cmake python ruby ninja-build libtool autoconf"
   fi
 fi
