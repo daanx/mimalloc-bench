@@ -103,8 +103,9 @@ lib_mesh="${localdevdir}/mesh/libmesh.so"
 lib_nomesh="${localdevdir}/nomesh/libmesh.so"
 lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
-lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
 lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc.so"
+lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
+lib_tbb_dir="$(dirname $lib_tbb)"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc.so"
@@ -508,7 +509,7 @@ function run_sc_test {
 
 function run_tbb_test {
   if test "$run_tbb" = "1"; then
-    run_testx $1 "tbb" "${ldpreload}=$lib_tbb" "$2"
+    run_testx $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$lib_tbb" "$2"
   fi
 }
 
