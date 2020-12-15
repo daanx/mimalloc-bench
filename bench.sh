@@ -5,7 +5,7 @@ echo ""
 echo "Use '-h' or '--help' for help on configuration options."
 echo ""
 
-procs=`nproc`
+procs=`sysctl -n hw.ncpu`
 
 run_je=0
 run_mi=0
@@ -54,8 +54,15 @@ run_rptest=0
 
 verbose="no"
 ldpreload="LD_PRELOAD"
+timecmd=/usr/bin/time
+darwin=""
+extso=".so"
 case "$OSTYPE" in
-  darwin*) ldpreload="DYLD_INSERT_LIBRARIES";;
+  darwin*) 
+    darwin="yes"
+    timecmd=gtime  # use brew install gnu-time
+    extso=".dylib"
+    ldpreload="DYLD_INSERT_LIBRARIES";;
 esac
 
 curdir=`pwd`
@@ -85,37 +92,37 @@ leanmldir="$leandir/../mathlib"
 redis_dir="$localdevdir/redis-6.0.9/src"
 pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
-lib_mi="$localdevdir/mimalloc/out/release/libmimalloc.so"
-lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug.so"
-lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure.so"
-lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc.so"
-lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug.so"
-lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure.so"
+lib_mi="$localdevdir/mimalloc/out/release/libmimalloc$extso"
+lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
+lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
+lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
 
-lib_hd="$localdevdir/Hoard/src/libhoard.so"
-lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
-lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc.so"
-#lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc_pthread.so"
-lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
-lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap.so`"
-#lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
-lib_mesh="${localdevdir}/mesh/libmesh.so"
-lib_nomesh="${localdevdir}/nomesh/libmesh.so"
-lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
-lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
-lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc.so"
-lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
+lib_hd="$localdevdir/Hoard/src/libhoard$extso"
+lib_sn="$localdevdir/snmalloc/release/libsnmallocshim$extso"
+lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
+#lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc_pthread$extso"
+lib_je="${localdevdir}/jemalloc/lib/libjemalloc$extso"
+lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso`"
+#lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap$extso"
+lib_mesh="${localdevdir}/mesh/libmesh$extso"
+lib_nomesh="${localdevdir}/nomesh/libmesh$extso"
+lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf$extso"
+lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
+lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
+lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy$extso`"
 lib_tbb_dir="$(dirname $lib_tbb)"
 
 if test "$use_packages" = "1"; then
-  lib_tc="/usr/lib/libtcmalloc.so"
-  lib_tbb="/usr/lib/libtbbmalloc_proxy.so"
+  lib_tc="/usr/lib/libtcmalloc$extso"
+  lib_tbb="/usr/lib/libtbbmalloc_proxy$extso"
 
-  if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc.so"; then
-    lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc.so"u
+  if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"; then
+    lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"u
   fi
-  if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"; then
-    lib_tbb="/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"
+  if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"; then
+    lib_tbb="/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"
   fi
 fi
 
@@ -144,28 +151,30 @@ while : ; do
         run_je=1
         run_tbb=1
         run_rp=1
-        #run_sm=1
-        #run_sc=1
         run_sn=1
         run_hd=1
         run_mesh=1
         run_nomesh=1
+        #run_sm=1
+        #run_sc=1        
         run_sys=1;;
     allt)
         run_cfrac=1
         run_espresso=1
         run_barnes=1
         run_lean=1
-        # run_lean_mathlib=1
-        run_alloc_test=1
         run_xmalloc_test=1
-        run_larson=1
-        run_sh6bench=1
-        run_sh8bench=1
+        run_larson=1        
         run_cscratch=1
-	      run_redis=1
-        run_mstress=1
-        run_rptest=1
+	      run_mstress=1
+        if [ -z "$darwin" ]; then
+          run_rptest=1
+          run_alloc_test=1
+          run_sh6bench=1
+          run_sh8bench=1
+          run_redis=1        
+        fi
+        # run_lean_mathlib=1
         # run_gs=1
         # run_rbstress=1
         # run_cthrash=1
@@ -323,7 +332,7 @@ benchres="$curdir/benchres.csv"
 run_pre_cmd=""
 
 procs16=$procs
-if test $procs16 -lt 16; then
+if [ 18 -gt $procs ]; then
   procs16=16
 fi
 
@@ -373,7 +382,7 @@ function run_testx {
   case "$1" in
     redis*)
        echo "start server"
-       /usr/bin/time -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
+       $timecmd -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
        sleep 1s
        $redis_dir/redis-cli flushall
        sleep 1s
@@ -385,7 +394,7 @@ function run_testx {
        sleep 1s
        ;;
     *)
-       /usr/bin/time -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
   # fixup larson with relative time
   case "$1" in
@@ -393,24 +402,24 @@ function run_testx {
       ops=`tail -$redis_tail "$outfile" | sed -n 's/.*: \([0-9\.]*\) requests per second.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1 $2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     larson*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/.* time: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     rptest*)
       ops=`cat "$1-$2-out.txt" | sed -n 's/.*\.\.\.\([0-9]*\) memory ops.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1,$2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     xmalloc*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     ebizzy)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     spec-*)
       popd;;
   esac
@@ -667,7 +676,7 @@ if test "$run_spec" = "1"; then
   esac
 fi
 
-sed -i "s/ 0:/ /" $benchres
+sed -i.bak "s/ 0:/ /" $benchres
 echo ""
 echo "# --------------------------------------------------"
 cat $benchres

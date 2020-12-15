@@ -1,6 +1,13 @@
 #!/bin/bash
 set -eo pipefail
 
+case "$OSTYPE" in
+  darwin*) 
+    darwin="yes";;
+  *)
+    darwin="";;
+esac
+
 procs=4
 verbose="no"
 curdir=`pwd`
@@ -13,7 +20,7 @@ version_tc=gperftools-2.7
 version_sn=0.5.2
 version_mi=v1.6.7
 version_rp=1.4.1
-version_hd=9d137ef37
+version_hd=d880f72  #9d137ef37
 version_sm=709663f
 version_tbb=2020
 version_mesh=67ff31acae
@@ -63,19 +70,21 @@ while : ; do
         setup_tc=$flag_arg
         setup_sn=$flag_arg
         setup_mi=$flag_arg
-        setup_rp=$flag_arg
-        setup_hd=$flag_arg
-        setup_sm=$flag_arg
         setup_tbb=$flag_arg
-        setup_mesh=$flag_arg
-	   # only run Mesh's 'nomesh' configuration if asked
-        #setup_nomesh=$flag_arg
+        setup_hd=$flag_arg                
+        if [ -z "$darwin" ]; then
+          setup_rp=$flag_arg
+          setup_sm=$flag_arg
+          setup_mesh=$flag_arg          
+        fi        
+	      # only run Mesh's 'nomesh' configuration if asked
+        #   setup_nomesh=$flag_arg
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
-        #setup_ch=$flag_arg
         setup_bench=$flag_arg
-        #setup_packages=$flag_arg
+        #setup_ch=$flag_arg
+        setup_packages=$flag_arg
         ;;
     je)
         setup_je=$flag_arg;;
@@ -208,6 +217,13 @@ function dnfinstall {
   sudo dnf install $1
 }
 
+function brewinstall {
+  echo ""
+  echo "> brew install $1"
+  echo ""
+  brew install $1
+}
+
 if test "$all" = "1"; then
   if test "$rebuild" = "1"; then
     phase "clean $devdir for a full rebuild"
@@ -225,6 +241,8 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang llvm-dev unzip dos2unix bc gmp-devel"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
+  elif brew --version >/dev/null; then
+    brewinstall "dos2unix cmake ninja automake libtool gnu-time gmp mpir"
   else
     echo "updating package database... (sudo apt update)"
     sudo apt update

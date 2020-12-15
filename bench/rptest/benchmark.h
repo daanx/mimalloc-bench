@@ -29,7 +29,11 @@ void*
 benchmark_malloc(size_t alignment, size_t size) {
 	// memset/calloc to ensure all memory is touched!
 	if (alignment != 0) {
+		#if defined(__MACH__)
+		void* ptr = aligned_alloc(alignment, size);
+		#else
 		void* ptr = memalign(alignment, size);
+		#endif
 		if (ptr != NULL) memset(ptr,0xCD,size);
 		return ptr;
 	}
