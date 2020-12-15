@@ -82,7 +82,7 @@ popd > /dev/null
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-5.0.3/src"
+redis_dir="$localdevdir/redis-6.0.9/src"
 pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
 lib_mi="$localdevdir/mimalloc/out/release/libmimalloc.so"

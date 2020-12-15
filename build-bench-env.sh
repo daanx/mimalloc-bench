@@ -19,6 +19,7 @@ version_tbb=2020
 version_mesh=67ff31acae
 version_nomesh=67ff31acae
 version_sc=master
+version_redis=6.0.9
 
 # allocators
 setup_je=0
@@ -389,17 +390,17 @@ if test "$setup_lean" = "1"; then
 fi
 
 if test "$setup_redis" = "1"; then
-  phase "build redis 5.0.3"
+  phase "build redis $version_redis"
 
   pushd "$devdir"
-  if test -d "redis-5.0.3"; then
-    echo "$devdir/redis-5.0.3 already exists; no need to download it"
+  if test -d "redis-$version_redis"; then
+    echo "$devdir/redis-$version_redis already exists; no need to download it"
   else
-    wget "http://download.redis.io/releases/redis-5.0.3.tar.gz"
-    tar xzf "redis-5.0.3.tar.gz"
+    wget "http://download.redis.io/releases/redis-$version_redis.tar.gz"
+    tar xzf "redis-$version_redis.tar.gz"
   fi
 
-  cd "redis-5.0.3/src"
+  cd "redis-$version_redis/src"
   make USE_JEMALLOC=no MALLOC=libc
   popd
 fi
