@@ -1,3 +1,13 @@
+#!/bin/bash
+set -eo pipefail
+
+case "$OSTYPE" in
+  darwin*) 
+    darwin="yes";;
+  *)
+    darwin="";;
+esac
+
 procs=4
 verbose="no"
 curdir=`pwd`
@@ -6,15 +16,17 @@ all=0
 
 # allocator versions
 version_je=5.2.1
-version_tc=gperftools-2.7
-version_sn=0.3
-version_mi=dev
-version_rp=1.4.0
-version_hd=3.13
+version_tc=gperftools-2.8.1
+version_sn=0.5.3
+version_mi=v1.6.7
+version_rp=1.4.1
+version_hd=d880f72  #9d137ef37
 version_sm=709663f
-version_tbb=2020
-version_mesh=51222e7
+version_tbb=v2020.3
+version_mesh=67ff31acae
+version_nomesh=67ff31acae
 version_sc=master
+version_redis=6.0.9
 
 # allocators
 setup_je=0
@@ -26,6 +38,7 @@ setup_hd=0
 setup_sm=0
 setup_tbb=0
 setup_mesh=0
+setup_nomesh=0
 setup_sc=0
 
 # bigger benchmarks
@@ -57,16 +70,20 @@ while : ; do
         setup_tc=$flag_arg
         setup_sn=$flag_arg
         setup_mi=$flag_arg
-        setup_rp=$flag_arg
-        setup_hd=$flag_arg
-        setup_sm=$flag_arg
         setup_tbb=$flag_arg
-        setup_mesh=$flag_arg
+        setup_hd=$flag_arg                
+        if [ -z "$darwin" ]; then
+          setup_rp=$flag_arg
+          setup_sm=$flag_arg
+          setup_mesh=$flag_arg          
+        fi        
+	      # only run Mesh's 'nomesh' configuration if asked
+        #   setup_nomesh=$flag_arg
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
-        #setup_ch=$flag_arg
         setup_bench=$flag_arg
+        #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
     je)
@@ -89,6 +106,8 @@ while : ; do
         setup_tbb=$flag_arg;;
     mesh)
         setup_mesh=$flag_arg;;
+    nomesh)
+        setup_nomesh=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
     redis)
@@ -108,7 +127,7 @@ while : ; do
     -h|--help|-\?|help|\?)
         echo "./build-bench-env [options]"
         echo ""
-        echo "  all                          setup and build everything"
+        echo "  all                          setup and build (almost) everything"
         echo ""
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
@@ -120,6 +139,7 @@ while : ; do
         echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
+        echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  sm                           setup supermalloc ($version_sm)"
         echo "  sn                           setup snmalloc ($version_sn)"
         echo "  rp                           setup rpmalloc ($version_rp)"
@@ -175,7 +195,7 @@ function checkout {  # name, git-tag, directory, git repo
   if test -d "$3"; then
     echo "$devdir/$3 already exists; no need to git clone"
   else
-    git clone $4
+    git clone $4 $3
   fi
   cd "$3"
   git checkout $2
@@ -188,6 +208,20 @@ function aptinstall {
   echo "> sudo apt install $1"
   echo ""
   sudo apt install $1
+}
+
+function dnfinstall {
+  echo ""
+  echo "> sudo dnf install $1"
+  echo ""
+  sudo dnf install $1
+}
+
+function brewinstall {
+  echo ""
+  echo "> brew install $1"
+  echo ""
+  brew install $1
 }
 
 if test "$all" = "1"; then
@@ -203,11 +237,19 @@ fi
 
 if test "$setup_packages" = "1"; then
   phase "install packages"
-  echo "updating package database... (sudo apt update)"
-  sudo apt update
+  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
+    # no 'apt update' equivalent needed on Fedora
+    dnfinstall "gcc-c++ clang llvm-dev unzip dos2unix bc gmp-devel"
+    dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
+  elif brew --version 2> /dev/null >/dev/null; then
+    brewinstall "dos2unix cmake ninja automake libtool gnu-time gmp mpir"
+  else
+    echo "updating package database... (sudo apt update)"
+    sudo apt update
 
-  aptinstall "g++ clang unzip dos2unix linuxinfo bc libgmp-dev"
-  aptinstall "cmake python ruby ninja-build   libtool autoconf"
+    aptinstall "g++ clang llvm-dev unzip dos2unix linuxinfo bc libgmp-dev"
+    aptinstall "cmake python ruby ninja-build libtool autoconf"
+  fi
 fi
 
 if test "$setup_tbb" = "1"; then
@@ -234,7 +276,6 @@ if test "$setup_hd" = "1"; then
   checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard.git
   cd src
   make
-  sudo make
   popd
 fi
 
@@ -286,6 +327,13 @@ fi
 if test "$setup_mesh" = "1"; then
   checkout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
   ./configure
+  make lib
+  popd
+fi
+
+if test "$setup_nomesh" = "1"; then
+  checkout nomesh $version_nomesh nomesh https://github.com/plasma-umass/mesh
+  ./configure --disable-meshing
   make lib
   popd
 fi
@@ -360,17 +408,17 @@ if test "$setup_lean" = "1"; then
 fi
 
 if test "$setup_redis" = "1"; then
-  phase "build redis 5.0.3"
+  phase "build redis $version_redis"
 
   pushd "$devdir"
-  if test -d "redis-5.0.3"; then
-    echo "$devdir/redis-5.0.3 already exists; no need to download it"
+  if test -d "redis-$version_redis"; then
+    echo "$devdir/redis-$version_redis already exists; no need to download it"
   else
-    wget "http://download.redis.io/releases/redis-5.0.3.tar.gz"
-    tar xzf "redis-5.0.3.tar.gz"
+    wget "http://download.redis.io/releases/redis-$version_redis.tar.gz"
+    tar xzf "redis-$version_redis.tar.gz"
   fi
 
-  cd "redis-5.0.3/src"
+  cd "redis-$version_redis/src"
   make USE_JEMALLOC=no MALLOC=libc
   popd
 fi

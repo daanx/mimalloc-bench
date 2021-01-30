@@ -33,11 +33,14 @@ benchmark_thread_finalize(void) {
 
 void*
 benchmark_malloc(size_t alignment, size_t size) {
-	// memset/calloc to ensure the memory is touched!
-  void* p;
+	// memset/calloc to ensure all memory is touched!
   /*
 	if (alignment != 0) {
-		posix_memalign(&ptr, alignment, size);    
+		#if defined(__MACH__)
+		void* ptr = aligned_alloc(alignment, size);
+		#else
+		void* ptr = memalign(alignment, size);
+		#endif
 		if (ptr != NULL) memset(ptr,0xCD,size);
 		return ptr;
 	}
@@ -46,7 +49,7 @@ benchmark_malloc(size_t alignment, size_t size) {
 	}
   */
   if (size > 80 && size <= 96) size = 100;
-  p = CUSTOM_MALLOC(size);
+  void* p = CUSTOM_MALLOC(size);
   if (p != NULL) memset(p, 0xCD, size);
   return p;
 }

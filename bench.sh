@@ -5,7 +5,7 @@ echo ""
 echo "Use '-h' or '--help' for help on configuration options."
 echo ""
 
-procs=4
+procs=8
 
 run_je=0
 run_mi=0
@@ -23,6 +23,7 @@ run_sm=0
 run_sn=0
 run_tbb=0
 run_mesh=0
+run_nomesh=0
 run_tlsf=0
 run_sc=0
 
@@ -48,12 +49,23 @@ run_rbstress=0
 run_spec=0
 run_spec_bench=0
 run_mstress=0
+run_mleak=0
 run_rptest=0
 
 verbose="no"
 ldpreload="LD_PRELOAD"
+timecmd=/usr/bin/time
+darwin=""
+extso=".so"
 case "$OSTYPE" in
-  darwin*) ldpreload="DYLD_INSERT_LIBRARIES";;
+  darwin*) 
+    darwin="yes"
+    timecmd=gtime  # use brew install gnu-time
+    extso=".dylib"
+    ldpreload="DYLD_INSERT_LIBRARIES"
+    procs=`sysctl -n hw.physicalcpu`;;
+  *)
+    procs=`nproc`;;
 esac
 
 curdir=`pwd`
@@ -80,38 +92,41 @@ popd > /dev/null
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-5.0.3/src"
+redis_dir="$localdevdir/redis-6.0.9/src"
 pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
-lib_mi="$localdevdir/mimalloc/out/release/libmimalloc.so"
-lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug.so"
-lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure.so"
-lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc.so"
-lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug.so"
-lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure.so"
+lib_mi="$localdevdir/mimalloc/out/release/libmimalloc$extso"
+lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
+lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
+lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
+export MIMALLOC_EAGER_COMMIT_DELAY=0
 
-lib_hd="$localdevdir/Hoard/src/libhoard.so"
-lib_sn="$localdevdir/snmalloc/release/libsnmallocshim.so"
-lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc.so"
-#lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc_pthread.so"
-lib_je="${localdevdir}/jemalloc/lib/libjemalloc.so"
-lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap.so`"
-#lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap.so"
-lib_mesh="${localdevdir}/mesh/libmesh.so"
-lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf.so"
-lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal.so"
-lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy.so.*`"
-lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc.so"
+lib_hd="$localdevdir/Hoard/src/libhoard$extso"
+lib_sn="$localdevdir/snmalloc/release/libsnmallocshim$extso"
+lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
+#lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc_pthread$extso"
+lib_je="${localdevdir}/jemalloc/lib/libjemalloc$extso"
+lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso`"
+#lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap$extso"
+lib_mesh="${localdevdir}/mesh/libmesh$extso"
+lib_nomesh="${localdevdir}/nomesh/libmesh$extso"
+lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf$extso"
+lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
+lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
+lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy$extso`"
+lib_tbb_dir="$(dirname $lib_tbb)"
 
 if test "$use_packages" = "1"; then
-  lib_tc="/usr/lib/libtcmalloc.so"
-  lib_tbb="/usr/lib/libtbbmalloc_proxy.so"
+  lib_tc="/usr/lib/libtcmalloc$extso"
+  lib_tbb="/usr/lib/libtbbmalloc_proxy$extso"
 
-  if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc.so"; then
-    lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc.so"u
+  if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"; then
+    lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"u
   fi
-  if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"; then
-    lib_tbb="/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy.so"
+  if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"; then
+    lib_tbb="/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"
   fi
 fi
 
@@ -133,34 +148,39 @@ while : ; do
   case "$flag" in
     "") break;;
     alla)
-        run_je=1
         run_mi=1
+        run_smi=1
         #run_dmi=1
-        #run_smi=1
         run_tc=1
-        run_hd=1
-        run_rp=1
-        run_sm=1
-        run_sn=1
+        run_je=1
         run_tbb=1
+        run_rp=1
+        run_sn=1
+        run_hd=1
+        run_mesh=1
+        run_nomesh=1
+        #run_sm=1
+        #run_sc=1        
         run_sys=1;;
     allt)
         run_cfrac=1
         run_espresso=1
         run_barnes=1
         run_lean=1
-        # run_lean_mathlib=1
-        run_alloc_test=1
         run_xmalloc_test=1
-        run_larson=1
-        run_sh6bench=1
-        run_sh8bench=1
+        run_larson=1        
         run_cscratch=1
-	      run_redis=1
-        run_mstress=1
-        run_rptest=1
-        # run_rbstress=1
+	      run_mstress=1
+        if [ -z "$darwin" ]; then
+          run_rptest=1
+          run_alloc_test=1
+          run_sh6bench=1
+          run_sh8bench=1
+          run_redis=1        
+        fi
+        # run_lean_mathlib=1
         # run_gs=1
+        # run_rbstress=1
         # run_cthrash=1
         # run_malloc_test=1
         ;;
@@ -194,6 +214,8 @@ while : ; do
         run_tbb=1;;
     mesh)
         run_mesh=1;;
+    nomesh)
+        run_nomesh=1;;
     tlsf)
         run_tlsf=1;;
     sys|mc)
@@ -240,6 +262,8 @@ while : ; do
         run_rbstress=1;;
     mstress)
         run_mstress=1;;
+    mleak)
+        run_mleak=1;;
     rptest)
         run_rptest=1;;
     spec=*)
@@ -271,13 +295,14 @@ while : ; do
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
         echo "  mesh                         use mesh"
+        echo "  nomesh                       use mesh w/ meshing disabled"
         echo ""
         echo "  cfrac                        run cfrac"
         echo "  espresso                     run espresso"
         echo "  barnes                       run barnes"
         echo "  gs                           run ghostscript (~1:50s per test)"
         echo "  lean                         run leanN (~40s per test on 4 cores)"
-        echo "  math-lib                     run math-lib (~10 min per test on 4 cores)"
+        echo "  mathlib                      run mathlib (~10 min per test on 4 cores)"
         echo "  redis                        run redis benchmark"
         echo "  spec=<num>                   run selected spec2017 benchmarks (if available)"
         echo "  larson                       run larsonN"
@@ -290,6 +315,7 @@ while : ; do
         echo "  mstress                      run mstressN"
         echo "  rbstress                     run rbstressN"
         echo "  rptest                       run rptestN"
+        echo "  mleak                        run mleakN"
         echo ""
         exit 0;;
     *) echo "warning: unknown option \"$1\"." 1>&2
@@ -310,10 +336,12 @@ benchres="$curdir/benchres.csv"
 run_pre_cmd=""
 
 procs16=$procs
-if test $procs16 -lt 16; then
+if [ 18 -gt $procs ]; then
   procs16=16
 fi
 
+procsx2=`echo "($procs*2)" | bc`
+procsx4=`echo "($procs*4)" | bc`
 
 function set_spec_bench_dir {
   if test -f "$1.0000/compare.out"; then
@@ -358,18 +386,19 @@ function run_testx {
   case "$1" in
     redis*)
        echo "start server"
-       /usr/bin/time -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
-       sleep 2s
+       $timecmd -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
+       sleep 1s
        $redis_dir/redis-cli flushall
        sleep 1s
        $4 >> "$outfile"
        sleep 1s
        $redis_dir/redis-cli flushall
+       sleep 1s
        $redis_dir/redis-cli shutdown
        sleep 1s
        ;;
     *)
-       /usr/bin/time -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
   # fixup larson with relative time
   case "$1" in
@@ -377,24 +406,24 @@ function run_testx {
       ops=`tail -$redis_tail "$outfile" | sed -n 's/.*: \([0-9\.]*\) requests per second.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1 $2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     larson*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/.* time: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     rptest*)
       ops=`cat "$1-$2-out.txt" | sed -n 's/.*\.\.\.\([0-9]*\) memory ops.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1,$2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     xmalloc*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     ebizzy)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
-      sed -i "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     spec-*)
       popd;;
   esac
@@ -461,6 +490,12 @@ function run_mesh_test {
   fi
 }
 
+function run_nomesh_test {
+  if test "$run_nomesh" = "1"; then
+    run_testx $1 "nomesh" "${ldpreload}=$lib_nomesh" "$2"
+  fi
+}
+
 function run_rp_test {
   if test "$run_rp" = "1"; then
     run_testx $1 "rp" "${ldpreload}=$lib_rp" "$2"
@@ -487,7 +522,7 @@ function run_sc_test {
 
 function run_tbb_test {
   if test "$run_tbb" = "1"; then
-    run_testx $1 "tbb" "${ldpreload}=$lib_tbb" "$2"
+    run_testx $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$lib_tbb" "$2"
   fi
 }
 
@@ -516,13 +551,14 @@ function run_test {
   run_smi_test $1 "$2"
   run_tc_test $1 "$2"
   run_je_test $1 "$2"
-  run_sn_test $1 "$2"
   run_tbb_test $1 "$2"
+  run_sm_test $1 "$2"
+  run_sc_test $1 "$2"
+  run_sn_test $1 "$2"
   run_rp_test $1 "$2"
   run_hd_test $1 "$2"
-  run_sc_test $1 "$2"
   run_mesh_test $1 "$2"
-  run_sm_test $1 "$2"
+  run_nomesh_test $1 "$2"
   run_tlsf_test $1 "$2"
 }
 
@@ -544,7 +580,7 @@ fi
 if test "$run_lean" = "1"; then
   pushd "$leandir/library"
   # run_test "lean1" "../bin/lean --make -j 1"
-  run_test "leanN" "../bin/lean --make -j 8"
+  run_test "leanN" "../bin/lean --make -j 8" # more than 8 makes it slower
   popd
 fi
 if test "$run_lean_mathlib" = "1"; then
@@ -553,10 +589,10 @@ if test "$run_lean_mathlib" = "1"; then
   popd
 fi
 if test "$run_redis" = "1"; then
-  # redis_tail="2"
-  # run_test "redis-incr" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t incr"
+  #redis_tail="2"
+  #run_test "redis-lpush" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t lpush"
   redis_tail="1"
-  run_test "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -P 8 -q lpush a 1 2 3 4 5 6 7 8 9 10 lrange a 1 10"
+  run_test "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5"
 fi
 
 if test "$run_alloc_test" = "1"; then
@@ -570,20 +606,20 @@ if test "$run_alloc_test" = "1"; then
   fi
 fi
 if test "$run_larson" = "1"; then
-  run_test "larsonN" "./larson 2.5 7 8 1000 10000 42 100"
+  run_test "larsonN" "./larson 5 8 1000 5000 100 4141 $procs"
 fi
 if test "$run_ebizzy" = "1"; then
   run_test "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128"
 fi
 if test "$run_sh6bench" = "1"; then
-  run_test "sh6benchN" "./sh6bench $procs"
+  run_test "sh6benchN" "./sh6bench $procsx2"
 fi
 if test "$run_sh8bench" = "1"; then
-  run_test "sh8benchN" "./sh8bench $procs"
+  run_test "sh8benchN" "./sh8bench $procsx2"
 fi
 if test "$run_xmalloc_test" = "1"; then
-  tds=`echo "2*$procs" | bc`
-  run_test "xmalloc-testN" "./xmalloc-test -w $tds -t 5 -s 64"
+  #tds=`echo "$procs/2" | bc`
+  run_test "xmalloc-testN" "./xmalloc-test -w $procs -t 5 -s 64"
   #run_test "xmalloc-fixedN" "./xmalloc-test -w 100 -t 5 -s 128"
 fi
 if test "$run_cthrash" = "1"; then
@@ -620,13 +656,18 @@ if test "$run_rbstress" = "1"; then
 fi
 
 if test "$run_mstress" = "1"; then
-  run_test "mstressN" "./mstress $procs16 100 5"
+  run_test "mstressN" "./mstress $procs 50 25"
+fi
+
+if test "$run_mleak" = "1"; then
+  run_test "mleak10"  "./mleak 5"
+  run_test "mleak100" "./mleak 50"
 fi
 
 if test "$run_rptest" = "1"; then
-  run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 8 64000"
-  # run_test "rptestN" "./rptest $procs16 0 1 2 1000 1000 500 8 64000"
-  # run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 16 1600000"
+  run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 16000"
+  # run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 128000"
+  # run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 512000"
 fi
 
 if test "$run_spec" = "1"; then
@@ -639,7 +680,7 @@ if test "$run_spec" = "1"; then
   esac
 fi
 
-sed -i "s/ 0:/ /" $benchres
+sed -i.bak "s/ 0:/ /" $benchres
 echo ""
 echo "# --------------------------------------------------"
 cat $benchres
