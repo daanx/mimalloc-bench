@@ -22,7 +22,7 @@ version_mi=v1.6.7
 version_rp=1.4.1
 version_hd=d880f72  #9d137ef37
 version_sm=709663f
-version_tbb=2020
+version_tbb=v2020.3
 version_mesh=67ff31acae
 version_nomesh=67ff31acae
 version_sc=master
@@ -241,7 +241,7 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang llvm-dev unzip dos2unix bc gmp-devel"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
-  elif brew --version >/dev/null; then
+  elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix cmake ninja automake libtool gnu-time gmp mpir"
   else
     echo "updating package database... (sudo apt update)"
