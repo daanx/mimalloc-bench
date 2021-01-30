@@ -16,8 +16,8 @@ all=0
 
 # allocator versions
 version_je=5.2.1
-version_tc=gperftools-2.7
-version_sn=0.5.2
+version_tc=gperftools-2.8.1
+version_sn=0.5.3
 version_mi=v1.6.7
 version_rp=1.4.1
 version_hd=d880f72  #9d137ef37

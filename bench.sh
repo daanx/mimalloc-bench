@@ -5,7 +5,7 @@ echo ""
 echo "Use '-h' or '--help' for help on configuration options."
 echo ""
 
-procs=`sysctl -n hw.ncpu`
+procs=8
 
 run_je=0
 run_mi=0
@@ -62,7 +62,10 @@ case "$OSTYPE" in
     darwin="yes"
     timecmd=gtime  # use brew install gnu-time
     extso=".dylib"
-    ldpreload="DYLD_INSERT_LIBRARIES";;
+    ldpreload="DYLD_INSERT_LIBRARIES"
+    procs=`sysctl -n hw.physicalcpu`;;
+  *)
+    procs=`nproc`;;
 esac
 
 curdir=`pwd`
@@ -98,6 +101,7 @@ lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
 lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
 lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
 lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
+export MIMALLOC_EAGER_COMMIT_DELAY=0
 
 lib_hd="$localdevdir/Hoard/src/libhoard$extso"
 lib_sn="$localdevdir/snmalloc/release/libsnmallocshim$extso"
@@ -608,10 +612,10 @@ if test "$run_ebizzy" = "1"; then
   run_test "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128"
 fi
 if test "$run_sh6bench" = "1"; then
-  run_test "sh6benchN" "./sh6bench $procs"
+  run_test "sh6benchN" "./sh6bench $procsx2"
 fi
 if test "$run_sh8bench" = "1"; then
-  run_test "sh8benchN" "./sh8bench $procs"
+  run_test "sh8benchN" "./sh8bench $procsx2"
 fi
 if test "$run_xmalloc_test" = "1"; then
   #tds=`echo "$procs/2" | bc`
@@ -661,9 +665,9 @@ if test "$run_mleak" = "1"; then
 fi
 
 if test "$run_rptest" = "1"; then
-  run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 128000"
-  # run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 200 8 64000"
-  # run_test "rptestN" "./rptest $procs16 0 2 2 500 1000 200 16 1600000"
+  run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 16000"
+  # run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 128000"
+  # run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 512000"
 fi
 
 if test "$run_spec" = "1"; then
