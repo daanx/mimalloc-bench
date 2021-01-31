@@ -115,7 +115,7 @@ lib_nomesh="${localdevdir}/nomesh/libmesh$extso"
 lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf$extso"
 lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
 lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
-lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy$extso`"
+lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy$extso.2`"
 lib_tbb_dir="$(dirname $lib_tbb)"
 
 if test "$use_packages" = "1"; then
