@@ -614,7 +614,7 @@ if test "$run_larson" = "1"; then
   run_test "larsonN" "./larson 5 8 1000 5000 100 4141 $procs"
 fi
 if test "$run_larson_sized" = "1"; then
-  run_test "larsonN-sized" "./larson 5 8 1000 5000 100 4141 $procs"
+  run_test "larsonN-sized" "./larson_sized 5 8 1000 5000 100 4141 $procs"
 fi
 if test "$run_ebizzy" = "1"; then
   run_test "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128"
