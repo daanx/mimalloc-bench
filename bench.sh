@@ -29,6 +29,7 @@ run_sc=0
 
 run_cfrac=0
 run_larson=0
+run_larson_sized=0
 run_ebizzy=0
 run_sh6bench=0
 run_sh8bench=0
@@ -169,6 +170,7 @@ while : ; do
         run_lean=1
         run_xmalloc_test=1
         run_larson=1        
+        run_larson_sized=1        
         run_cscratch=1
 	      run_mstress=1
         if [ -z "$darwin" ]; then
@@ -228,6 +230,8 @@ while : ; do
         run_barnes=1;;
     larson)
         run_larson=1;;
+    larson-sized)
+        run_larson_sized=1;;
     ebizzy)
         run_ebizzy=1;;
     sh6bench)
@@ -306,6 +310,7 @@ while : ; do
         echo "  redis                        run redis benchmark"
         echo "  spec=<num>                   run selected spec2017 benchmarks (if available)"
         echo "  larson                       run larsonN"
+        echo "  larson-sized                 run larsonN sized deallocation test"
         echo "  alloc-test                   run alloc-testN"
         echo "  xmalloc-test                 run xmalloc-testN"
         echo "  sh6bench                     run sh6benchN"
@@ -607,6 +612,9 @@ if test "$run_alloc_test" = "1"; then
 fi
 if test "$run_larson" = "1"; then
   run_test "larsonN" "./larson 5 8 1000 5000 100 4141 $procs"
+fi
+if test "$run_larson_sized" = "1"; then
+  run_test "larsonN-sized" "./larson 5 8 1000 5000 100 4141 $procs"
 fi
 if test "$run_ebizzy" = "1"; then
   run_test "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128"
