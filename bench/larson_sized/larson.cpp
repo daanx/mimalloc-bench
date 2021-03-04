@@ -387,7 +387,7 @@ void runloops(long sleep_cnt, int num_chunks )
     for( cblks=0; cblks<num_chunks; cblks++){
       victim = lran2(&rgen)%num_chunks ;
 #if defined(CPP)
-    delete[] blkp[victim], blksize[victim];
+    operator delete[] (blkp[victim], blksize[victim]);
 #elif defined(USE_MALLOC)
     free(blkp[victim]);
 #else
@@ -591,7 +591,7 @@ static void * exercise_heap( void *pinput)
   for( cblks=0; cblks<pdea->NumBlocks; cblks++){
     victim = lran2(&pdea->rgen)%pdea->asize ;
 #ifdef CPP
-    delete[] pdea->array[victim], pdea->blksize[victim];
+    operator delete[] (pdea->array[victim], pdea->blksize[victim]);
 #else
     CUSTOM_FREE(pdea->array[victim]) ;
 #endif
@@ -685,7 +685,7 @@ static void warmup(char **blkp, int num_chunks )
   for( cblks=0; cblks<4*num_chunks; cblks++){
     victim = lran2(&rgen)%num_chunks ;
 #ifdef CPP
-    delete[] blkp[victim], blksize[victim];
+    operator delete[] (blkp[victim], blksize[victim]);
 #else
     CUSTOM_FREE(blkp[victim]) ;
 #endif

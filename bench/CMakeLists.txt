@@ -61,7 +61,7 @@ target_compile_definitions(larson PRIVATE CPP=1)
 target_link_libraries(larson pthread)
 
 add_executable(larson_sized larson_sized/larson.cpp)
-target_compile_options(larson_sized PRIVATE -Wno-unused-result -fsized-deallocation -std=c++14)
+target_compile_options(larson_sized PRIVATE -Wno-unused-result -fsized-deallocation -DCPP)
 target_compile_definitions(larson_sized PRIVATE CPP=1)
 target_link_libraries(larson_sized pthread)
 
