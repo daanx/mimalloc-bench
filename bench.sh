@@ -170,7 +170,7 @@ while : ; do
         run_lean=1
         run_xmalloc_test=1
         run_larson=1        
-        run_larson_sized=1        
+        run_larson_sized=1
         run_cscratch=1
 	      run_mstress=1
         if [ -z "$darwin" ]; then
