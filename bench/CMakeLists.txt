@@ -57,12 +57,12 @@ target_link_libraries(barnes m)
 
 add_executable(larson larson/larson.cpp)
 target_compile_options(larson PRIVATE -Wno-unused-result)
-target_compile_definitions(larson PRIVATE)
+target_compile_definitions(larson PRIVATE CPP=1)
 target_link_libraries(larson pthread)
 
 add_executable(larson-sized larson/larson.cpp)
 target_compile_options(larson-sized PRIVATE -Wno-unused-result -fsized-deallocation)
-target_compile_definitions(larson-sized PRIVATE CPP=1)
+target_compile_definitions(larson-sized PRIVATE CPP=1 SIZED=1)
 target_link_libraries(larson-sized pthread)
 
 if(NOT APPLE)

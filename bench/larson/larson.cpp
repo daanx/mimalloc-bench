@@ -279,7 +279,11 @@ int main (int argc, char *argv[])
   printf( "\nSingle-threaded test driver \n") ;
 #endif
 #ifdef CPP
+#if defined(SIZED)
   printf("C++ version (new and sized delete)\n") ;
+#else
+  printf("C++ version (new and delete)\n") ;
+#endif
 #else
   printf("C version (malloc and free)\n") ;
 #endif
@@ -387,7 +391,11 @@ void runloops(long sleep_cnt, int num_chunks )
     for( cblks=0; cblks<num_chunks; cblks++){
       victim = lran2(&rgen)%num_chunks ;
 #if defined(CPP)
+#if defined(SIZED)
     operator delete[] (blkp[victim], blksize[victim]);
+#else
+    delete[] blkp[victim] ;
+#endif
 #else
     CUSTOM_FREE(blkp[victim]) ;
 #endif
@@ -589,7 +597,11 @@ static void * exercise_heap( void *pinput)
   for( cblks=0; cblks<pdea->NumBlocks; cblks++){
     victim = lran2(&pdea->rgen)%pdea->asize ;
 #ifdef CPP
+#if defined(SIZED)
     operator delete[] (pdea->array[victim], pdea->blksize[victim]);
+#else
+    delete[] pdea->array[victim] ;
+#endif
 #else
     CUSTOM_FREE(pdea->array[victim]) ;
 #endif
@@ -683,7 +695,11 @@ static void warmup(char **blkp, int num_chunks )
   for( cblks=0; cblks<4*num_chunks; cblks++){
     victim = lran2(&rgen)%num_chunks ;
 #ifdef CPP
+#if defined(SIZED)
     operator delete[] (blkp[victim], blksize[victim]);
+#else
+    delete[] blkp[victim] ;
+#endif
 #else
     CUSTOM_FREE(blkp[victim]) ;
 #endif
