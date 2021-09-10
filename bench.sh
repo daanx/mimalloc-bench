@@ -7,6 +7,7 @@ echo ""
 
 procs=8
 
+run_iso=0
 run_je=0
 run_mi=0
 run_dmi=0
@@ -117,6 +118,7 @@ lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
 lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy$extso.2`"
 lib_tbb_dir="$(dirname $lib_tbb)"
+lib_iso="${localdevdir}/iso/build/libisoalloc$extso"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc$extso"
@@ -148,6 +150,7 @@ while : ; do
   case "$flag" in
     "") break;;
     alla)
+        run_mi=1
         run_mi=1
         run_smi=1
         #run_dmi=1
@@ -184,6 +187,8 @@ while : ; do
         # run_cthrash=1
         # run_malloc_test=1
         ;;
+    iso)
+        run_iso=1;;
     je)
         run_je=1;;
     rp)
@@ -282,6 +287,7 @@ while : ; do
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo ""
+        echo "  iso                          use isoalloc"
         echo "  je                           use jemalloc"
         echo "  tc                           use tcmalloc"
         echo "  mi                           use mimalloc"
@@ -520,6 +526,12 @@ function run_sc_test {
   fi
 }
 
+function run_iso_test {
+  if test "$run_iso" = "1"; then
+    run_testx $1 "iso" "${ldpreload}=$lib_iso" "$2"
+  fi
+}
+
 function run_tbb_test {
   if test "$run_tbb" = "1"; then
     run_testx $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$lib_tbb" "$2"
@@ -542,6 +554,7 @@ function run_test {
   echo "      " >> $benchres
   echo ""
   echo "---- $1"
+  run_iso_test $1 "$2"
   run_sys_test $1 "$2"
   run_xmi_test $1 "$2"
   run_xdmi_test $1 "$2"
