@@ -18,7 +18,7 @@ all=0
 version_je=5.2.1
 version_tc=gperftools-2.8.1
 version_sn=0.5.3
-version_mi=v2.0.0   #v1.7.0
+version_mi=v1.7.2
 version_rp=1.4.1
 version_hd=a43ac40 #d880f72  #9d137ef37
 version_sm=709663f
@@ -471,7 +471,8 @@ if test "$setup_bench" = "1"; then
   if test -f "$pdfdoc"; then
     echo "do nothing: $devdir/$pdfdoc already exists"
   else
-    wget https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf
+    # wget https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf
+    curl -o $pdfdoc https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
   fi
   popd
 fi
