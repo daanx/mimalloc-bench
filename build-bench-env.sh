@@ -15,6 +15,7 @@ rebuild=0
 all=0
 
 # allocator versions
+version_iso=master
 version_je=5.2.1
 version_tc=gperftools-2.9.1
 version_sn=0.5.3
@@ -29,6 +30,7 @@ version_sc=master
 version_redis=6.0.9
 
 # allocators
+setup_iso=0
 setup_je=0
 setup_tc=0
 setup_sn=0
@@ -66,6 +68,7 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
+        setup_iso=$flag_arg                
         setup_je=$flag_arg
         setup_tc=$flag_arg
         setup_sn=$flag_arg
@@ -86,6 +89,8 @@ while : ; do
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
+    iso)
+        setup_iso=$flag_arg;;
     je)
         setup_je=$flag_arg;;
     tc)
@@ -133,6 +138,7 @@ while : ; do
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
+        echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
         echo "  tc                           setup tcmalloc ($version_tc)"
         echo "  mi                           setup mimalloc ($version_mi)"
@@ -250,6 +256,12 @@ if test "$setup_packages" = "1"; then
     aptinstall "g++ clang llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python ruby ninja-build libtool autoconf"
   fi
+fi
+
+if test "$setup_iso" = "1"; then
+  checkout iso $version_iso iso https://github.com/struct/isoalloc
+  make library
+  popd
 fi
 
 if test "$setup_tbb" = "1"; then
