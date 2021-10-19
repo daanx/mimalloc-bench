@@ -16,13 +16,13 @@ all=0
 
 # allocator versions
 version_je=5.2.1
-version_tc=gperftools-2.8.1
+version_tc=gperftools-2.9.1
 version_sn=0.5.3
 version_mi=v1.7.2
-version_rp=1.4.1
-version_hd=a43ac40 #d880f72  #9d137ef37
+version_rp=1.4.3
+version_hd=3.13 # a43ac40 #d880f72  #9d137ef37
 version_sm=709663f
-version_tbb=v2020.3
+version_tbb=v2021.4.0 # v2020.3
 version_mesh=67ff31acae
 version_nomesh=67ff31acae
 version_sc=master
@@ -254,7 +254,9 @@ fi
 
 if test "$setup_tbb" = "1"; then
   checkout tbb $version_tbb tbb https://github.com/intel/tbb
-  make tbbmalloc
+  # make tbbmalloc
+  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF
+  make -j$procs
   popd
 fi
 
