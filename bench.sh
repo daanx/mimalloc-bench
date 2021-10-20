@@ -7,6 +7,7 @@ echo ""
 
 procs=8
 
+run_hm=0
 run_iso=0
 run_je=0
 run_mi=0
@@ -119,6 +120,7 @@ lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy$extso.2`"
 lib_tbb_dir="$(dirname $lib_tbb)"
 lib_iso="${localdevdir}/iso/build/libisoalloc$extso"
+lib_hm="${localdevdir}/hm/libhardened_malloc$extso"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc$extso"
@@ -150,6 +152,7 @@ while : ; do
   case "$flag" in
     "") break;;
     alla)
+        run_hm=1
         run_mi=1
         run_mi=1
         run_smi=1
@@ -187,6 +190,8 @@ while : ; do
         # run_cthrash=1
         # run_malloc_test=1
         ;;
+    hm)
+        run_hm=1;;
     iso)
         run_iso=1;;
     je)
@@ -287,6 +292,7 @@ while : ; do
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo ""
+        echo "  hm                           use hardened_malloc"
         echo "  iso                          use isoalloc"
         echo "  je                           use jemalloc"
         echo "  tc                           use tcmalloc"
@@ -526,6 +532,13 @@ function run_sc_test {
   fi
 }
 
+function run_hm_test {
+  if test "$run_hm" = "1"; then
+    run_testx $1 "hm" "${ldpreload}=$lib_hm" "$2"
+  fi
+}
+
+
 function run_iso_test {
   if test "$run_iso" = "1"; then
     run_testx $1 "iso" "${ldpreload}=$lib_iso" "$2"
@@ -554,6 +567,7 @@ function run_test {
   echo "      " >> $benchres
   echo ""
   echo "---- $1"
+  run_hm_test $1 "$2"
   run_iso_test $1 "$2"
   run_sys_test $1 "$2"
   run_xmi_test $1 "$2"
