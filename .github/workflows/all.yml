@@ -1,0 +1,15 @@
+name: Build and run everything
+on: [push, pull_request]
+jobs:
+  build-all:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install and build all benchmarks and allocators
+        run: ./build-bench-env.sh all
+      - name: Run everything.
+        run: |
+          cd out/bench
+          ../../bench.sh alla allt
+
