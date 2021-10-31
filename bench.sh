@@ -7,6 +7,7 @@ echo ""
 
 procs=8
 
+run_scudo=0
 run_iso=0
 run_je=0
 run_mi=0
@@ -119,6 +120,7 @@ lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
 lib_tbb="`find $localdevdir/tbb/build -name libtbbmalloc_proxy$extso.2`"
 lib_tbb_dir="$(dirname $lib_tbb)"
 lib_iso="${localdevdir}/iso/build/libisoalloc$extso"
+lib_scudo="${localdevdir}/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
 
 if test "$use_packages" = "1"; then
   lib_tc="/usr/lib/libtcmalloc$extso"
@@ -187,6 +189,8 @@ while : ; do
         # run_cthrash=1
         # run_malloc_test=1
         ;;
+    scudo)
+        run_scudo=1;;
     iso)
         run_iso=1;;
     je)
@@ -287,6 +291,7 @@ while : ; do
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo ""
+        echo "  scudo                        use scudo"
         echo "  iso                          use isoalloc"
         echo "  je                           use jemalloc"
         echo "  tc                           use tcmalloc"
@@ -532,6 +537,13 @@ function run_iso_test {
   fi
 }
 
+function run_scudo_test {
+  if test "$run_scudo" = "1"; then
+    run_testx $1 "scudo" "${ldpreload}=$lib_scudo" "$2"
+  fi
+}
+
+
 function run_tbb_test {
   if test "$run_tbb" = "1"; then
     run_testx $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$lib_tbb" "$2"
@@ -554,6 +566,7 @@ function run_test {
   echo "      " >> $benchres
   echo ""
   echo "---- $1"
+  run_scudo_test $1 "$2"
   run_iso_test $1 "$2"
   run_sys_test $1 "$2"
   run_xmi_test $1 "$2"
