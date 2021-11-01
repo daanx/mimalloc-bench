@@ -60,6 +60,11 @@ target_compile_options(larson PRIVATE -Wno-unused-result)
 target_compile_definitions(larson PRIVATE CPP=1)
 target_link_libraries(larson pthread)
 
+add_executable(larson-sized larson/larson.cpp)
+target_compile_options(larson-sized PRIVATE -Wno-unused-result -fsized-deallocation)
+target_compile_definitions(larson-sized PRIVATE CPP=1 SIZED=1)
+target_link_libraries(larson-sized pthread)
+
 if(NOT APPLE)
 add_executable(alloc-test alloc-test/test_common.cpp alloc-test/allocator_tester.cpp)
 target_compile_definitions(alloc-test PRIVATE BENCH=4)

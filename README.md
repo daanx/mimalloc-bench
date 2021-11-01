@@ -126,6 +126,8 @@ The first set of benchmarks are real world programs and consist of:
    objects to be freed by other threads. Larson and Krishnan observe this
    behavior (which they call _bleeding_) in actual server applications,
    and the benchmark simulates this.
+- __larsonN-sized__: same as the __larsonN__ except it uses sized deallocation calls which
+   have a fast path in some allocators. 
 
 The second set of  benchmarks are stress tests and consist of:
 

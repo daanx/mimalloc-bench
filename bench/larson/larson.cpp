@@ -29,7 +29,6 @@
 #include <pthread.h>
 #endif
 
-
 typedef void * LPVOID;
 typedef long long LONGLONG;
 typedef long DWORD;
@@ -177,7 +176,7 @@ typedef struct thr_data {
   int    max_size ;
 
   char * *array ;
-  int    *blksize ;
+  size_t *blksize ;
   int     asize ;
 
   long   cAllocs ;
@@ -200,7 +199,7 @@ static long lran2(struct lran2_st* d) ;
 ULONG CountReservedSpace() ;
 
 char *          blkp[MAX_BLOCKS] ;
-int             blksize[MAX_BLOCKS] ;
+size_t          blksize[MAX_BLOCKS] ;
 long            seqlock=0 ;
 struct lran2_st rgen ;
 int             min_size=10, max_size=500 ;
@@ -280,7 +279,11 @@ int main (int argc, char *argv[])
   printf( "\nSingle-threaded test driver \n") ;
 #endif
 #ifdef CPP
+#if defined(SIZED)
+  printf("C++ version (new and sized delete)\n") ;
+#else
   printf("C++ version (new and delete)\n") ;
+#endif
 #else
   printf("C version (malloc and free)\n") ;
 #endif
@@ -353,7 +356,7 @@ void runloops(long sleep_cnt, int num_chunks )
 {
   int     cblks ;
   int     victim ;
-  int     blk_size ;
+  size_t  blk_size ;
 #ifdef __WIN32__
 	_LARGE_INTEGER ticks_per_sec, start_cnt, end_cnt;
 #else
@@ -388,9 +391,11 @@ void runloops(long sleep_cnt, int num_chunks )
     for( cblks=0; cblks<num_chunks; cblks++){
       victim = lran2(&rgen)%num_chunks ;
 #if defined(CPP)
+#if defined(SIZED)
+    operator delete[] (blkp[victim], blksize[victim]);
+#else
     delete[] blkp[victim] ;
-#elif defined(USE_MALLOC)
-    free(blkp[victim]);
+#endif
 #else
     CUSTOM_FREE(blkp[victim]) ;
 #endif
@@ -578,7 +583,7 @@ static void * exercise_heap( void *pinput)
   thread_data  *pdea;
   int           cblks=0 ;
   int           victim ;
-  long          blk_size ;
+  size_t        blk_size;
   int           range ;
 
   if( stopflag ) return 0;
@@ -592,7 +597,11 @@ static void * exercise_heap( void *pinput)
   for( cblks=0; cblks<pdea->NumBlocks; cblks++){
     victim = lran2(&pdea->rgen)%pdea->asize ;
 #ifdef CPP
+#if defined(SIZED)
+    operator delete[] (pdea->array[victim], pdea->blksize[victim]);
+#else
     delete[] pdea->array[victim] ;
+#endif
 #else
     CUSTOM_FREE(pdea->array[victim]) ;
 #endif
@@ -652,8 +661,9 @@ static void warmup(char **blkp, int num_chunks )
 {
   int     cblks ;
   int     victim ;
-  int     blk_size ;
+  size_t  blk_size ;
   LPVOID  tmp ;
+  size_t  tmp_sz;
 
 
   for( cblks=0; cblks<num_chunks; cblks++){
@@ -675,14 +685,21 @@ static void warmup(char **blkp, int num_chunks )
   for( cblks=num_chunks; cblks > 0 ; cblks--){
     victim = lran2(&rgen)%cblks ;
     tmp = blkp[victim] ;
+    tmp_sz = blksize[victim];
     blkp[victim]  = blkp[cblks-1] ;
+    blksize[victim] = blksize[cblks-1];
     blkp[cblks-1] = (char *) tmp ;
+    blksize[cblks-1] = tmp_sz;
   }
 
   for( cblks=0; cblks<4*num_chunks; cblks++){
     victim = lran2(&rgen)%num_chunks ;
 #ifdef CPP
+#if defined(SIZED)
+    operator delete[] (blkp[victim], blksize[victim]);
+#else
     delete[] blkp[victim] ;
+#endif
 #else
     CUSTOM_FREE(blkp[victim]) ;
 #endif
