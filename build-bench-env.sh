@@ -227,11 +227,12 @@ function partial_checkout {  # name, git-tag, directory, git repo, directory to 
     git init
     git remote add origin $4
     git config extensions.partialClone origin
-    git fetch --depth=1 --filter=blob:none origin $2
     git sparse-checkout set $5
+    git checkout $2
   fi
+  git fetch --depth=1 --filter=blob:none origin $2
   git checkout $2
-  git pull origin $2
+  git reset origin/$2 --hard
   write_version $1 $2 $4
 }
 
