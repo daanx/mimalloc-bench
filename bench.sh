@@ -210,7 +210,6 @@ while : ; do
         run_cfrac=1
         run_espresso=1
         run_barnes=1
-        run_lean=1
         run_xmalloc_test=1
         run_larson=1        
         run_larson_sized=1
@@ -222,6 +221,9 @@ while : ; do
           run_sh6bench=1
           run_sh8bench=1
           run_redis=1        
+        fi
+        if [ -f "${localdevdir}/lean/bin/lean" ]; then  # only run lean if it is installed (for CI)
+          run_lean=1
         fi
         # run_lean_mathlib=1
         # run_gs=1
