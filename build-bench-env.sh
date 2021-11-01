@@ -227,11 +227,12 @@ function partial_checkout {  # name, git-tag, directory, git repo, directory to 
     git init
     git remote add origin $4
     git config extensions.partialClone origin
-    git fetch --depth=1 --filter=blob:none origin $2
     git sparse-checkout set $5
+    git checkout $2
   fi
+  git fetch --depth=1 --filter=blob:none origin $2
   git checkout $2
-  git pull origin $2
+  git reset origin/$2 --hard
   write_version $1 $2 $4
 }
 
@@ -288,7 +289,7 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang llvm-dev unzip dos2unix bc gmp-devel wget"
+    dnfinstall "gcc-c++ clang lld llvm-dev unzip dos2unix bc gmp-devel wget"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir"
@@ -296,7 +297,7 @@ if test "$setup_packages" = "1"; then
     echo "updating package database... (sudo apt update)"
     sudo apt update
 
-    aptinstall "g++ clang llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
+    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python ruby ninja-build libtool autoconf"
   fi
 fi
@@ -317,7 +318,7 @@ if test "$setup_scudo" = "1"; then
   partial_checkout scudo $version_scudo scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
   cd "compiler-rt/lib/scudo/standalone"
   # TODO: make the next line prettier instead of hardcoding everything.
-  clang++ -fPIC -std=c++14 -fno-exceptions -fno-rtti -I include -shared -o libscudo$extso *.cpp -pthread
+  clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
   cd -
   popd
 fi
