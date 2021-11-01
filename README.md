@@ -55,7 +55,7 @@ Or just test _mimalloc_ and _tcmalloc_ on _cfrac_ and _larson_ with 16 threads:
 - `~/dev/mimalloc-bench/out/bench>../../bench.sh --procs=16 mi tc cfrac larson`
 
 Generally, you can specify the allocators (`mi`, `je`,
-`tc`, `hd`, `mc` (system allocator)) etc, and the benchmarks
+`tc`, `hd`, `sys` (system allocator)) etc, and the benchmarks
 , `cfrac`, `espresso`, `barnes`, `lean`, `larson`, `alloc-test`, `cscratch`, etc.
 Or all allocators (`alla`) and tests (`allt`).
 Use `--procs=<n>` to set the concurrency, and use `--help` to see all supported
@@ -140,6 +140,9 @@ The second set of  benchmarks are stress tests and consist of:
   100&middot;10^6^ allocations per thread with objects up to 1KiB
   in size. Using commit `94f6cb`
   ([master](https://github.com/node-dot-cpp/alloc-test), 2018-07-04)
+- __mstress__: simulates real-world server-like allocation patterns, using N threads with with allocations in powers of 2  
+  where objects can migrate between threads and some have long life times. Not all threads have equal workloads and 
+  after each phase all threads are destroyed and new threads created where some objects survive between phases.
 - __sh6bench__: by [MicroQuill](http://www.microquill.com/) as part of SmartHeap. Stress test
    where some of the objects are freed in a
    usual last-allocated, first-freed (LIFO) order, but others are freed
