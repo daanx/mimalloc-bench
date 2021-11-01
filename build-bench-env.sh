@@ -336,7 +336,7 @@ if test "$setup_tc" = "1"; then
     echo "already configured"
   else
     ./autogen.sh
-    CXXFLAGS="-w" ./configure --enable-minimal 
+    CXXFLAGS="-w -DNDEBUG -O2" ./configure --enable-minimal 
   fi
   make -j $procs # ends with error on benchmark, but thats ok.
   #echo ""
