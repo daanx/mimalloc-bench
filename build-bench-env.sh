@@ -76,13 +76,13 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
-        setup_iso=$flag_arg                
         setup_je=$flag_arg
         setup_tc=$flag_arg
         setup_sn=$flag_arg
         setup_mi=$flag_arg
         setup_tbb=$flag_arg
         if [ -z "$darwin" ]; then
+          setup_iso=$flag_arg       # sets output to .so on macOS
           setup_hd=$flag_arg        # fails to build on macOS with arm64 (M1)
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_scudo=$flag_arg                

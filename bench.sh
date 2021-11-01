@@ -5,30 +5,8 @@ echo ""
 echo "Use '-h' or '--help' for help on configuration options."
 echo ""
 
-procs=8
-
-run_scudo=0
-run_hm=0
-run_iso=0
-run_je=0
-run_mi=0
-run_dmi=0
-run_smi=0
-run_xmi=0
-run_xdmi=0
-run_xsmi=0
-
-run_tc=0
-run_hd=0
-run_sys=0
-run_rp=0
-run_sm=0
-run_sn=0
-run_tbb=0
-run_mesh=0
-run_nomesh=0
-run_tlsf=0
-run_sc=0
+all_allocators="sys je tc hd sp sm sn tbb mesh nomesh tlsf sc scudo hm iso mi dmi smi xmi xdmi xsmi"
+run_allocators=""
 
 run_cfrac=0
 run_larson=0
@@ -61,6 +39,7 @@ ldpreload="LD_PRELOAD"
 timecmd=/usr/bin/time
 darwin=""
 extso=".so"
+procs=8
 case "$OSTYPE" in
   darwin*) 
     darwin="yes"
@@ -69,7 +48,9 @@ case "$OSTYPE" in
     ldpreload="DYLD_INSERT_LIBRARIES"
     procs=`sysctl -n hw.physicalcpu`;;
   *)
-    procs=`nproc`;;
+    if command -v nproc; then 
+      procs=`nproc`
+    fi;;
 esac
 
 curdir=`pwd`
@@ -143,6 +124,26 @@ spec_base="base"
 spec_bench="refspeed"
 spec_config="malloc-test-m64"
 
+# list of allocators to run
+run_allocators=""
+
+function contains {
+  for s in $1; do
+    if test "$s" = "$2"; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+function can_run {
+  contains "$run_allocators" $1
+}
+
+function run_add {
+  run_allocators="$run_allocators $1"
+}
+
 
 # Parse command-line arguments
 while : ; do
@@ -155,22 +156,56 @@ while : ; do
   case "$flag" in
     "") break;;
     alla)
-        run_hm=1
-        run_mi=1
-        run_mi=1
-        run_smi=1
-        #run_dmi=1
-        run_tc=1
-        run_je=1
-        run_tbb=1
-        run_rp=1
-        run_sn=1
-        run_hd=1
-        run_mesh=1
-        run_nomesh=1
-        #run_sm=1
-        #run_sc=1        
-        run_sys=1;;
+        # use all installed allocators
+        run_allocators="sys"
+        while read word _; do run_add "${word%:*}"; done < ${localdevdir}/versions.txt
+        if can_run "mi"; then
+          run_allocators="$run_allocators smi"   # secure mimalloc
+        fi;;
+
+    scudo)
+        run_add "scudo";;
+    hm)
+        run_add "hm";;
+    iso)
+        run_add "iso";;
+    je)
+        run_add "je";;
+    rp)
+        run_add "rp";;
+    sm)
+        run_add "sm";;
+    sn)
+        run_add "sn";;
+    sc)
+        run_add "sc";;
+    tc)
+        run_add "tc";;
+    mi)
+        run_add "mi";;
+    dmi)
+        run_add "dmi";;
+    smi)
+        run_add "smi";;
+    xmi)
+        run_add "xmi";;
+    xdmi)
+        run_add "xdmi";;
+    xsmi)
+        run_add "xsmi";;
+    hd)
+        run_add "hd";;
+    tbb)
+        run_add "tbb";;
+    mesh)
+        run_add "mesh";;
+    nomesh)
+        run_add "nomesh";;
+    tlsf)
+        run_add "tlsf";;
+    sys|mc)
+        run_add "sys";;
+
     allt)
         run_cfrac=1
         run_espresso=1
@@ -194,48 +229,7 @@ while : ; do
         # run_cthrash=1
         # run_malloc_test=1
         ;;
-    scudo)
-        run_scudo=1;;
-    hm)
-        run_hm=1;;
-    iso)
-        run_iso=1;;
-    je)
-        run_je=1;;
-    rp)
-        run_rp=1;;
-    sm)
-        run_sm=1;;
-    sn)
-        run_sn=1;;
-    sc)
-        run_sc=1;;
-    tc)
-        run_tc=1;;
-    mi)
-        run_mi=1;;
-    dmi)
-        run_dmi=1;;
-    smi)
-        run_smi=1;;
-    xmi)
-        run_xmi=1;;
-    xdmi)
-        run_xdmi=1;;
-    xsmi)
-        run_xsmi=1;;
-    hd)
-        run_hd=1;;
-    tbb)
-        run_tbb=1;;
-    mesh)
-        run_mesh=1;;
-    nomesh)
-        run_nomesh=1;;
-    tlsf)
-        run_tlsf=1;;
-    sys|mc)
-        run_sys=1;;
+
     cfrac)
         run_cfrac=1;;
     espresso)
@@ -287,6 +281,7 @@ while : ; do
     spec=*)
         run_spec=1
         run_spec_bench="$flag_arg";;
+
     -j=*|--procs=*)
         procs="$flag_arg";;
     -v|--verbose)
@@ -300,9 +295,7 @@ while : ; do
         echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo ""
-        echo "  scudo                        use scudo"
-        echo "  hm                           use hardened_malloc"
-        echo "  iso                          use isoalloc"
+        echo "  sys                          use system malloc (glibc)"
         echo "  je                           use jemalloc"
         echo "  tc                           use tcmalloc"
         echo "  mi                           use mimalloc"
@@ -312,7 +305,9 @@ while : ; do
         echo "  sc                           use scalloc"
         echo "  rp                           use rpmalloc"
         echo "  tbb                          use Intel TBB malloc"
-        echo "  sys                          use system malloc (glibc)"
+        echo "  scudo                        use scudo"
+        echo "  hm                           use hardened_malloc"
+        echo "  iso                          use isoalloc"
         echo "  dmi                          use debug version of mimalloc"
         echo "  smi                          use secure version of mimalloc"
         echo "  mesh                         use mesh"
@@ -353,6 +348,9 @@ if test "$verbose"="yes"; then
   cat ${localdevdir}/versions.txt | column -t
   echo ""
 fi
+
+echo "Allocators to be tested: $run_allocators"
+echo ""
 
 benchres="$curdir/benchres.csv"
 run_pre_cmd=""
@@ -452,159 +450,42 @@ function run_testx {
   tail -n1 $benchres
 }
 
-function run_mi_test {
-  if test "$run_mi" = "1"; then
-    run_testx $1 "mi" "${ldpreload}=$lib_mi" "$2"
-  fi
-}
 
-function run_dmi_test {
-  if test "$run_dmi" = "1"; then
-    run_testx $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$lib_dmi" "$2"
-  fi
-}
-
-function run_smi_test {
-  if test "$run_smi" = "1"; then
-    run_testx $1 "smi" "${ldpreload}=$lib_smi" "$2"
-  fi
-}
-
-function run_xmi_test {
-  if test "$run_xmi" = "1"; then
-    run_testx $1 "xmi" "${ldpreload}=$lib_xmi" "$2"
-  fi
-}
-
-function run_xdmi_test {
-  if test "$run_xdmi" = "1"; then
-    run_testx $1 "xdmi" "${ldpreload}=$lib_xdmi" "$2"
-  fi
-}
-
-function run_xsmi_test {
-  if test "$run_xsmi" = "1"; then
-    run_testx $1 "xsmi" "${ldpreload}=$lib_xsmi" "$2"
-  fi
-}
-
-function run_je_test {
-  if test "$run_je" = "1"; then
-    run_testx $1 "je" "${ldpreload}=$lib_je" "$2"
-  fi
-}
-
-function run_tc_test {
-  if test "$run_tc" = "1"; then
-    run_testx $1 "tc" "${ldpreload}=$lib_tc" "$2"
-  fi
-}
-
-function run_hd_test {
-  if test "$run_hd" = "1"; then
-    run_testx $1 "hd" "${ldpreload}=$lib_hd" "$2"
-  fi
-}
-
-function run_mesh_test {
-  if test "$run_mesh" = "1"; then
-    run_testx $1 "mesh" "${ldpreload}=$lib_mesh" "$2"
-  fi
-}
-
-function run_nomesh_test {
-  if test "$run_nomesh" = "1"; then
-    run_testx $1 "nomesh" "${ldpreload}=$lib_nomesh" "$2"
-  fi
-}
-
-function run_rp_test {
-  if test "$run_rp" = "1"; then
-    run_testx $1 "rp" "${ldpreload}=$lib_rp" "$2"
-  fi
-}
-
-function run_sm_test {
-  if test "$run_sm" = "1"; then
-    run_testx $1 "sm" "${ldpreload}=$lib_sm" "$2"
-  fi
-}
-
-function run_sn_test {
-  if test "$run_sn" = "1"; then
-    run_testx $1 "sn" "${ldpreload}=$lib_sn" "$2"
-  fi
-}
-
-function run_sc_test {
-  if test "$run_sc" = "1"; then
-    run_testx $1 "sc" "${ldpreload}=$lib_sc" "$2"
-  fi
-}
-
-function run_hm_test {
-  if test "$run_hm" = "1"; then
-    run_testx $1 "hm" "${ldpreload}=$lib_hm" "$2"
-  fi
-}
-
-
-function run_iso_test {
-  if test "$run_iso" = "1"; then
-    run_testx $1 "iso" "${ldpreload}=$lib_iso" "$2"
-  fi
-}
-
-function run_scudo_test {
-  if test "$run_scudo" = "1"; then
-    run_testx $1 "scudo" "${ldpreload}=$lib_scudo" "$2"
-  fi
-}
-
-
-function run_tbb_test {
-  if test "$run_tbb" = "1"; then
-    run_testx $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$lib_tbb" "$2"
-  fi
-}
-
-function run_tlsf_test {
-  if test "$run_tlsf" = "1"; then
-    run_testx $1 "tlsf" "${ldpreload}=$lib_tlsf" "$2"
-  fi
-}
-
-function run_sys_test {
-  if test "$run_sys" = "1"; then
-    run_testx $1 "sys" "SYSMALLOC=1" "$2"
+function try_run_test {  # test allocator env-args lib cmd
+  if can_run $2; then
+    if [ -z "$4" ]; then
+      run_testx $1 $2 "$3" "$5"
+    else
+      run_testx $1 $2 "$3 ${ldpreload}=$4" "$5"
+    fi
   fi
 }
 
 function run_test {
   echo "      " >> $benchres
   echo ""
-  echo "---- $1"
-  run_scudo_test $1 "$2"
-  run_hm_test $1 "$2"
-  run_iso_test $1 "$2"
-  run_sys_test $1 "$2"
-  run_xmi_test $1 "$2"
-  run_xdmi_test $1 "$2"
-  run_xsmi_test $1 "$2"
-  run_mi_test $1 "$2"
-  run_dmi_test $1 "$2"
-  run_smi_test $1 "$2"
-  run_tc_test $1 "$2"
-  run_je_test $1 "$2"
-  run_tbb_test $1 "$2"
-  run_sm_test $1 "$2"
-  run_sc_test $1 "$2"
-  run_sn_test $1 "$2"
-  run_rp_test $1 "$2"
-  run_hd_test $1 "$2"
-  run_mesh_test $1 "$2"
-  run_nomesh_test $1 "$2"
-  run_tlsf_test $1 "$2"
+  echo "---- $1"  
+  try_run_test $1 "sys"   "SYSMALLOC=1" "" "$2"
+  try_run_test $1 "xmi"   "" $lib_xmi   "$2"
+  try_run_test $1 "xdmi"  "" $lib_xdmi  "$2"
+  try_run_test $1 "xsmi"  "" $lib_xsmi  "$2"
+  try_run_test $1 "mi"    "" $lib_mi    "$2"
+  try_run_test $1 "dmi"   "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1" $lib_dmi "$2"
+  try_run_test $1 "smi"   "" $lib_smi   "$2"
+  try_run_test $1 "tc"    "" $lib_tc    "$2"
+  try_run_test $1 "je"    "" $lib_je    "$2"
+  try_run_test $1 "tbb"   "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir" $lib_tbb "$2"
+  try_run_test $1 "scudo" "" $lib_scudo "$2"
+  try_run_test $1 "hm"    "" $lib_hm    "$2"
+  try_run_test $1 "iso"   "" $lib_iso   "$2"
+  try_run_test $1 "sm"    "" $lib_sm    "$2"
+  try_run_test $1 "sc"    "" $lib_sc    "$2"
+  try_run_test $1 "sn"    "" $lib_sn    "$2"
+  try_run_test $1 "rp"    "" $lib_rp    "$2"
+  try_run_test $1 "hd"    "" $lib_hd    "$2"
+  try_run_test $1 "mesh"  "" $lib_mesh  "$2"
+  try_run_test $1 "nomesh"  "" $lib_nomesh "$2"
+  try_run_test $1 "tlsf"  "" $lib_tlsf  "$2"  
 }
 
 echo "# benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres
