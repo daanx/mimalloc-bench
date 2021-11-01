@@ -2,9 +2,11 @@
 set -eo pipefail
 
 procs=4
+extso=".so"
 case "$OSTYPE" in
   darwin*) 
     darwin="yes"
+    extso=".dylib"
     procs=`sysctl -n hw.physicalcpu`;;
   *)
     darwin=""
@@ -81,11 +83,11 @@ while : ; do
         setup_sn=$flag_arg
         setup_mi=$flag_arg
         setup_tbb=$flag_arg
+        setup_scudo=$flag_arg               
         if [ -z "$darwin" ]; then
           setup_iso=$flag_arg       # sets output to .so on macOS
           setup_hd=$flag_arg        # fails to build on macOS with arm64 (M1)
           setup_hm=$flag_arg        # lacking <thread.h>
-          setup_scudo=$flag_arg                
           setup_rp=$flag_arg
           setup_sm=$flag_arg
           setup_mesh=$flag_arg          
@@ -206,7 +208,7 @@ function phase {
 }
 
 function write_version {  # name, git-tag, repo
-  commit=`git log -n 1 | sed -n 's/commit \([0-9A-Fa-f]\{7\}\).*/\1/p'`
+  commit=`git log -n 1 | sed -n 's/commit \([0-9A-Fa-f]\{7\}\).*/\1/p' | cut -f1`
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
 }
 
@@ -315,7 +317,7 @@ if test "$setup_scudo" = "1"; then
   partial_checkout scudo $version_scudo scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
   cd "compiler-rt/lib/scudo/standalone"
   # TODO: make the next line prettier instead of hardcoding everything.
-  clang++ -fPIC -std=c++14 -fno-exceptions -fno-rtti -I include -shared -o libscudo.so *.cpp -pthread
+  clang++ -fPIC -std=c++14 -fno-exceptions -fno-rtti -I include -shared -o libscudo$extso *.cpp -pthread
   cd -
   popd
 fi
