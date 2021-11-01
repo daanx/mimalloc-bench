@@ -144,6 +144,18 @@ function run_add {
   run_allocators="$run_allocators $1"
 }
 
+function run_remove {
+  if can_run "$1"; then
+    old_allocators="$run_allocators"
+    run_allocators=""
+    for s in $old_allocators; do
+      if [ "$s" != "$1" ]; then
+        run_add "$s"
+      fi
+    done
+  fi
+}
+
 
 # Parse command-line arguments
 while : ; do
@@ -169,6 +181,8 @@ while : ; do
         run_add "hm";;
     iso)
         run_add "iso";;
+    no-iso)
+        run_remove "iso";;
     je)
         run_add "je";;
     rp)

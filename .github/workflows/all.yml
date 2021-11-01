@@ -11,5 +11,5 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          ../../bench.sh alla allt
+          ../../bench.sh alla allt no-iso
 
