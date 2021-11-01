@@ -208,8 +208,12 @@ function partial_checkout {  # name, git-tag, directory, git repo, directory to 
     echo "$devdir/$3 already exists; no need to git clone"
     cd "$3"
   else
-    git clone --depth=1 --filter=blob:none --no-checkout $4 $3
+    mkdir "$3"
     cd "$3"
+    git init
+    git remote add origin $4
+    git config extensions.partialClone origin
+    git fetch --depth=1 --filter=blob:none origin $2
     git sparse-checkout set $5
   fi
   git checkout $2
