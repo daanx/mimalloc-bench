@@ -323,7 +323,7 @@ fi
 if test "$setup_tbb" = "1"; then
   checkout tbb $version_tbb tbb https://github.com/intel/tbb
   # make tbbmalloc
-  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF
+  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench
   make -j $procs
   popd
 fi
