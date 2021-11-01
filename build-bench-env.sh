@@ -1,14 +1,18 @@
 #!/bin/bash
 set -eo pipefail
 
+procs=4
 case "$OSTYPE" in
   darwin*) 
-    darwin="yes";;
+    darwin="yes"
+    procs=`sysctl -n hw.physicalcpu`;;
   *)
-    darwin="";;
+    darwin=""
+    if command -v nproc; then 
+      procs=`nproc`
+    fi;;
 esac
 
-procs=4
 verbose="no"
 curdir=`pwd`
 rebuild=0
@@ -23,7 +27,7 @@ version_tc=gperftools-2.9.1
 version_sn=0.5.3
 version_mi=v1.7.2
 version_rp=1.4.3
-version_hd=3.13 # a43ac40 #d880f72  #9d137ef37
+version_hd=3.12       # a43ac40 #d880f72  #9d137ef37
 version_sm=709663f
 version_tbb=v2021.4.0 # v2020.3
 version_mesh=67ff31acae
@@ -72,16 +76,16 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
-        setup_scudo=$flag_arg                
-        setup_hm=$flag_arg                
         setup_iso=$flag_arg                
         setup_je=$flag_arg
         setup_tc=$flag_arg
         setup_sn=$flag_arg
         setup_mi=$flag_arg
         setup_tbb=$flag_arg
-        setup_hd=$flag_arg                
         if [ -z "$darwin" ]; then
+          setup_hd=$flag_arg        # fails to build on macOS with arm64 (M1)
+          setup_hm=$flag_arg        # lacking <thread.h>
+          setup_scudo=$flag_arg                
           setup_rp=$flag_arg
           setup_sm=$flag_arg
           setup_mesh=$flag_arg          
@@ -178,7 +182,9 @@ done
 if test -f ./build-bench-env.sh; then
   echo ""
   echo "use '-h' to see all options"
-  echo "building with $procs concurrency"
+  echo "use 'all' to build all allocators"
+  echo ""
+  echo "building with $procs threads"
   echo "--------------------------------------------"
   echo ""
 else
@@ -295,7 +301,7 @@ fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make 
+  make CONFIG_NATIVE=false CONFIG_WERROR=false
   popd
 fi
 
@@ -318,7 +324,7 @@ if test "$setup_tbb" = "1"; then
   checkout tbb $version_tbb tbb https://github.com/intel/tbb
   # make tbbmalloc
   cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF
-  make -j$procs
+  make -j $procs
   popd
 fi
 
@@ -328,18 +334,18 @@ if test "$setup_tc" = "1"; then
     echo "already configured"
   else
     ./autogen.sh
-    ./configure --enable-minimal
+    CXXFLAGS="-w" ./configure --enable-minimal 
   fi
-  make # ends with error on benchmark, but thats ok.
-  echo ""
-  echo "(note: the error 'Makefile:3912: recipe for target 'malloc_bench' failed' is expected)"
+  make -j $procs # ends with error on benchmark, but thats ok.
+  #echo ""
+  #echo "(note: the error 'Makefile:3912: recipe for target 'malloc_bench' failed' is expected)"
   popd
 fi
 
 if test "$setup_hd" = "1"; then
   checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard.git
   cd src
-  make
+  make  
   popd
 fi
 
@@ -466,7 +472,8 @@ if test "$setup_lean" = "1"; then
   git checkout v3.4.1
   mkdir -p out/release
   cd out/release
-  env CC=gcc CXX="g++ -Wno-exceptions" cmake ../../src -DCUSTOM_ALLOCATORS=OFF
+  env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
+  echo "make -j$procs"
   make -j $procs
   popd
 fi
@@ -483,7 +490,7 @@ if test "$setup_redis" = "1"; then
   fi
 
   cd "redis-$version_redis/src"
-  make USE_JEMALLOC=no MALLOC=libc
+  make -j $procs USE_JEMALLOC=no MALLOC=libc
   popd
 fi
 
