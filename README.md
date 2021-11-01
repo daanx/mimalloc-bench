@@ -63,40 +63,42 @@ allocators and benchmarks.
 
 ## Current Allocators
 
-Supported allocators are:
+Supported allocators are as follow, see
+[build-bench-env.sh](https://github.com/daanx/mimalloc-bench/blob/master/build-bench-env.sh)
+for the versions:
 
-- **mi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator,
-  using version tag `v1.0.0`.
+- **mi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator.
   We can also test a secure version of _mimalloc_ as **smi**, and
   the debug version as **dmi** (this can be used to check for any bugs
   in the benchmarks).
 - **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
   allocator which comes as part of
   the Google performance tools and is used in the Chrome browser.
-  Installed as package `libgoogle-perftools-dev` version
-  `2.5-2.2ubuntu3`.
 - **je**: The [_jemalloc_](https://github.com/jemalloc/jemalloc)
   allocator by Jason Evans is developed at Facebook
   and widely used in practice, for example in FreeBSD and Firefox.
-  Using version tag 5.2.0.
 - **sn**: The [_snmalloc_](https://github.com/microsoft/snmalloc) allocator
   is a recent concurrent message passing
-  allocator by Liétar et al. \[8]. Using `git-0b64536b`.
+  allocator by Liétar et al. \[8].
 - **rp**: The [_rpmalloc_](https://github.com/mjansson/rpmalloc) allocator
    uses 16-byte aligned allocations and is developed by Mattias Jansson at Rampant Pixels.
-   Using version tag 1.4.0.
 - **hd**: The [_Hoard_](https://github.com/emeryberger/Hoard) allocator by
   Emery Berger \[1]. This is one of the first
-  multi-thread scalable allocators. Using version tag 3.13.
+  multi-thread scalable allocators.
 - **glibc**,**mc**: The system allocator. Here we use the _glibc_ allocator (which is originally based on
-  _Ptmalloc2_), using version 2.27.0. Note that version 2.26 significantly improved scalability over
-  earlier versions.
+  _Ptmalloc2_).
 - **sm**: The [_Supermalloc_](https://github.com/kuszmaul/SuperMalloc) allocator by
   Bradley Kuszmaul uses hardware transactional memory
-  to speed up parallel operations. Using version `git-709663fb`.
+  to speed up parallel operations.
 - **tbb**: The Intel [TBB](https://github.com/intel/tbb) allocator that comes with
   the Thread Building Blocks (TBB) library \[7].
-  Installed as package `libtbb-dev`, version `2017~U7-8`.
+- **scudo**: The [_scudo_](https://www.llvm.org/docs/ScudoHardenedAllocator.html) allocator
+  used by Fuschia and Android.
+- **hm**: The [_Hardened Malloc_](https://github.com/GrapheneOS/hardened_malloc)
+  from GrapheneOS, security-focused.
+- **iso**: The [_Isoalloc_](https://github.com/struct/isoalloc/) allocator,
+  isolation-based aiming at providing a reasonable level of security without
+  sacrificing too much the performances.
 
 
 ## Current Benchmarks
