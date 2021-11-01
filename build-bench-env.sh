@@ -369,7 +369,7 @@ if test "$setup_rp" = "1"; then
   else
     python configure.py
   fi
-  ninja
+  ninja -j$procs
   popd
 fi
 
@@ -384,7 +384,7 @@ if test "$setup_sn" = "1"; then
     cd ..
   fi
   cd release
-  ninja
+  ninja -j$procs
   popd
 fi
 
