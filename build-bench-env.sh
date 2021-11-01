@@ -15,6 +15,7 @@ rebuild=0
 all=0
 
 # allocator versions
+version_scudo=main
 version_hm=main
 version_iso=master
 version_je=5.2.1
@@ -31,6 +32,7 @@ version_sc=master
 version_redis=6.0.9
 
 # allocators
+setup_scudo=0
 setup_hm=0
 setup_iso=0
 setup_je=0
@@ -70,6 +72,7 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
+        setup_scudo=$flag_arg                
         setup_hm=$flag_arg                
         setup_iso=$flag_arg                
         setup_je=$flag_arg
@@ -83,7 +86,7 @@ while : ; do
           setup_sm=$flag_arg
           setup_mesh=$flag_arg          
         fi        
-	      # only run Mesh's 'nomesh' configuration if asked
+        # only run Mesh's 'nomesh' configuration if asked
         #   setup_nomesh=$flag_arg
         # bigger benchmarks
         setup_lean=$flag_arg
@@ -92,6 +95,8 @@ while : ; do
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
+    scudo)
+        setup_scudo=$flag_arg;;
     hm)
         setup_hm=$flag_arg;;
     iso)
@@ -143,6 +148,7 @@ while : ; do
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
+        echo "  scudo                        setup scudo ($version_scudo)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
@@ -196,6 +202,29 @@ function phase {
 function write_version {  # name, git-tag, repo
   commit=`git log -n 1 | sed -n 's/commit \([0-9A-Fa-f]\{7\}\).*/\1/p'`
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
+}
+
+function partial_checkout {  # name, git-tag, directory, git repo, directory to download
+  phase "build $1: version $2"
+  pushd $devdir
+  if test "$rebuild" = "1"; then
+    rm -rf "$3"
+  fi
+  if test -d "$3"; then
+    echo "$devdir/$3 already exists; no need to git clone"
+    cd "$3"
+  else
+    mkdir "$3"
+    cd "$3"
+    git init
+    git remote add origin $4
+    git config extensions.partialClone origin
+    git fetch --depth=1 --filter=blob:none origin $2
+    git sparse-checkout set $5
+  fi
+  git checkout $2
+  git pull origin $2
+  write_version $1 $2 $4
 }
 
 function checkout {  # name, git-tag, directory, git repo
@@ -273,6 +302,15 @@ fi
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
   make library
+  popd
+fi
+
+if test "$setup_scudo" = "1"; then
+  partial_checkout scudo $version_scudo scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
+  cd "compiler-rt/lib/scudo/standalone"
+  # TODO: make the next line prettier instead of hardcoding everything.
+  clang++ -fPIC -std=c++14 -fno-exceptions -fno-rtti -I include -shared -o libscudo.so *.cpp -pthread
+  cd -
   popd
 fi
 
