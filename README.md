@@ -55,7 +55,7 @@ Or just test _mimalloc_ and _tcmalloc_ on _cfrac_ and _larson_ with 16 threads:
 - `~/dev/mimalloc-bench/out/bench>../../bench.sh --procs=16 mi tc cfrac larson`
 
 Generally, you can specify the allocators (`mi`, `je`,
-`tc`, `hd`, `mc` (system allocator)) etc, and the benchmarks
+`tc`, `hd`, `sys` (system allocator)) etc, and the benchmarks
 , `cfrac`, `espresso`, `barnes`, `lean`, `larson`, `alloc-test`, `cscratch`, etc.
 Or all allocators (`alla`) and tests (`allt`).
 Use `--procs=<n>` to set the concurrency, and use `--help` to see all supported
