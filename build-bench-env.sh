@@ -21,19 +21,19 @@ rebuild=0
 all=0
 
 # allocator versions
-version_scudo=main
-version_hm=main
-version_iso=master
 version_je=5.2.1
 version_tc=gperftools-2.9.1
 version_sn=0.5.3
 version_mi=v1.7.2
 version_rp=1.4.3
-version_hd=master # 3.12       # a43ac40 #d880f72  #9d137ef37
-version_sm=709663f
 version_tbb=v2021.4.0 # v2020.3
-version_mesh=67ff31acae
-version_nomesh=67ff31acae
+version_scudo=main
+version_hm=main
+version_iso=master
+version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
+version_sm=709663f
+version_mesh=78b9b5d
+version_nomesh=78b9b5d
 version_sc=master
 version_redis=6.0.9
 
@@ -398,15 +398,15 @@ fi
 
 if test "$setup_mesh" = "1"; then
   checkout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
-  ./configure
-  make -j $procs lib
+  cmake .
+  make  # cannot run in parallel 
   popd
 fi
 
 if test "$setup_nomesh" = "1"; then
   checkout nomesh $version_nomesh nomesh https://github.com/plasma-umass/mesh
-  ./configure --disable-meshing
-  make -j $procs lib
+  cmake . -DDISABLE_MESHING=ON
+  make  # cannot run in parallel 
   popd
 fi
 
