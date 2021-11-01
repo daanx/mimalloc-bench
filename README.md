@@ -11,9 +11,10 @@ automated scripts to pull specific versions of benchmark programs and
 allocators from Github and build them.
 
 Due to the large variance in programs and allocators, the suite is currently
-only developed for Linux-like systems, and specifically Ubuntu with `apt-get` or Fedora with `dnf`.
+only developed for Unix-like systems, and specifically Ubuntu with `apt-get`, Fedora with `dnf`,
+and macOS (for a limited set of allocators and benchmarks).
 The only system-installed allocator used is glibc's implementation that ships as part of Linux's libc.
-All other allocators are downloaded + built as part of `build-bench-env.sh` --
+All other allocators are downloaded and built as part of `build-bench-env.sh` --
 if you are looking to run these benchmarks on a different Linux distribution look at
 the `setup_packages` function to see the packages required to build the full set of
 allocators.
@@ -25,7 +26,6 @@ please do so!.
 Enjoy,
   Daan
 
-\
 
 
 Note that all the code in the `bench` directory is not part of
@@ -43,6 +43,7 @@ all needed benchmarks and allocators and build them in the `extern` directory:
 ```
 It starts installing packages and you will need to enter the sudo password.
 All other programs are build in the `mimalloc-bench/extern` directory.
+Use `./build-bench-env.sh -h` to see all options.
 
 If everything succeeded, you can run the full benchmark suite (from `out/bench`) as:
 
@@ -53,7 +54,7 @@ Or just test _mimalloc_ and _tcmalloc_ on _cfrac_ and _larson_ with 16 threads:
 
 - `~/dev/mimalloc-bench/out/bench>../../bench.sh --procs=16 mi tc cfrac larson`
 
-Generally, you can specify the allocators (`mi`,`je`,
+Generally, you can specify the allocators (`mi`, `je`,
 `tc`, `hd`, `mc` (system allocator)) etc, and the benchmarks
 , `cfrac`, `espresso`, `barnes`, `lean`, `larson`, `alloc-test`, `cscratch`, etc.
 Or all allocators (`alla`) and tests (`allt`).
@@ -68,9 +69,10 @@ Supported allocators are as follow, see
 for the versions:
 
 - **mi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator.
-  We can also test a secure version of _mimalloc_ as **smi**, and
-  the debug version as **dmi** (this can be used to check for any bugs
+  We can also test the debug version as **dmi** (this can be used to check for any bugs
   in the benchmarks).
+- **smi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator 
+  compiled in secure mode which is hardened against buffer overflow, use-after-free, etc.  
 - **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
   allocator which comes as part of
   the Google performance tools and is used in the Chrome browser.
@@ -85,7 +87,7 @@ for the versions:
 - **hd**: The [_Hoard_](https://github.com/emeryberger/Hoard) allocator by
   Emery Berger \[1]. This is one of the first
   multi-thread scalable allocators.
-- **glibc**,**mc**: The system allocator. Here we use the _glibc_ allocator (which is originally based on
+- **sys**: The system allocator. Here we usually use the _glibc_ allocator (which is originally based on
   _Ptmalloc2_).
 - **sm**: The [_Supermalloc_](https://github.com/kuszmaul/SuperMalloc) allocator by
   Bradley Kuszmaul uses hardware transactional memory
