@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
-procs=4
+procs=8
 extso=".so"
 case "$OSTYPE" in
   darwin*) 
