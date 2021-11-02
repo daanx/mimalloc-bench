@@ -1,12 +1,14 @@
 #!/bin/bash
-# Copyright 2018, Microsoft Research, Daan Leijen
+# Copyright 2018-2021, Microsoft Research, Daan Leijen
 echo "--- Benchmarking ---"
 echo ""
 echo "Use '-h' or '--help' for help on configuration options."
 echo ""
 
-all_allocators="sys je tc hd sp sm sn tbb mesh nomesh tlsf sc scudo hm iso mi dmi smi xmi xdmi xsmi"
-run_allocators=""
+alloc_all="sys je tc hd sp sm sn tbb mesh nomesh tlsf sc scudo hm iso mi dmi smi xmi xdmi xsmi"
+alloc_run=""           # allocators to run (expanded by command line options)
+alloc_installed="sys"  # later expanded to include all installed allocators
+alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
 run_cfrac=0
 run_larson=0
@@ -36,6 +38,10 @@ run_rptest=0
 run_glibc_simple=0
 run_glibc_thread=0
 
+# --------------------------------------------------------------------
+# Environment
+# --------------------------------------------------------------------
+
 verbose="no"
 ldpreload="LD_PRELOAD"
 timecmd=/usr/bin/time
@@ -54,6 +60,10 @@ case "$OSTYPE" in
       procs=`nproc`
     fi;;
 esac
+
+# --------------------------------------------------------------------
+# Check directories
+# --------------------------------------------------------------------
 
 curdir=`pwd`
 if test -f ../../build-bench-env.sh; then
@@ -77,59 +87,12 @@ pushd "../../bench" > /dev/null
 benchdir=`pwd`
 popd > /dev/null
 
-leandir="$localdevdir/lean"
-leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-6.0.9/src"
-pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
-lib_mi="$localdevdir/mimalloc/out/release/libmimalloc$extso"
-lib_dmi="$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
-lib_smi="$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
-lib_xmi="$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
-lib_xdmi="$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
-lib_xsmi="$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
-export MIMALLOC_EAGER_COMMIT_DELAY=0
+# --------------------------------------------------------------------
+# Helper functions
+# --------------------------------------------------------------------
 
-lib_hd="$localdevdir/Hoard/src/libhoard$extso"
-lib_sn="$localdevdir/snmalloc/release/libsnmallocshim$extso"
-lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
-#lib_sm="$localdevdir/SuperMalloc/release/lib/libsupermalloc_pthread$extso"
-lib_je="${localdevdir}/jemalloc/lib/libjemalloc$extso"
-lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso`"
-#lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap$extso"
-lib_mesh="${localdevdir}/mesh/build/lib/libmesh$extso"
-lib_nomesh="${localdevdir}/nomesh/build/lib/libmesh$extso"
-lib_tlsf="${localdevdir}/tlsf/out/release/libtlsf$extso"
-lib_tc="$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
-lib_sc="$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
-lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
-lib_tbb_dir="$(dirname $lib_tbb)"
-lib_iso="${localdevdir}/iso/build/libisoalloc$extso"
-lib_scudo="${localdevdir}/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
-lib_hm="${localdevdir}/hm/libhardened_malloc$extso"
-
-if test "$use_packages" = "1"; then
-  lib_tc="/usr/lib/libtcmalloc$extso"
-  lib_tbb="/usr/lib/libtbbmalloc_proxy$extso"
-
-  if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"; then
-    lib_tc="/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"u
-  fi
-  if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"; then
-    lib_tbb="/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"
-  fi
-fi
-
-
-spec_dir="$localdevdir/../../spec2017"
-spec_base="base"
-spec_bench="refspeed"
-spec_config="malloc-test-m64"
-
-# list of allocators to run
-run_allocators=""
-
-function contains {
+function contains {  # <string> <substring>   does string contain substring?
   for s in $1; do
     if test "$s" = "$2"; then
       return 0
@@ -138,233 +101,301 @@ function contains {
   return 1
 }
 
-function can_run {
-  contains "$run_allocators" $1
+function is_installed {  # <allocator>
+  contains "$alloc_installed" $1
 }
 
-function run_add {
-  run_allocators="$run_allocators $1"
+function is_runnable {   # <allocator>
+  contains "$alloc_run" $1
 }
 
-function run_remove {
-  if can_run "$1"; then
-    old_allocators="$run_allocators"
-    run_allocators=""
-    for s in $old_allocators; do
+function alloc_run_add {  # <allocator>   :add to runnable
+  alloc_run="$alloc_run $1"
+}
+
+function alloc_run_remove {   # <allocator>  :remove from runnables
+  if is_runnable "$1"; then
+    alloc_run_old="$alloc_run"
+    alloc_run=""
+    for s in $alloc_run_old; do
       if [ "$s" != "$1" ]; then
-        run_add "$s"
+        alloc_run_add "$s"
       fi
     done
   fi
 }
 
+function alloc_run_add_remove { # <allocator> <add?> 
+  if test "$2" = "1"; then
+    alloc_run_add "$1"
+  else
+    alloc_run_remove "$1"
+  fi
+}
 
-# Parse command-line arguments
+# read in the installed allocators
+while read word _; do alloc_installed="$alloc_installed ${word%:*}"; done < ${localdevdir}/versions.txt
+if is_installed "mi"; then
+  alloc_installed="$alloc_installed smi"   # secure mimalloc
+fi
+
+
+function alloc_lib_add {  # <allocator> <variable> <librarypath>
+  alloc_libs="$1=$2 $alloc_libs"
+}
+
+alloc_lib=""
+function alloc_lib_set {  # <allocator>
+  for entry in $alloc_libs; do
+    entry_name="${entry%=*}"
+    entry_lib="${entry#*=}"
+    if [ "$entry_name" = "$1" ]; then
+      alloc_lib="$entry_lib"
+      return 0
+    fi
+  done
+  echo "warning: cannot set library path for allocator $1"
+  alloc_lib="lib$1.so"
+}
+
+
+# --------------------------------------------------------------------
+# The allocator library paths
+# --------------------------------------------------------------------
+
+leandir="$localdevdir/lean"
+leanmldir="$leandir/../mathlib"
+redis_dir="$localdevdir/redis-6.0.9/src"
+pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
+
+spec_dir="$localdevdir/../../spec2017"
+spec_base="base"
+spec_bench="refspeed"
+spec_config="malloc-test-m64"
+
+alloc_lib_add "mi"    "$localdevdir/mimalloc/out/release/libmimalloc$extso"
+alloc_lib_add "dmi"   "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "smi"   "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "xmi"   "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
+alloc_lib_add "xdmi"  "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "xsmi"  "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
+export MIMALLOC_EAGER_COMMIT_DELAY=0
+alloc_lib_add "hd"    "$localdevdir/Hoard/src/libhoard$extso"
+alloc_lib_add "sn"    "$localdevdir/snmalloc/release/libsnmallocshim$extso"
+alloc_lib_add "sm"    "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
+alloc_lib_add "je"    "${localdevdir}/jemalloc/lib/libjemalloc$extso"
+alloc_lib_add "rp"    "`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso`"
+#lib_rp="/usr/lib/x86_64-linux-gnu/librpmallocwrap$extso"
+alloc_lib_add "mesh"  "${localdevdir}/mesh/build/lib/libmesh$extso"
+alloc_lib_add "nomesh" "${localdevdir}/nomesh/build/lib/libmesh$extso"
+alloc_lib_add "tlsf"  "${localdevdir}/tlsf/out/release/libtlsf$extso"
+alloc_lib_add "tc"    "$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
+alloc_lib_add "sc"    "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
+alloc_lib_add "iso"   "${localdevdir}/iso/build/libisoalloc$extso"
+alloc_lib_add "scudo" "${localdevdir}/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
+alloc_lib_add "hm"    "${localdevdir}/hm/libhardened_malloc$extso"
+alloc_lib_add "tbb"   "$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
+lib_tbb_dir="$(dirname $lib_tbb)"
+
+if test "$use_packages" = "1"; then
+  alloc_lib_add "tc"  "/usr/lib/libtcmalloc$extso"
+  alloc_lib_add "tbb" "/usr/lib/libtbbmalloc_proxy$extso"
+
+  if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"; then
+    alloc_lib_add "tc" "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"u
+  fi
+  if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"; then
+    alloc_lib_add "tbb" "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"
+  fi
+fi
+
+
+# --------------------------------------------------------------------
+# Parse command line
+# --------------------------------------------------------------------
+
 while : ; do
   flag="$1"
   case "$flag" in
-  *=*)  flag_arg="${flag#*=}";;
-  *)    flag_arg="yes" ;;
+    *=*)  flag_arg="${flag#*=}"
+          flag="${flag%=*}";;
+    no-*) flag_arg="0"
+          flag="${flag#no-}";;
+    none) flag_arg="0" ;;
+    *)    flag_arg="1" ;;
   esac
-  # echo "option: $flag, arg: $flag_arg"
-  case "$flag" in
-    "") break;;
-    alla)
-        # use all installed allocators
-        run_allocators="sys"
-        while read word _; do run_add "${word%:*}"; done < ${localdevdir}/versions.txt
-        if can_run "mi"; then
-          run_allocators="$run_allocators smi"   # secure mimalloc
-        fi;;
-
-    scudo)
-        run_add "scudo";;
-    hm)
-        run_add "hm";;
-    iso)
-        run_add "iso";;
-    no-iso)
-        run_remove "iso";;
-    je)
-        run_add "je";;
-    rp)
-        run_add "rp";;
-    sm)
-        run_add "sm";;
-    sn)
-        run_add "sn";;
-    sc)
-        run_add "sc";;
-    tc)
-        run_add "tc";;
-    mi)
-        run_add "mi";;
-    dmi)
-        run_add "dmi";;
-    smi)
-        run_add "smi";;
-    xmi)
-        run_add "xmi";;
-    xdmi)
-        run_add "xdmi";;
-    xsmi)
-        run_add "xsmi";;
-    hd)
-        run_add "hd";;
-    tbb)
-        run_add "tbb";;
-    mesh)
-        run_add "mesh";;
-    nomesh)
-        run_add "nomesh";;
-    tlsf)
-        run_add "tlsf";;    
-    sys|mc)
-        run_add "sys";;
-
-    allt)
-        run_cfrac=1
-        run_espresso=1
-        run_barnes=1
-        run_xmalloc_test=1
-        run_larson=1        
-        run_larson_sized=1
-        run_cscratch=1
-	      run_mstress=1
-        run_glibc_simple=1
-        run_glibc_thread=1
-        if [ -z "$darwin" ]; then
-          run_rptest=1
-          run_alloc_test=1
-          run_sh6bench=1
-          run_sh8bench=1
-          run_redis=1        
-        fi
-        if [ -f "${localdevdir}/lean/bin/lean" ]; then  # only run lean if it is installed (for CI)
-          run_lean=1
-        fi
-        # run_lean_mathlib=1
-        # run_gs=1
-        # run_rbstress=1
-        # run_cthrash=1
-        # run_malloc_test=1
-        ;;
-
-    cfrac)
-        run_cfrac=1;;
-    espresso)
-        run_espresso=1;;
-    barnes)
-        run_barnes=1;;
-    larson)
-        run_larson=1;;
-    larson-sized)
-        run_larson_sized=1;;
-    ebizzy)
-        run_ebizzy=1;;
-    sh6bench)
-        run_sh6bench=1;;
-    sh8bench)
-        run_sh8bench=1;;
-    cthrash)
-        run_cthrash=1;;
-    cscratch)
-        run_cscratch=1;;
-    lean)
-        run_lean=1;;
-    no-lean)
-        run_lean=0;;
-    z3)
-        run_z3=1;;
-    gs)
-        run_gs=1;;
-    alloc-test)
-        run_alloc_test=1;;
-    malloc-test)
-        run_malloc_test=1;;
-    xmalloc-test)
-        run_xmalloc_test=1;;
-    malloc-large)
-        run_malloc_large=1;;
-    mathlib)
-        run_lean_mathlib=1;;
-    redis)
-        run_redis=1;;
-    rbstress)
-        run_rbstress=1;;
-    mstress)
-        run_mstress=1;;
-    mleak)
-        run_mleak=1;;
-    rptest)
-        run_rptest=1;;
-    glibc-simple)
-        run_glibc_simple=1;;
-    glibc-thread)
-        run_glibc_thread=1;;
-    spec=*)
-        run_spec=1
-        run_spec_bench="$flag_arg";;
-
-    -j=*|--procs=*)
-        procs="$flag_arg";;
-    -v|--verbose)
-        verbose="yes";;
-    -h|--help|-\?|help|\?)
-        echo "./bench [options]"
-        echo ""
-        echo "  allt                         run all tests"
-        echo "  alla                         run all allocators"
-        echo ""
-        echo "  --verbose                    be verbose"
-        echo "  --procs=<n>                  number of processors (=$procs)"
-        echo ""
-        echo "  sys                          use system malloc (glibc)"
-        echo "  je                           use jemalloc"
-        echo "  tc                           use tcmalloc"
-        echo "  mi                           use mimalloc"
-        echo "  hd                           use hoard"
-        echo "  sm                           use supermalloc"
-        echo "  sn                           use snmalloc"
-        echo "  sc                           use scalloc"
-        echo "  rp                           use rpmalloc"
-        echo "  tbb                          use Intel TBB malloc"
-        echo "  scudo                        use scudo"
-        echo "  hm                           use hardened_malloc"
-        echo "  iso                          use isoalloc"
-        echo "  dmi                          use debug version of mimalloc"
-        echo "  smi                          use secure version of mimalloc"
-        echo "  mesh                         use mesh"
-        echo "  nomesh                       use mesh w/ meshing disabled"
-        echo ""
-        echo "  cfrac                        run cfrac"
-        echo "  espresso                     run espresso"
-        echo "  barnes                       run barnes"
-        echo "  gs                           run ghostscript (~1:50s per test)"
-        echo "  lean                         run leanN (~40s per test on 4 cores)"
-        echo "  mathlib                      run mathlib (~10 min per test on 4 cores)"
-        echo "  redis                        run redis benchmark"
-        echo "  spec=<num>                   run selected spec2017 benchmarks (if available)"
-        echo "  larson                       run larsonN"
-        echo "  larson-sized                 run larsonN sized deallocation test"
-        echo "  alloc-test                   run alloc-testN"
-        echo "  xmalloc-test                 run xmalloc-testN"
-        echo "  sh6bench                     run sh6benchN"
-        echo "  sh8bench                     run sh8benchN"
-        echo "  cscratch                     run cache-scratch"
-        echo "  cthrash                      run cache-thrash"
-        echo "  mstress                      run mstressN"
-        echo "  rbstress                     run rbstressN"
-        echo "  rptest                       run rptestN"
-        echo "  mleak                        run mleakN"
-        echo ""
-        exit 0;;
-    *) echo "warning: unknown option \"$1\"." 1>&2
+  case "$flag_arg" in
+    yes|on|true)  flag_arg="1";;
+    no|off|false) flag_arg="0";;
   esac
+  #echo "option: $flag, arg: $flag_arg"
+  if contains "$alloc_all" "$flag"; then
+    #echo "allocator flag: $flag"
+    if ! contains "$alloc_installed" "$flag"; then
+      echo "warning: allocator '$flag' selected but it is not installed ($alloc_installed)"
+    fi
+    alloc_run_add_remove "$flag" "$flag_arg"    
+  else
+    case "$flag" in
+      "") break;;
+      alla)
+          # use all installed allocators (iterate to maintain order as specified in alloc_all)
+          for alloc in $alloc_all; do 
+            if is_installed "$alloc"; then
+              alloc_run_add_remove "$alloc" "$flag_arg"
+            fi
+          done;;
+
+      allt)
+          run_cfrac=1
+          run_espresso=1
+          run_barnes=1
+          run_xmalloc_test=1
+          run_larson=1        
+          run_larson_sized=1
+          run_cscratch=1
+          run_mstress=1
+          run_glibc_simple=1
+          run_glibc_thread=1
+          if [ -z "$darwin" ]; then
+            run_rptest=1
+            run_alloc_test=1
+            run_sh6bench=1
+            run_sh8bench=1
+            run_redis=1        
+          fi
+          if [ -f "${localdevdir}/lean/bin/lean" ]; then  # only run lean if it is installed (for CI)
+            run_lean=1
+          fi
+          # run_lean_mathlib=1
+          # run_gs=1
+          # run_rbstress=1
+          # run_cthrash=1
+          # run_malloc_test=1
+          ;;
+
+      cfrac)
+          run_cfrac=1;;
+      espresso)
+          run_espresso=1;;
+      barnes)
+          run_barnes=1;;
+      larson)
+          run_larson=1;;
+      larson-sized)
+          run_larson_sized=1;;
+      ebizzy)
+          run_ebizzy=1;;
+      sh6bench)
+          run_sh6bench=1;;
+      sh8bench)
+          run_sh8bench=1;;
+      cthrash)
+          run_cthrash=1;;
+      cscratch)
+          run_cscratch=1;;
+      lean)
+          run_lean=1;;
+      no-lean)
+          run_lean=0;;
+      z3)
+          run_z3=1;;
+      gs)
+          run_gs=1;;
+      alloc-test)
+          run_alloc_test=1;;
+      malloc-test)
+          run_malloc_test=1;;
+      xmalloc-test)
+          run_xmalloc_test=1;;
+      malloc-large)
+          run_malloc_large=1;;
+      mathlib)
+          run_lean_mathlib=1;;
+      redis)
+          run_redis=1;;
+      rbstress)
+          run_rbstress=1;;
+      mstress)
+          run_mstress=1;;
+      mleak)
+          run_mleak=1;;
+      rptest)
+          run_rptest=1;;
+      glibc-simple)
+          run_glibc_simple=1;;
+      glibc-thread)
+          run_glibc_thread=1;;
+      spec=*)
+          run_spec=1
+          run_spec_bench="$flag_arg";;
+
+      -j=*|--procs=*)
+          procs="$flag_arg";;
+      -v|--verbose)
+          verbose="yes";;
+      -h|--help|-\?|help|\?)
+          echo "./bench [options]"
+          echo ""
+          echo "  allt                         run all tests"
+          echo "  alla                         run all allocators"
+          echo ""
+          echo "  --verbose                    be verbose"
+          echo "  --procs=<n>                  number of processors (=$procs)"
+          echo ""
+          echo "  sys                          use system malloc (glibc)"
+          echo "  je                           use jemalloc"
+          echo "  tc                           use tcmalloc"
+          echo "  mi                           use mimalloc"
+          echo "  hd                           use hoard"
+          echo "  sm                           use supermalloc"
+          echo "  sn                           use snmalloc"
+          echo "  sc                           use scalloc"
+          echo "  rp                           use rpmalloc"
+          echo "  tbb                          use Intel TBB malloc"
+          echo "  scudo                        use scudo"
+          echo "  hm                           use hardened_malloc"
+          echo "  iso                          use isoalloc"
+          echo "  dmi                          use debug version of mimalloc"
+          echo "  smi                          use secure version of mimalloc"
+          echo "  mesh                         use mesh"
+          echo "  nomesh                       use mesh w/ meshing disabled"
+          echo ""
+          echo "  cfrac                        run cfrac"
+          echo "  espresso                     run espresso"
+          echo "  barnes                       run barnes"
+          echo "  gs                           run ghostscript (~1:50s per test)"
+          echo "  lean                         run leanN (~40s per test on 4 cores)"
+          echo "  mathlib                      run mathlib (~10 min per test on 4 cores)"
+          echo "  redis                        run redis benchmark"
+          echo "  spec=<num>                   run selected spec2017 benchmarks (if available)"
+          echo "  larson                       run larsonN"
+          echo "  larson-sized                 run larsonN sized deallocation test"
+          echo "  alloc-test                   run alloc-testN"
+          echo "  xmalloc-test                 run xmalloc-testN"
+          echo "  sh6bench                     run sh6benchN"
+          echo "  sh8bench                     run sh8benchN"
+          echo "  cscratch                     run cache-scratch"
+          echo "  cthrash                      run cache-thrash"
+          echo "  mstress                      run mstressN"
+          echo "  rbstress                     run rbstressN"
+          echo "  rptest                       run rptestN"
+          echo "  mleak                        run mleakN"
+          echo ""
+          exit 0;;
+      *) echo "warning: unknown option \"$1\"." 1>&2
+    esac
+  fi
   shift
 done
 echo "Running on $procs cores."
 export verbose
+
+
+
+# --------------------------------------------------------------------
+# Info
+# --------------------------------------------------------------------
 
 if test "$verbose"="yes"; then
   echo "Installed allocators:"
@@ -373,7 +404,7 @@ if test "$verbose"="yes"; then
   echo ""
 fi
 
-echo "Allocators to be tested: $run_allocators"
+echo "Allocators to be tested: $alloc_run"
 echo ""
 
 benchres="$curdir/benchres.csv"
@@ -401,7 +432,12 @@ function set_spec_bench_dir {
   fi
 }
 
-function run_testx {
+
+# --------------------------------------------------------------------
+# Run a test
+# --------------------------------------------------------------------
+
+function run_testx { # <test name> <allocator name> <environment args> <command>
   echo
   echo "run $1 $2: $3 $4"
   # cat $benchres
@@ -479,43 +515,26 @@ function run_testx {
   tail -n1 $benchres
 }
 
-
-function try_run_test {  # test allocator env-args lib cmd
-  if can_run $2; then
-    if [ -z "$4" ]; then
-      run_testx $1 $2 "$3" "$5"
-    else
-      run_testx $1 $2 "$3 ${ldpreload}=$4" "$5"
-    fi
-  fi
-}
-
-function run_test {
+function run_test {  # <test name> <command>
   echo "      " >> $benchres
   echo ""
   echo "---- $1"  
-  try_run_test $1 "sys"   "SYSMALLOC=1" "" "$2"
-  try_run_test $1 "xmi"   "" $lib_xmi   "$2"
-  try_run_test $1 "xdmi"  "" $lib_xdmi  "$2"
-  try_run_test $1 "xsmi"  "" $lib_xsmi  "$2"
-  try_run_test $1 "mi"    "" $lib_mi    "$2"
-  try_run_test $1 "dmi"   "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1" $lib_dmi "$2"
-  try_run_test $1 "smi"   "" $lib_smi   "$2"
-  try_run_test $1 "tc"    "" $lib_tc    "$2"
-  try_run_test $1 "je"    "" $lib_je    "$2"
-  try_run_test $1 "tbb"   "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir" $lib_tbb "$2"
-  try_run_test $1 "scudo" "" $lib_scudo "$2"
-  try_run_test $1 "hm"    "" $lib_hm    "$2"
-  try_run_test $1 "iso"   "" $lib_iso   "$2"
-  try_run_test $1 "sm"    "" $lib_sm    "$2"
-  try_run_test $1 "sc"    "" $lib_sc    "$2"
-  try_run_test $1 "sn"    "" $lib_sn    "$2"
-  try_run_test $1 "rp"    "" $lib_rp    "$2"
-  try_run_test $1 "hd"    "" $lib_hd    "$2"
-  try_run_test $1 "mesh"  "" $lib_mesh  "$2"
-  try_run_test $1 "nomesh"  "" $lib_nomesh "$2"
-  try_run_test $1 "tlsf"  "" $lib_tlsf  "$2"  
+  for alloc in $alloc_run; do
+    # echo "allocator: $alloc"
+    alloc_lib_set "$alloc"  # sets alloc_lib to point to the allocator .so file
+    case "$alloc" in
+      sys) run_testx $1 "sys" "SYSMALLOC=1" "$2";;
+      dmi) run_testx $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
+      tbb) run_testx $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2";;
+      *)   run_testx $1 "$alloc" "${ldpreload}=$alloc_lib" "$2";;
+    esac
+  done           
 }
+
+
+# --------------------------------------------------------------------
+# Run all tests
+# --------------------------------------------------------------------
 
 echo "# benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres
 
