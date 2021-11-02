@@ -2,7 +2,10 @@ name: Build and run everything
 on: [push, pull_request]
 jobs:
   build-all:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
