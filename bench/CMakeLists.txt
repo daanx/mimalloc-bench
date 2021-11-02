@@ -101,3 +101,9 @@ add_executable(rptest rptest/rptest.c rptest/thread.c rptest/timer.c)
 target_compile_options(rptest PRIVATE -fpermissive)
 target_include_directories(rptest PRIVATE rptest)
 target_link_libraries(rptest pthread m)
+
+add_executable(glibc-simple glibc-bench/bench-malloc-simple.c)
+target_link_libraries(glibc-simple pthread)
+
+add_executable(glibc-thread glibc-bench/bench-malloc-thread.c)
+target_link_libraries(glibc-thread pthread)

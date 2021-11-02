@@ -33,6 +33,8 @@ run_spec_bench=0
 run_mstress=0
 run_mleak=0
 run_rptest=0
+run_glibc_simple=0
+run_glibc_thread=0
 
 verbose="no"
 ldpreload="LD_PRELOAD"
@@ -216,7 +218,7 @@ while : ; do
     nomesh)
         run_add "nomesh";;
     tlsf)
-        run_add "tlsf";;
+        run_add "tlsf";;    
     sys|mc)
         run_add "sys";;
 
@@ -229,6 +231,8 @@ while : ; do
         run_larson_sized=1
         run_cscratch=1
 	      run_mstress=1
+        run_glibc_simple=1
+        run_glibc_thread=1
         if [ -z "$darwin" ]; then
           run_rptest=1
           run_alloc_test=1
@@ -294,6 +298,10 @@ while : ; do
         run_mleak=1;;
     rptest)
         run_rptest=1;;
+    glibc-simple)
+        run_glibc_simple=1;;
+    glibc-thread)
+        run_glibc_thread=1;;
     spec=*)
         run_spec=1
         run_spec_bench="$flag_arg";;
@@ -460,6 +468,11 @@ function run_testx {
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2,${rtime}s"
       sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+    glibc-thread)
+      ops=`cat "$1-$2-out.txt" | sed -n 's/\([0-9\.]*\).*/\1/p'`
+      rtime=`echo "scale=3; (10000000000 / $ops)" | bc`
+      echo "$1 $2: iterations: ${ops}, relative time: ${rtime}s"
+      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
     spec-*)
       popd;;
   esac
@@ -613,6 +626,14 @@ if test "$run_rptest" = "1"; then
   run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 16000"
   # run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 128000"
   # run_test "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 512000"
+fi
+
+if test "$run_glibc_simple" = "1"; then
+  run_test "glibc-simple" "./glibc-simple"
+fi
+
+if test "$run_glibc_thread" = "1"; then
+  run_test "glibc-thread" "./glibc-thread $procs"
 fi
 
 if test "$run_spec" = "1"; then
