@@ -19,7 +19,6 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <sys/resource.h>
 // #include "bench-timing.h"
 // #include "json-lib.h"
