@@ -1,7 +1,7 @@
 name: Build and run everything
 on: [push, pull_request]
 jobs:
-  build-all:
+  build-all-ubuntu:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -12,4 +12,16 @@ jobs:
         run: |
           cd out/bench
           ../../bench.sh alla allt no-iso
+  build-all-osx:
+    runs-on: macos-11
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install and build all benchmarks and allocators
+        run: ./build-bench-env.sh all no-lean
+      - name: Run everything.
+        run: |
+          cd out/bench
+          ../../bench.sh alla allt no-iso
+
 
