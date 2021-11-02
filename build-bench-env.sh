@@ -297,7 +297,7 @@ if test "$setup_packages" = "1"; then
     sudo apt update
 
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
-    aptinstall "cmake python ruby ninja-build libtool autoconf"
+    aptinstall "cmake python3 ruby ninja-build libtool autoconf"
   fi
 fi
 
@@ -367,7 +367,7 @@ if test "$setup_rp" = "1"; then
   if test -f build.ninja; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
-    python configure.py
+    python3 configure.py
   fi
   ninja -j$procs
   popd
