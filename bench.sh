@@ -25,7 +25,7 @@ tests_alla="$tests_all1 $tests_all2"  # run with 'alla' command option
 
 tests_run=""
 tests_exclude=""
-tests_exclude_macos="rptest alloc_test sh6bench sh8bench redis"
+tests_exclude_macos="rptest sh6bench sh8bench redis"
 
 
 # --------------------------------------------------------------------
