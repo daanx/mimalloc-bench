@@ -5,7 +5,7 @@ procs=8
 extso=".so"
 case "$OSTYPE" in
   darwin*) 
-    darwin="yes"
+    darwin="1"
     extso=".dylib"
     procs=`sysctl -n hw.physicalcpu`;;
   *)
@@ -24,7 +24,7 @@ all=0
 version_je=5.2.1
 version_tc=gperftools-2.9.1
 version_sn=0.5.3
-version_mi=v1.7.2
+version_mi=dev   # v1.7.2
 version_rp=1.4.3
 version_tbb=v2021.4.0 # v2020.3
 version_scudo=main
@@ -347,6 +347,9 @@ fi
 if test "$setup_hd" = "1"; then
   checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard.git
   cd src
+  if [ "`uname -m -s`" = "Darwin x86_64" ] ; then
+    sed -i_orig 's/-arch arm64/ /g' GNUmakefile   # fix the makefile    
+  fi
   make -j $procs
   popd
 fi
