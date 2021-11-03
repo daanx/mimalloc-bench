@@ -25,7 +25,7 @@ tests_alla="$tests_all1 $tests_all2"  # run with 'alla' command option
 
 tests_run=""
 tests_exclude=""
-tests_exclude_macos="rptest sh6bench sh8bench redis"
+tests_exclude_macos="sh6bench sh8bench redis"
 
 
 # --------------------------------------------------------------------
@@ -375,11 +375,6 @@ echo ""
 benchres="$curdir/benchres.csv"
 run_pre_cmd=""
 
-procs16=$procs
-if [ 18 -gt $procs ]; then
-  procs16=16
-fi
-
 procsx2=`echo "($procs*2)" | bc`
 procsx4=`echo "($procs*4)" | bc`
 
@@ -580,6 +575,12 @@ function run_test {  # <test>
       run_test_cmd "mleak10"  "./mleak 5"
       run_test_cmd "mleak100" "./mleak 50";;
     rptest)
+      procs16="$procs" 
+      if test "$darwin" != "1"; then
+        if [ "16" -gt "$procs" ]; then
+          procs16="16"
+        fi
+      fi
       run_test_cmd "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 16000"
       # run_test_cmd "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 128000"
       # run_test_cmd "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 512000"
