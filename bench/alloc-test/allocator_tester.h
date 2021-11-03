@@ -258,7 +258,7 @@ void randomPos_RandomSize( AllocatorUnderTest& allocatorUnderTest, size_t iterCo
 	constexpr bool doMemAccess = mat != MEM_ACCESS_TYPE::none;
 	allocatorUnderTest.init();
 	allocatorUnderTest.getTestRes()->threadID = threadID; // just as received
-	allocatorUnderTest.getTestRes()->rdtscBegin = __rdtsc();
+	allocatorUnderTest.getTestRes()->rdtscBegin = get_timestamp();
 
 	size_t start = GetMillisecondCount();
 
@@ -323,7 +323,7 @@ void randomPos_RandomSize( AllocatorUnderTest& allocatorUnderTest, size_t iterCo
 			}
 	}
 	allocatorUnderTest.doWhateverAfterSetupPhase();
-	allocatorUnderTest.getTestRes()->rdtscSetup = __rdtsc();
+	allocatorUnderTest.getTestRes()->rdtscSetup = get_timestamp();
 	allocatorUnderTest.getTestRes()->allocatedAfterSetupSz = allocatedSz;
 
 	rss = getRss();
@@ -399,7 +399,7 @@ void randomPos_RandomSize( AllocatorUnderTest& allocatorUnderTest, size_t iterCo
 		if ( rssMax < rss ) rssMax = rss;
 	}
 	allocatorUnderTest.doWhateverAfterMainLoopPhase();
-	allocatorUnderTest.getTestRes()->rdtscMainLoop = __rdtsc();
+	allocatorUnderTest.getTestRes()->rdtscMainLoop = get_timestamp();
 	allocatorUnderTest.getTestRes()->allocatedMax = allocatedSzMax;
 
 	// exit
@@ -436,7 +436,7 @@ void randomPos_RandomSize( AllocatorUnderTest& allocatorUnderTest, size_t iterCo
 	//else
 	//	allocatorUnderTest.deallocateSlots( baseBuff );
 	allocatorUnderTest.deinit();
-	allocatorUnderTest.getTestRes()->rdtscExit = __rdtsc();
+	allocatorUnderTest.getTestRes()->rdtscExit = get_timestamp();
 	allocatorUnderTest.getTestRes()->innerDur = GetMillisecondCount() - start;
 	allocatorUnderTest.doWhateverAfterCleanupPhase();
 

@@ -51,7 +51,7 @@
 #if defined(__APPLE__)
 #include <time.h>
 //#if defined(CLOCK_REALTIME) || defined(CLOCK_MONOTONIC)
-static inline uint64_t __rdtsc(void) {
+static inline uint64_t get_timestamp(void) {
   struct timespec t;
   #ifdef CLOCK_MONOTONIC
   clock_gettime(CLOCK_MONOTONIC, &t);
@@ -62,6 +62,9 @@ static inline uint64_t __rdtsc(void) {
 }
 #else
 #include <x86intrin.h>
+static inline uint64_t get_timestamp(void) {
+	return __rdtsc();
+}
 #endif
 #define ALIGN(n)      __attribute__ ((aligned(n))) 
 #define NOINLINE      __attribute__ ((noinline))
