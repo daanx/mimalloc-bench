@@ -114,6 +114,13 @@ size_t getRss()
 	else
 		return 0;
 }
+#elif defined(__APPLE__)
+#include <unistd.h>
+size_t getRss() {
+	struct rusage rusage;
+  getrusage(RUSAGE_SELF, &rusage);
+	return rusage.ru_maxrss;
+}
 #else
 size_t getRss()
 {

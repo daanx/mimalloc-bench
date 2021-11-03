@@ -48,7 +48,21 @@
 #define NOINLINE      __declspec(noinline)
 #define FORCE_INLINE	__forceinline
 #elif __GNUC__
+#if defined(__APPLE__)
+#include <time.h>
+//#if defined(CLOCK_REALTIME) || defined(CLOCK_MONOTONIC)
+static inline uint64_t __rdtsc(void) {
+  struct timespec t;
+  #ifdef CLOCK_MONOTONIC
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  #else  
+  clock_gettime(CLOCK_REALTIME, &t);
+  #endif
+  return ((uint64_t)t.tv_sec * 1000) + ((uint64_t)t.tv_nsec / 1000000);
+}
+#else
 #include <x86intrin.h>
+#endif
 #define ALIGN(n)      __attribute__ ((aligned(n))) 
 #define NOINLINE      __attribute__ ((noinline))
 #define	FORCE_INLINE inline __attribute__((always_inline))
