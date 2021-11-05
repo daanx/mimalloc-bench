@@ -435,9 +435,14 @@ if test "$setup_mi" = "1"; then
   echo ""
   echo "- build mimalloc release"
 
+  mi_use_cxx=""
+  if test "$darwin" = "1"; then
+    mi_use_cxx="-DMI_USE_CXX=ON"
+  fi
+
   mkdir -p out/release
   cd out/release
-  cmake ../..
+  cmake ../..  $mi_use_cxx
   make -j 4
   cd ../..
 
@@ -446,7 +451,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/debug
   cd out/debug
-  cmake ../.. -DMI_CHECK_FULL=ON
+  cmake ../.. -DMI_CHECK_FULL=ON $mi_use_cxx
   make -j 4
   cd ../..
 
@@ -455,7 +460,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/secure
   cd out/secure
-  cmake ../..
+  cmake ../.. $mi_use_cxx
   make -j 4
   cd ../..
   popd
