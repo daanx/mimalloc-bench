@@ -495,7 +495,7 @@ if test "$setup_redis" = "1"; then
   if test -d "redis-$version_redis"; then
     echo "$devdir/redis-$version_redis already exists; no need to download it"
   else
-    wget "http://download.redis.io/releases/redis-$version_redis.tar.gz"
+    wget --no-verbose "http://download.redis.io/releases/redis-$version_redis.tar.gz"
     tar xzf "redis-$version_redis.tar.gz"
   fi
 
@@ -526,7 +526,7 @@ if test "$setup_bench" = "1"; then
   if test -f sh6bench-new.c; then
     echo "do nothing: bench/shbench/sh6bench-new.c already exists"
   else
-    wget http://www.microquill.com/smartheap/shbench/bench.zip
+    wget --no-verbose http://www.microquill.com/smartheap/shbench/bench.zip
     unzip -o bench.zip
     dos2unix sh6bench.patch
     dos2unix sh6bench.c
@@ -535,7 +535,7 @@ if test "$setup_bench" = "1"; then
   if test -f sh8bench-new.c; then
     echo "do nothing: bench/shbench/sh8bench-new.c already exists"
   else
-    wget http://www.microquill.com/smartheap/SH8BENCH.zip
+    wget --no-verbose http://www.microquill.com/smartheap/SH8BENCH.zip
     unzip -o SH8BENCH.zip
     dos2unix sh8bench.patch
     dos2unix SH8BENCH.C
