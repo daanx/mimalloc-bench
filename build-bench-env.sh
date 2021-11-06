@@ -5,6 +5,7 @@ procs=8
 extso=".so"
 case "$OSTYPE" in
   darwin*) 
+    export HOMEBREW_NO_EMOJI=1
     darwin="1"
     extso=".dylib"
     procs=`sysctl -n hw.physicalcpu`;;
