@@ -338,7 +338,7 @@ if test "$setup_tc" = "1"; then
     ./autogen.sh
     CXXFLAGS="-w -DNDEBUG -O2" ./configure --enable-minimal 
   fi
-  make -j $procs # ends with error on benchmark, but thats ok.
+  make -j $procs .libs/libtcmalloc_minimal$extso # ends with error on benchmark, but thats ok.
   #echo ""
   #echo "(note: the error 'Makefile:3912: recipe for target 'malloc_bench' failed' is expected)"
   popd
