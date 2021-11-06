@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+      - name: Silence some git warnings
+        run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
         run: ./build-bench-env.sh all no-lean
       - name: Run everything.
