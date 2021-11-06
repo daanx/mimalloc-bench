@@ -14,11 +14,28 @@ jobs:
         run: |
           cd out/bench
           ../../bench.sh alla allt no-iso
+  build-all-fedora:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install and build all benchmarks and allocators
+        # rp: https://github.com/mjansson/rpmalloc/issues/263
+        # mi and mesh: error: '__malloc_hook' was not declared in this scope;
+        run: ./build-bench-env.sh all no-lean no-rp no-mi no-mesh no-nomesh
+      - name: Run everything.
+        run: |
+          cd out/bench
+          ../../bench.sh alla allt no-iso
   build-all-osx:
     runs-on: macos-11
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+      - name: Silence some git warnings
+        run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
         run: ./build-bench-env.sh all no-lean
       - name: Run everything.
