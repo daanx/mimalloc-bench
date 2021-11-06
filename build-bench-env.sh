@@ -387,7 +387,7 @@ if test "$setup_sn" = "1"; then
     cd ..
   fi
   cd release
-  ninja -j$procs
+  ninja -j$procs libsnmallocshim$extso
   popd
 fi
 
