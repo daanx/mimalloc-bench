@@ -257,7 +257,7 @@ function aptinstall {
   echo ""
   echo "> sudo apt install $1"
   echo ""
-  sudo apt install $1
+  sudo apt install --no-install-recommends $1
 }
 
 function dnfinstall {
