@@ -402,8 +402,8 @@ function set_spec_bench_dir {
 # Run a test
 # --------------------------------------------------------------------
 allocfill="     "
-testfill="          "
- 
+benchfill="           "
+
 function run_test_env_cmd { # <test name> <allocator name> <environment args> <command>
   echo
   echo "run $1 $2: $3 $4"
@@ -433,7 +433,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     redis*)
        echo "start server"
-       $timecmd -a -o $benchres -f "$1${testfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
+       $timecmd -a -o $benchres -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
        sleep 1s
        $redis_dir/redis-cli flushall
        sleep 1s
@@ -445,7 +445,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        sleep 1s
        ;;
     *)
-       $timecmd -a -o $benchres -f "$1${testfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o $benchres -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
   # fixup larson with relative time
   case "$1" in
@@ -453,29 +453,29 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       ops=`tail -$redis_tail "$outfile" | sed -n 's/.*: \([0-9\.]*\) requests per second.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1 $2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
     larson*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/.* time: \([0-9\.]*\).*/\1/p'`
-      echo "$1,$2,${rtime}s"
-      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      echo "$1,$2, relative time: ${rtime}s"
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
     rptest*)
       ops=`cat "$1-$2-out.txt" | sed -n 's/.*\.\.\.\([0-9]*\) memory ops.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1,$2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
     xmalloc*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
-      echo "$1,$2,${rtime}s"
-      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      echo "$1,$2, relative time: ${rtime}s"
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
     ebizzy)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
-      echo "$1,$2,${rtime}s"
-      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      echo "$1,$2, relative time: ${rtime}s"
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
     glibc-thread)
       ops=`cat "$1-$2-out.txt" | sed -n 's/\([0-9\.]*\).*/\1/p'`
       rtime=`echo "scale=3; (10000000000 / $ops)" | bc`
-      echo "$1 $2: iterations: ${ops}, relative time: ${rtime}s"
-      sed -i.bak "s/$1 $2 [^ ]*/$1 $2 0:$rtime/" $benchres;;
+      echo "$1,$2: iterations: ${ops}, relative time: ${rtime}s"
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
     spec-*)
       popd;;
   esac
@@ -505,7 +505,7 @@ function run_test_cmd {  # <test name> <command>
 # Run all tests
 # --------------------------------------------------------------------
 
-echo "#benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres
+echo "# benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres
 
 function run_test {  # <test>
   case $1 in
@@ -615,4 +615,4 @@ done
 sed -i.bak "s/ 0:/ /" $benchres
 echo ""
 echo "# --------------------------------------------------"
-cat $benchres | column -t
+cat $benchres 
