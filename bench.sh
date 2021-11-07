@@ -377,6 +377,11 @@ run_pre_cmd=""
 
 procsx2=`echo "($procs*2)" | bc`
 procsx4=`echo "($procs*4)" | bc`
+procs_div2=`echo "($procs/2)" | bc`
+procs_max16="$procs" 
+if [ $procs -gt 16 ]; then
+  procs16="16"
+fi
 
 function set_spec_bench_dir {
   if test -f "$1.0000/compare.out"; then
@@ -575,15 +580,9 @@ function run_test {  # <test>
       run_test_cmd "mleak10"  "./mleak 5"
       run_test_cmd "mleak100" "./mleak 50";;
     rptest)
-      procs16="$procs" 
-      if test "$darwin" != "1"; then
-        if [ "16" -gt "$procs" ]; then
-          procs16="16"
-        fi
-      fi
-      run_test_cmd "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 16000"
-      # run_test_cmd "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 128000"
-      # run_test_cmd "rptestN" "./rptest $procs16 0 1 2 500 1000 100 8 512000"
+      run_test_cmd "rptestN" "./rptest $procs_max16 0 1 2 500 1000 100 8 16000"
+      # run_test_cmd "rptestN" "./rptest $procs_max16 0 1 2 500 1000 100 8 128000"
+      # run_test_cmd "rptestN" "./rptest $procs_max16 0 1 2 500 1000 100 8 512000"
       ;;
     glibc-simple)
       run_test_cmd "glibc-simple" "./glibc-simple";;
