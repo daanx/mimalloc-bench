@@ -401,7 +401,9 @@ function set_spec_bench_dir {
 # --------------------------------------------------------------------
 # Run a test
 # --------------------------------------------------------------------
-
+allocfill="     "
+testfill="          "
+ 
 function run_test_env_cmd { # <test name> <allocator name> <environment args> <command>
   echo
   echo "run $1 $2: $3 $4"
@@ -431,7 +433,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     redis*)
        echo "start server"
-       $timecmd -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
+       $timecmd -a -o $benchres -f "$1${testfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
        sleep 1s
        $redis_dir/redis-cli flushall
        sleep 1s
@@ -443,7 +445,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        sleep 1s
        ;;
     *)
-       $timecmd -a -o $benchres -f "$1 $2 %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o $benchres -f "$1${testfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
   # fixup larson with relative time
   case "$1" in
@@ -503,7 +505,7 @@ function run_test_cmd {  # <test name> <command>
 # Run all tests
 # --------------------------------------------------------------------
 
-echo "# benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres
+echo "#benchmark allocator elapsed rss user sys page-faults page-reclaims" > $benchres
 
 function run_test {  # <test>
   case $1 in
@@ -613,4 +615,4 @@ done
 sed -i.bak "s/ 0:/ /" $benchres
 echo ""
 echo "# --------------------------------------------------"
-cat $benchres
+cat $benchres | column -t
