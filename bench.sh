@@ -564,9 +564,8 @@ function run_test {  # <test>
       if test "$procs" != "1"; then
         run_test_cmd "cache-scratchN" "./cache-scratch $procs 1000 1 2000000 $procs"
       fi;;
-    malloc_test)
-      run_test_cmd "malloc-test" "./malloc-test";;
-    malloc_large)
+    malloc-large)
+      # run_test_cmd "malloc-large-old" "./malloc-large-old"
       run_test_cmd "malloc-large" "./malloc-large";;
     z3)
       run_test_cmd "z3" "z3 -smt2 $benchdir/z3/test1.smt2";;
