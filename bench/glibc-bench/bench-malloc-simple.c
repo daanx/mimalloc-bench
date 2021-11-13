@@ -16,6 +16,8 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
+// modified by Daan Leijen to fit the bench suite and add lifo/fifo free order.
+
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +50,7 @@ typedef struct
 } malloc_args;
 
 static void
-do_benchmark (malloc_args *args, int **arr)
+do_benchmark (malloc_args *args, char**arr)
 {
   timing_t start, stop;
   size_t iters = args->iters;
@@ -60,13 +62,20 @@ do_benchmark (malloc_args *args, int **arr)
   for (int j = 0; j < iters; j++)
     {
       for (int i = 0; i < n; i++) {
-	arr[i] = malloc (size);
-  for(int g = 0; g < (size/sizeof(int)); g++) { arr[i][g] = g; }
+        arr[i] = malloc (size);
+        for(int g = 0; g < size; g++) { arr[i][g] =(char)g; }
       }
 
-      for (int i = 0; i < n; i++)
-	free (arr[i]);
-    }
+      // free half in fifo order
+      for (int i = 0; i < n/2; i++) {
+	      free (arr[i]);  
+      }
+    
+      // and the other half in lifo order
+      for(int i = n-1; i >= n/2; i--) {
+        free(arr[i]);
+      }
+  }      
 
   TIMING_NOW (stop);
 
@@ -79,7 +88,7 @@ static int allocs[NUM_ALLOCS] = { 25, 100, 400, MAX_ALLOCS };
 static void *
 thread_test (void *p)
 {
-  int **arr = (int**)p;
+  char **arr = (char**)p;
 
   /* Run benchmark multi-threaded.  */
   for (int i = 0; i < NUM_ALLOCS; i++)
@@ -92,7 +101,7 @@ void
 bench (unsigned long size)
 {
   size_t iters = NUM_ITERS;
-  int **arr = (int**) malloc (MAX_ALLOCS * sizeof (void*));
+  char**arr = (char**)malloc (MAX_ALLOCS * sizeof (void*));
 
   for (int t = 0; t < 3; t++)
     for (int i = 0; i < NUM_ALLOCS; i++)
@@ -181,16 +190,16 @@ static void usage (const char *name)
 int
 main (int argc, char **argv)
 {
-  long val = 16;
+  long size = 16;
   if (argc == 2)
-    val = strtol (argv[1], NULL, 0);
+    size = strtol (argv[1], NULL, 0);
 
-  if (argc > 2 || val <= 0)
+  if (argc > 2 || size <= 0)
     usage (argv[0]);
 
-  bench (val);
-  bench (2*val);
-  bench (4*val);
+  bench (size);
+  bench (2*size);
+  bench (4*size);
 
   return 0;
 }
