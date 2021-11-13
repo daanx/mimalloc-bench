@@ -206,7 +206,6 @@ alloc_lib_add "smi"   "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso
 alloc_lib_add "xmi"   "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
 alloc_lib_add "xdmi"  "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
 alloc_lib_add "xsmi"  "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
-export MIMALLOC_EAGER_COMMIT_DELAY=0
 alloc_lib_add "hd"    "$localdevdir/Hoard/src/libhoard$extso"
 alloc_lib_add "sn"    "$localdevdir/snmalloc/release/libsnmallocshim$extso"
 alloc_lib_add "sm"    "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
