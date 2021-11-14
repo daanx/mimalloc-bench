@@ -46,7 +46,7 @@ case "$OSTYPE" in
     ldpreload="DYLD_INSERT_LIBRARIES"
     procs=`sysctl -n hw.physicalcpu`;;
   *)
-    if command -v nproc; then 
+    if command -v nproc > /dev/null; then 
       procs=`nproc`
     fi;;
 esac
@@ -285,7 +285,7 @@ while : ; do
         spec=*)
             test_run_add "spec"
             run_spec_bench="$flag_arg";;
-        -j=*|--procs=*)
+        -j|--procs)
             procs="$flag_arg";;
         -v|--verbose)
             verbose="yes";;
@@ -379,7 +379,7 @@ procsx4=`echo "($procs*4)" | bc`
 procs_div2=`echo "($procs/2)" | bc`
 procs_max16="$procs" 
 if [ $procs -gt 16 ]; then
-  procs16="16"
+  procs_max16="16"
 fi
 
 function set_spec_bench_dir {
@@ -580,9 +580,9 @@ function run_test {  # <test>
       run_test_cmd "mleak10"  "./mleak 5"
       run_test_cmd "mleak100" "./mleak 50";;
     rptest)
-      run_test_cmd "rptestN" "./rptest $procs_max16 0 1 2 500 1000 100 8 16000"
-      # run_test_cmd "rptestN" "./rptest $procs_max16 0 1 2 500 1000 100 8 128000"
-      # run_test_cmd "rptestN" "./rptest $procs_max16 0 1 2 500 1000 100 8 512000"
+      run_test_cmd "rptestN" "./rptest $procs 0 1 2 500 1000 100 8 16000"
+      # run_test_cmd "rptestN" "./rptest $procs 0 1 2 500 1000 100 8 128000"
+      # run_test_cmd "rptestN" "./rptest $procs 0 1 2 500 1000 100 8 512000"
       ;;
     glibc-simple)
       run_test_cmd "glibc-simple" "./glibc-simple";;
