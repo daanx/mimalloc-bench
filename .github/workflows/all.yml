@@ -1,5 +1,9 @@
 name: Build and run everything
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * 1'
 jobs:
   build-all-ubuntu:
     runs-on: ubuntu-latest
