@@ -345,7 +345,7 @@ if test "$setup_tc" = "1"; then
 fi
 
 if test "$setup_hd" = "1"; then
-  checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard.git
+  checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard
   cd src
   if [ "`uname -m -s`" = "Darwin x86_64" ] ; then
     sed -i_orig 's/-arch arm64/ /g' GNUmakefile   # fix the makefile    
@@ -355,7 +355,7 @@ if test "$setup_hd" = "1"; then
 fi
 
 if test "$setup_je" = "1"; then
-  checkout je $version_je jemalloc https://github.com/jemalloc/jemalloc.git
+  checkout je $version_je jemalloc https://github.com/jemalloc/jemalloc
   if test -f config.status; then
     echo "$devdir/jemalloc is already configured; no need to reconfigure"
   else
@@ -366,7 +366,7 @@ if test "$setup_je" = "1"; then
 fi
 
 if test "$setup_rp" = "1"; then
-  checkout rp $version_rp rpmalloc https://github.com/mjansson/rpmalloc.git
+  checkout rp $version_rp rpmalloc https://github.com/mjansson/rpmalloc
   if test -f build.ninja; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
@@ -377,7 +377,7 @@ if test "$setup_rp" = "1"; then
 fi
 
 if test "$setup_sn" = "1"; then
-  checkout sn $version_sn snmalloc https://github.com/Microsoft/snmalloc.git
+  checkout sn $version_sn snmalloc https://github.com/Microsoft/snmalloc
   if test -f release/build.ninja; then
     echo "$devdir/snmalloc is already configured; no need to reconfigure"
   else
@@ -392,7 +392,7 @@ if test "$setup_sn" = "1"; then
 fi
 
 if test "$setup_sm" = "1"; then
-  checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc.git
+  checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
   sed -i "s/-Werror//" Makefile.include
   cd release
   make
@@ -512,7 +512,7 @@ if test "$setup_ch" = "1"; then
     echo "$devdir/ClickHouse already exists; no need to git clone"
   else
     sudo apt-get install git pbuilder debhelper lsb-release fakeroot sudo debian-archive-keyring debian-keyring
-    git clone --recursive https://github.com/yandex/ClickHouse.git
+    git clone --recursive https://github.com/yandex/ClickHouse
   fi
   cd ClickHouse
   git checkout mimalloc
