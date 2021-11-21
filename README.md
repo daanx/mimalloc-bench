@@ -199,6 +199,10 @@ allocates more the faster the program runs. Unfortunately,
 there are no entries for _SuperMalloc_ in the _leanN_ and _xmalloc-testN_
 benchmarks as it faulted on those)
 
+# Resulting improvements
+
+- [Minor performances improvement](https://github.com/struct/isoalloc/commit/049c12e4c2ad5c21a768f7f3873d84bf1106646a) in isoalloc
+
 
 # References
 
