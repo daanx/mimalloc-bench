@@ -30,6 +30,7 @@ version_rp=1.4.3
 version_tbb=v2021.4.0 # v2020.3
 version_scudo=main
 version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
+version_mallocng=master
 version_hm=main
 version_iso=1.0.0
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
@@ -42,6 +43,7 @@ version_redis=6.0.9
 # allocators
 setup_dieharder=0
 setup_scudo=0
+setup_mallocng=0
 setup_hm=0
 setup_iso=0
 setup_je=0
@@ -95,6 +97,7 @@ while : ; do
           setup_sm=$flag_arg
           setup_mesh=$flag_arg          
           setup_dieharder=$flag_arg  # build is hardcoded for linux-64-gcc for now
+					setup_mallocng=$flag_arg   # lacking getentropy()
         fi        
         # only run Mesh's 'nomesh' configuration if asked
         #   setup_nomesh=$flag_arg
@@ -107,6 +110,8 @@ while : ; do
         ;;
     dieharder)
           setup_dieharder=$flag_arg;;
+    mallocng)
+        setup_mallocng=$flag_arg;;
     scudo)
         setup_scudo=$flag_arg;;
     hm)
@@ -162,6 +167,7 @@ while : ; do
         echo ""
         echo "  dieharder                    setup dieharder ($version_dieharder)"
         echo "  scudo                        setup scudo ($version_scudo)"
+        echo "  mallocng                     setup mallocng ($version_mallocng)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
@@ -319,6 +325,12 @@ if test "$setup_iso" = "1"; then
   popd
 fi
 
+if test "$setup_mallocng" = "1"; then
+  checkout mallocng $version_mallocng mallocng https://github.com/richfelker/mallocng-draft
+  make 
+  popd
+fi
+
 if test "$setup_scudo" = "1"; then
   partial_checkout scudo $version_scudo scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
   cd "compiler-rt/lib/scudo/standalone"
@@ -357,7 +369,7 @@ if test "$setup_tc" = "1"; then
 fi
 
 if test "$setup_hd" = "1"; then
-  checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard.git
+  checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard
   cd src
   if [ "`uname -m -s`" = "Darwin x86_64" ] ; then
     sed -i_orig 's/-arch arm64/ /g' GNUmakefile   # fix the makefile    
@@ -367,7 +379,7 @@ if test "$setup_hd" = "1"; then
 fi
 
 if test "$setup_je" = "1"; then
-  checkout je $version_je jemalloc https://github.com/jemalloc/jemalloc.git
+  checkout je $version_je jemalloc https://github.com/jemalloc/jemalloc
   if test -f config.status; then
     echo "$devdir/jemalloc is already configured; no need to reconfigure"
   else
@@ -378,7 +390,7 @@ if test "$setup_je" = "1"; then
 fi
 
 if test "$setup_rp" = "1"; then
-  checkout rp $version_rp rpmalloc https://github.com/mjansson/rpmalloc.git
+  checkout rp $version_rp rpmalloc https://github.com/mjansson/rpmalloc
   if test -f build.ninja; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
@@ -389,7 +401,7 @@ if test "$setup_rp" = "1"; then
 fi
 
 if test "$setup_sn" = "1"; then
-  checkout sn $version_sn snmalloc https://github.com/Microsoft/snmalloc.git
+  checkout sn $version_sn snmalloc https://github.com/Microsoft/snmalloc
   if test -f release/build.ninja; then
     echo "$devdir/snmalloc is already configured; no need to reconfigure"
   else
@@ -404,7 +416,7 @@ if test "$setup_sn" = "1"; then
 fi
 
 if test "$setup_sm" = "1"; then
-  checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc.git
+  checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
   sed -i "s/-Werror//" Makefile.include
   cd release
   make
@@ -524,7 +536,7 @@ if test "$setup_ch" = "1"; then
     echo "$devdir/ClickHouse already exists; no need to git clone"
   else
     sudo apt-get install git pbuilder debhelper lsb-release fakeroot sudo debian-archive-keyring debian-keyring
-    git clone --recursive https://github.com/yandex/ClickHouse.git
+    git clone --recursive https://github.com/yandex/ClickHouse
   fi
   cd ClickHouse
   git checkout mimalloc
