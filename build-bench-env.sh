@@ -29,6 +29,7 @@ version_mi=v1.7.3
 version_rp=1.4.3
 version_tbb=v2021.4.0 # v2020.3
 version_scudo=main
+version_mallocng=master
 version_hm=main
 version_iso=1.0.0
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
@@ -40,6 +41,7 @@ version_redis=6.0.9
 
 # allocators
 setup_scudo=0
+setup_mallocng=0
 setup_hm=0
 setup_iso=0
 setup_je=0
@@ -92,6 +94,7 @@ while : ; do
           setup_rp=$flag_arg
           setup_sm=$flag_arg
           setup_mesh=$flag_arg          
+					setup_mallocng=$flag_arg   # lacking getentropy()
         fi        
         # only run Mesh's 'nomesh' configuration if asked
         #   setup_nomesh=$flag_arg
@@ -102,6 +105,8 @@ while : ; do
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
+    mallocng)
+        setup_mallocng=$flag_arg;;
     scudo)
         setup_scudo=$flag_arg;;
     hm)
@@ -156,6 +161,7 @@ while : ; do
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
         echo "  scudo                        setup scudo ($version_scudo)"
+        echo "  mallocng                     setup mallocng ($version_mallocng)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
@@ -310,6 +316,12 @@ fi
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
   make library
+  popd
+fi
+
+if test "$setup_mallocng" = "1"; then
+  checkout mallocng $version_mallocng mallocng https://github.com/richfelker/mallocng-draft
+  make 
   popd
 fi
 
