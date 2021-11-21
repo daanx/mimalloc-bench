@@ -101,6 +101,8 @@ for the versions:
 - **iso**: The [_Isoalloc_](https://github.com/struct/isoalloc/) allocator,
   isolation-based aiming at providing a reasonable level of security without
   sacrificing too much the performances.
+- **dieharder**: The [_DieHarder_](https://github.com/emeryberger/DieHard)
+	allocator is an error-resistant memory allocator for Windows, Linux, and Mac OS X.
 
 
 ## Current Benchmarks

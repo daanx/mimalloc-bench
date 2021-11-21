@@ -29,6 +29,7 @@ version_mi=v1.7.3
 version_rp=1.4.3
 version_tbb=v2021.4.0 # v2020.3
 version_scudo=main
+version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
 version_mallocng=master
 version_hm=main
 version_iso=1.0.0
@@ -40,6 +41,7 @@ version_sc=v1.0.0
 version_redis=6.0.9
 
 # allocators
+setup_dieharder=0
 setup_scudo=0
 setup_mallocng=0
 setup_hm=0
@@ -94,6 +96,7 @@ while : ; do
           setup_rp=$flag_arg
           setup_sm=$flag_arg
           setup_mesh=$flag_arg          
+          setup_dieharder=$flag_arg  # build is hardcoded for linux-64-gcc for now
 					setup_mallocng=$flag_arg   # lacking getentropy()
         fi        
         # only run Mesh's 'nomesh' configuration if asked
@@ -105,6 +108,8 @@ while : ; do
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
+    dieharder)
+          setup_dieharder=$flag_arg;;
     mallocng)
         setup_mallocng=$flag_arg;;
     scudo)
@@ -160,6 +165,7 @@ while : ; do
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
+        echo "  dieharder                    setup dieharder ($version_dieharder)"
         echo "  scudo                        setup scudo ($version_scudo)"
         echo "  mallocng                     setup mallocng ($version_mallocng)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
@@ -242,7 +248,7 @@ function partial_checkout {  # name, git-tag, directory, git repo, directory to 
   write_version $1 $2 $4
 }
 
-function checkout {  # name, git-tag, directory, git repo
+function checkout {  # name, git-tag, directory, git repo, options
   phase "build $1: version $2"
   pushd $devdir
   if test "$rebuild" = "1"; then
@@ -251,7 +257,7 @@ function checkout {  # name, git-tag, directory, git repo
   if test -d "$3"; then
     echo "$devdir/$3 already exists; no need to git clone"
   else
-    git clone $4 $3
+    git clone $5 $4 $3
   fi
   cd "$3"
   git checkout $2
@@ -331,6 +337,12 @@ if test "$setup_scudo" = "1"; then
   # TODO: make the next line prettier instead of hardcoding everything.
   clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
   cd -
+  popd
+fi
+
+if test "$setup_dieharder" = "1"; then
+  checkout dieharder $version_dieharder dieharder https://github.com/emeryberger/DieHard "--recursive"
+  TARGET=libdieharder make -C src linux-gcc-64
   popd
 fi
 

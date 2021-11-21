@@ -10,7 +10,7 @@ echo ""
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh tlsf sc scudo hm iso dmi smi xdmi xsmi mallocng"
+alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh tlsf sc scudo hm iso dmi smi xdmi xsmi mallocng dieharder"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
@@ -102,6 +102,7 @@ alloc_lib_add "tc"    "$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "sc"    "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
 alloc_lib_add "iso"   "${localdevdir}/iso/build/libisoalloc$extso"
 alloc_lib_add "scudo" "${localdevdir}/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
+alloc_lib_add "dieharder" "${localdevdir}/dieharder/src/libdieharder$extso"
 alloc_lib_add "mallocng" "${localdevdir}/mallocng/libmallocng$extso"
 alloc_lib_add "hm"    "${localdevdir}/hm/libhardened_malloc$extso"
 lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
@@ -314,6 +315,7 @@ while : ; do
             echo "  rp                           use rpmalloc"
             echo "  tbb                          use Intel TBB malloc"
             echo "  scudo                        use scudo"
+            echo "  dieharder                    use dieharder"
             echo "  mallocng                     use mallocng"
             echo "  hm                           use hardened_malloc"
             echo "  iso                          use isoalloc"
