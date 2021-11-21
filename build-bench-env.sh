@@ -41,6 +41,7 @@ version_tc=gperftools-2.9.1
 
 # benchmark versions
 version_redis=6.0.9
+version_lean=v3.4.2
 
 # allocators
 setup_dieharder=0
@@ -496,7 +497,7 @@ fi
 phase "install benchmarks"
 
 if test "$setup_lean" = "1"; then
-  phase "build lean v3.4.1"
+  phase "build lean $version_lean"
 
   pushd $devdir
   if test -d lean; then
@@ -505,7 +506,7 @@ if test "$setup_lean" = "1"; then
     git clone https://github.com/leanprover/lean
   fi
   cd lean
-  git checkout v3.4.1
+  git checkout "$version_lean"
   mkdir -p out/release
   cd out/release
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
