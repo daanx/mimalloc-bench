@@ -22,47 +22,49 @@ rebuild=0
 all=0
 
 # allocator versions
-version_je=5.2.1
-version_tc=gperftools-2.9.1
-version_sn=0.5.3
-version_mi=v1.7.3
-version_rp=1.4.3
-version_tbb=v2021.4.0 # v2020.3
-version_scudo=main
 version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
-version_mallocng=master
+version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=main
 version_iso=1.0.0
-version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
-version_sm=709663f
+version_je=5.2.1
+version_mallocng=master
 version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+version_mi=v1.7.3
 version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+version_rp=1.4.3
 version_sc=v1.0.0
+version_scudo=main
+version_sm=709663f
+version_sn=0.5.3
+version_tbb=v2021.4.0 # v2020.3
+version_tc=gperftools-2.9.1
+
+# benchmark versions
 version_redis=6.0.9
 
 # allocators
 setup_dieharder=0
-setup_scudo=0
-setup_mallocng=0
+setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
-setup_tc=0
-setup_sn=0
-setup_mi=0
-setup_rp=0
-setup_hd=0
-setup_sm=0
-setup_tbb=0
+setup_mallocng=0
 setup_mesh=0
+setup_mi=0
 setup_nomesh=0
+setup_rp=0
 setup_sc=0
+setup_scudo=0
+setup_sm=0
+setup_sn=0
+setup_tbb=0
+setup_tc=0
 
 # bigger benchmarks
+setup_bench=0
+setup_ch=0
 setup_lean=0
 setup_redis=0
-setup_ch=0
-setup_bench=0
 
 # various
 setup_packages=0
@@ -83,21 +85,21 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
-        setup_je=$flag_arg
-        setup_tc=$flag_arg
-        setup_sn=$flag_arg
-        setup_mi=$flag_arg
-        setup_tbb=$flag_arg
         setup_hd=$flag_arg              
+        setup_je=$flag_arg
+        setup_mi=$flag_arg
+        setup_sn=$flag_arg
+        setup_tbb=$flag_arg
+        setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
-          setup_iso=$flag_arg       # sets output to .so on macOS
-          setup_hm=$flag_arg        # lacking <thread.h>
-          setup_scudo=$flag_arg     # lacking <sys/auxv.h>
-          setup_rp=$flag_arg
-          setup_sm=$flag_arg
-          setup_mesh=$flag_arg          
+          setup_mallocng=$flag_arg   # lacking getentropy()
           setup_dieharder=$flag_arg  # build is hardcoded for linux-64-gcc for now
-					setup_mallocng=$flag_arg   # lacking getentropy()
+          setup_hm=$flag_arg        # lacking <thread.h>
+          setup_iso=$flag_arg       # sets output to .so on macOS
+          setup_mesh=$flag_arg          
+          setup_rp=$flag_arg
+          setup_scudo=$flag_arg     # lacking <sys/auxv.h>
+          setup_sm=$flag_arg
         fi        
         # only run Mesh's 'nomesh' configuration if asked
         #   setup_nomesh=$flag_arg
@@ -108,48 +110,48 @@ while : ; do
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
+    bench)
+        setup_bench=$flag_arg;;
+    ch)
+        setup_ch=$flag_arg;;
     dieharder)
           setup_dieharder=$flag_arg;;
-    mallocng)
-        setup_mallocng=$flag_arg;;
-    scudo)
-        setup_scudo=$flag_arg;;
+    hd)
+        setup_hd=$flag_arg;;
     hm)
         setup_hm=$flag_arg;;
     iso)
         setup_iso=$flag_arg;;
     je)
         setup_je=$flag_arg;;
-    tc)
-        setup_tc=$flag_arg;;
+    lean)
+        setup_lean=$flag_arg;;
+    mallocng)
+        setup_mallocng=$flag_arg;;
+    mesh)
+        setup_mesh=$flag_arg;;
+    mi)
+        setup_mi=$flag_arg;;
+    nomesh)
+        setup_nomesh=$flag_arg;;
+    packages)
+        setup_packages=$flag_arg;;
+    redis)
+        setup_redis=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
+    sc)
+        setup_sc=$flag_arg;;
+    scudo)
+        setup_scudo=$flag_arg;;
     sm)
         setup_sm=$flag_arg;;
     sn)
         setup_sn=$flag_arg;;
-    sc)
-        setup_sc=$flag_arg;;
-    mi)
-        setup_mi=$flag_arg;;
-    hd)
-        setup_hd=$flag_arg;;
     tbb)
         setup_tbb=$flag_arg;;
-    mesh)
-        setup_mesh=$flag_arg;;
-    nomesh)
-        setup_nomesh=$flag_arg;;
-    lean)
-        setup_lean=$flag_arg;;
-    redis)
-        setup_redis=$flag_arg;;
-    ch)
-        setup_ch=$flag_arg;;
-    bench)
-        setup_bench=$flag_arg;;
-    packages)
-        setup_packages=$flag_arg;;
+    tc)
+        setup_tc=$flag_arg;;
     -r|--rebuild)
         rebuild=1;;
     -j=*|--procs=*)
@@ -161,31 +163,31 @@ while : ; do
         echo ""
         echo "  all                          setup and build (almost) everything"
         echo ""
-        echo "  --verbose                    be verbose"
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
+        echo "  --verbose                    be verbose"
         echo ""
         echo "  dieharder                    setup dieharder ($version_dieharder)"
-        echo "  scudo                        setup scudo ($version_scudo)"
-        echo "  mallocng                     setup mallocng ($version_mallocng)"
+        echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
-        echo "  tc                           setup tcmalloc ($version_tc)"
-        echo "  mi                           setup mimalloc ($version_mi)"
-        echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
-        echo "  hd                           setup hoard ($version_hd)"
+        echo "  mallocng                     setup mallocng ($version_mallocng)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
+        echo "  mi                           setup mimalloc ($version_mi)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
-        echo "  sm                           setup supermalloc ($version_sm)"
-        echo "  sn                           setup snmalloc ($version_sn)"
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
+        echo "  scudo                        setup scudo ($version_scudo)"
+        echo "  sm                           setup supermalloc ($version_sm)"
+        echo "  sn                           setup snmalloc ($version_sn)"
+        echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
+        echo "  tc                           setup tcmalloc ($version_tc)"
         echo ""
-        echo "  lean                         setup lean 3 benchmark"
-        echo "  redis                        setup redis benchmark"
         echo "  bench                        build all local benchmarks"
+        echo "  lean                         setup lean 3 benchmark"
         echo "  packages                     setup required packages"
+        echo "  redis                        setup redis benchmark"
         echo ""
         echo "Prefix an option with 'no-' to disable an option"
         exit 0;;
@@ -215,7 +217,7 @@ function phase {
   echo
   echo
   echo "--------------------------------------------"
-  echo $1
+  echo "$1"
   echo "--------------------------------------------"
   echo
 }
