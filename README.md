@@ -68,41 +68,50 @@ Supported allocators are as follow, see
 [build-bench-env.sh](https://github.com/daanx/mimalloc-bench/blob/master/build-bench-env.sh)
 for the versions:
 
-- **mi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator.
-  We can also test the debug version as **dmi** (this can be used to check for any bugs
-  in the benchmarks).
-- **smi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator 
-  compiled in secure mode which is hardened against buffer overflow, use-after-free, etc.  
-- **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
-  allocator which comes as part of
-  the Google performance tools and is used in the Chrome browser.
-- **je**: The [_jemalloc_](https://github.com/jemalloc/jemalloc)
-  allocator by Jason Evans is developed at Facebook
-  and widely used in practice, for example in FreeBSD and Firefox.
-- **sn**: The [_snmalloc_](https://github.com/microsoft/snmalloc) allocator
-  is a recent concurrent message passing
-  allocator by Liétar et al. \[8].
-- **rp**: The [_rpmalloc_](https://github.com/mjansson/rpmalloc) allocator
-   uses 16-byte aligned allocations and is developed by Mattias Jansson at Rampant Pixels.
+- **dieharder**: The [_DieHarder_](https://github.com/emeryberger/DieHard)
+  allocator is an error-resistant memory allocator for Windows, Linux, and Mac
+  OS X.
 - **hd**: The [_Hoard_](https://github.com/emeryberger/Hoard) allocator by
-  Emery Berger \[1]. This is one of the first
-  multi-thread scalable allocators.
-- **sys**: The system allocator. Here we usually use the _glibc_ allocator (which is originally based on
-  _Ptmalloc2_).
-- **sm**: The [_Supermalloc_](https://github.com/kuszmaul/SuperMalloc) allocator by
-  Bradley Kuszmaul uses hardware transactional memory
-  to speed up parallel operations.
-- **tbb**: The Intel [TBB](https://github.com/intel/tbb) allocator that comes with
-  the Thread Building Blocks (TBB) library \[7].
-- **scudo**: The [_scudo_](https://www.llvm.org/docs/ScudoHardenedAllocator.html) allocator
-  used by Fuschia and Android.
-- **hm**: The [_Hardened Malloc_](https://github.com/GrapheneOS/hardened_malloc)
-  from GrapheneOS, security-focused.
+  Emery Berger \[1]. This is one of the first multi-thread scalable allocators.
+- **hm**: The [_Hardened
+  Malloc_](https://github.com/GrapheneOS/hardened_malloc) from GrapheneOS,
+  security-focused.
 - **iso**: The [_Isoalloc_](https://github.com/struct/isoalloc/) allocator,
   isolation-based aiming at providing a reasonable level of security without
   sacrificing too much the performances.
-- **dieharder**: The [_DieHarder_](https://github.com/emeryberger/DieHard)
-	allocator is an error-resistant memory allocator for Windows, Linux, and Mac OS X.
+- **je**: The [_jemalloc_](https://github.com/jemalloc/jemalloc)
+  allocator by [Jason Evans](https://github.com/jasone),
+  now developed at Facebook
+  and widely used in practice, for example in FreeBSD and Firefox.
+- **mallocng**: [musl](https://musl.libc.org)'s memory allocator.
+- **mesh**: The [_mesh_](https://github.com/plasma-umass/mesh) allocator, a
+  memory allocator that automatically reduces the memory footprint of C/C++
+  applications. Also tested as **nomesh** with the meshing feature disabled.
+- **mi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator.
+  We can also test the debug version as **dmi** (this can be used to check for
+  any bugs in the benchmarks), and the secure version as **smi**.
+- **rp**: The [_rpmalloc_](https://github.com/mjansson/rpmalloc) allocator uses
+  16-byte aligned allocations and is developed by [Mattias
+  Jansson](https://twitter.com/maniccoder) at Epic Games, used for example
+  in [Haiku](https://git.haiku-os.org/haiku/commit/?id=7132b79eafd69cced14f028f227936b9eca4de48).
+- **sc**: The [_scalloc_](https://github.com/cksystemsgroup/scalloc) allocator,
+  a fast, multicore-scalable, low-fragmentation memory allocator 
+- **scudo**: The
+  [_scudo_](https://www.llvm.org/docs/ScudoHardenedAllocator.html) allocator
+  used by Fuschia and Android.
+- **sm**: The [_Supermalloc_](https://github.com/kuszmaul/SuperMalloc)
+  allocator by Bradley Kuszmaul uses hardware transactional memory to speed up
+  parallel operations.
+- **sn**: The [_snmalloc_](https://github.com/microsoft/snmalloc) allocator
+  is a recent concurrent message passing
+  allocator by Liétar et al. \[8].
+- **sys**: The system allocator. Here we usually use the _glibc_ allocator
+  (which is originally based on _Ptmalloc2_).
+- **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
+  allocator which comes as part of
+  the Google performance tools and is used in the Chrome browser.
+- **tbb**: The Intel [TBB](https://github.com/intel/tbb) allocator that comes
+  with the Thread Building Blocks (TBB) library \[7].
 
 
 ## Current Benchmarks
