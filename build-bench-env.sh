@@ -87,6 +87,7 @@ while : ; do
     all|none)
         all=$flag_arg
         setup_hd=$flag_arg              
+        setup_iso=$flag_arg
         setup_je=$flag_arg
         setup_mi=$flag_arg
         setup_sn=$flag_arg
@@ -96,7 +97,6 @@ while : ; do
           setup_mallocng=$flag_arg   # lacking getentropy()
           setup_dieharder=$flag_arg  # build is hardcoded for linux-64-gcc for now
           setup_hm=$flag_arg        # lacking <thread.h>
-          setup_iso=$flag_arg       # sets output to .so on macOS
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
           setup_scudo=$flag_arg     # lacking <sys/auxv.h>
