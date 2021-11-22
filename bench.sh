@@ -245,7 +245,7 @@ while : ; do
   flag="$1"
   case "$flag" in
     *=*)  flag_arg="${flag#*=}"
-          flag="${flag%=*}";;
+          flag="${flag%=*}=";;
     no-*) flag_arg="0"
           flag="${flag#no-}";;
     none) flag_arg="0" ;;
@@ -287,7 +287,7 @@ while : ; do
         spec=*)
             test_run_add "spec"
             run_spec_bench="$flag_arg";;
-        -j|--procs)
+        -j=*|--procs=*)
             procs="$flag_arg";;
         -v|--verbose)
             verbose="yes";;
@@ -297,7 +297,7 @@ while : ; do
             echo "options:"
             echo "  -h, --help                   show this help"  
             echo "  -v, --verbose                be verbose"
-            echo "  -j<n>, --procs=<n>           concurrency level (=$procs)"
+            echo "  -j=<n>, --procs=<n>          concurrency level (=$procs)"
             echo ""
             echo "  allt                         run all tests"
             echo "  alla                         run all allocators"
