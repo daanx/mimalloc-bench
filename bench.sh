@@ -34,7 +34,7 @@ tests_exclude_macos="sh6bench sh8bench redis"
 
 verbose="no"
 ldpreload="LD_PRELOAD"
-timecmd=/usr/bin/time
+timecmd="$(type -P time)"  # the shell builtin doesn't have all the options we need
 darwin=""
 extso=".so"
 procs=8
