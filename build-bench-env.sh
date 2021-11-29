@@ -11,7 +11,7 @@ case "$OSTYPE" in
     procs=`sysctl -n hw.physicalcpu`;;
   *)
     darwin=""
-    if command -v nproc; then 
+    if command -v nproc > /dev/null; then 
       procs=`nproc`
     fi;;
 esac
