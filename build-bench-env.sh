@@ -224,7 +224,7 @@ function phase {
 }
 
 function write_version {  # name, git-tag, repo
-  commit=`git log -n 1 | sed -n 's/commit \([0-9A-Fa-f]\{7\}\).*/\1/p' | cut -f1`
+	commit=$(git log -n1 --format=format:"%h")
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
 }
 
