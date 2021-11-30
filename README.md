@@ -202,6 +202,7 @@ benchmarks as it faulted on those)
 # Resulting improvements
 
 - [Minor performances improvement](https://github.com/struct/isoalloc/commit/049c12e4c2ad5c21a768f7f3873d84bf1106646a) in isoalloc
+- [Two]( https://github.com/struct/isoalloc/issues/57 ) [DoS]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
 
 
 # References
