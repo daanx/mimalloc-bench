@@ -203,6 +203,7 @@ benchmarks as it faulted on those)
 
 - [Minor performances improvement](https://github.com/struct/isoalloc/commit/049c12e4c2ad5c21a768f7f3873d84bf1106646a) in isoalloc
 - A [crash]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
+- Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 
 
 # References
