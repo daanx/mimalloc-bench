@@ -22,9 +22,8 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Install and build all benchmarks and allocators
-        # rp: https://github.com/mjansson/rpmalloc/issues/263
         # mi and mesh: error: '__malloc_hook' was not declared in this scope;
-        run: ./build-bench-env.sh all no-lean no-rp no-mi no-mesh no-nomesh
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh
       - name: Run everything.
         run: |
           cd out/bench
