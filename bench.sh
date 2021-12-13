@@ -412,8 +412,8 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   echo
   echo "run $1 $2: $3 $4"
   # clear temporary output
-  if [ -f $benchres.line ]; then
-    rm $benchres.line
+  if [ -f "$benchres.line" ]; then
+    rm "$benchres.line"
   fi
   outfile="$curdir/$1-$2-out.txt"
   infile="/dev/null"
@@ -486,8 +486,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     spec-*)
       popd;;
   esac
-  cat $benchres.line
-  cat $benchres.line >> $benchres
+  cat $benchres.line | tee -a $benchres
 }
 
 function run_test_cmd {  # <test name> <command>
@@ -611,8 +610,8 @@ function run_test {  # <test>
 }
 
 # Clear previous results
-if [ -f $benchres ]; then
-  rm $benchres
+if [ -f "$benchres" ]; then
+  rm "$benchres"
 fi
 
 for ((i=1; i<=$repeats; i++))
