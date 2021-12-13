@@ -57,7 +57,7 @@ struct thread_pointers {
 	atomic32_t* allocated;
 };
 
-static int benchmark_start;
+static atomic32_t benchmark_start;
 static atomic32_t benchmark_threads_sync;
 static atomic32_t cross_thread_counter;
 static size_t alloc_scatter;
@@ -351,7 +351,7 @@ benchmark_worker(void* argptr) {
 	memset(pointers, 0, pointers_size);
 	atomic_add32(&arg->allocated, (int32_t)pointers_size);
 
-	while (!benchmark_start)
+	while (!atomic_load32(&benchmark_start))
 		thread_sleep(10);
 
 	arg->ticks = 0;
@@ -720,7 +720,7 @@ benchmark_run(int argc, char** argv) {
 	arg = benchmark_malloc(0, sizeof(benchmark_arg) * thread_count);
 	thread_handle = benchmark_malloc(0, sizeof(thread_handle) * thread_count);
 
-	benchmark_start = 0;
+	atomic_store32(&benchmark_start, 0);
 
 	if (mode == MODE_RANDOM)
 		printf("%-12s %u threads random %s size [%u,%u] %u loops %u allocs %u ops: ",
@@ -745,7 +745,7 @@ benchmark_run(int argc, char** argv) {
 	uint64_t ticks = 0;
 
 	for (size_t iter = 0; iter < 2; ++iter) {
-		benchmark_start = 0;
+		atomic_store32(&benchmark_start, 0);
 		atomic_store32(&benchmark_threads_sync, 0);
 		thread_fence();
 
@@ -771,7 +771,7 @@ benchmark_run(int argc, char** argv) {
 
 		thread_sleep(1000);
 
-		benchmark_start = 1;
+		atomic_store32(&benchmark_start, 1);
 		thread_fence();
 
 		while (atomic_load32(&benchmark_threads_sync) < (int32_t)thread_count) {

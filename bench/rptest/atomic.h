@@ -1,5 +1,6 @@
 
 #include <stdint.h>
+#include <stdatomic.h>
 
 #if defined( __x86_64__ ) || defined( _M_AMD64 ) || defined( _M_X64 ) || defined( _AMD64_ ) || defined( __arm64__ ) || defined( __aarch64__ )
 #  define ARCH_64BIT 1
@@ -14,7 +15,7 @@
 #endif
 
 ALIGNED_STRUCT(atomicptr_t, 8) {
-	void* nonatomic;
+	void* _Atomic nonatomic;
 };
 typedef struct atomicptr_t atomicptr_t;
 
@@ -29,7 +30,7 @@ atomic_store_ptr(atomicptr_t* dst, void* val) {
 }
 
 ALIGNED_STRUCT(atomic32_t, 4) {
-	int32_t nonatomic;
+	int32_t _Atomic nonatomic;
 };
 typedef struct atomic32_t atomic32_t;
 
@@ -45,37 +46,17 @@ atomic_store32(atomic32_t* dst, int32_t val) {
 
 static int32_t
 atomic_incr32(atomic32_t* val) {
-#ifdef _MSC_VER
-	int32_t old = (int32_t)_InterlockedExchangeAdd((volatile long*)&val->nonatomic, 1);
-	return (old + 1);
-#else
-	return __sync_add_and_fetch(&val->nonatomic, 1);
-#endif
+	return atomic_fetch_add(&val->nonatomic, 1);
 }
 
 static int32_t
 atomic_add32(atomic32_t* val, int32_t add) {
-#ifdef _MSC_VER
-	int32_t old = (int32_t)_InterlockedExchangeAdd((volatile long*)&val->nonatomic, add);
-	return (old + add);
-#else
-	return __sync_add_and_fetch(&val->nonatomic, add);
-#endif
+	return atomic_fetch_add(&val->nonatomic, add);
 }
 
 static int
 atomic_cas_ptr(atomicptr_t* dst, void* val, void* ref) {
-#ifdef _MSC_VER
-#  if ARCH_64BIT
-	return (_InterlockedCompareExchange64((volatile long long*)&dst->nonatomic,
-		(long long)val, (long long)ref) == (long long)ref) ? 1 : 0;
-#  else
-	return (_InterlockedCompareExchange((volatile long*)&dst->nonatomic,
-		(long)val, (long)ref) == (long)ref) ? 1 : 0;
-#  endif
-#else
-	return __sync_bool_compare_and_swap(&dst->nonatomic, ref, val);
-#endif
+	return atomic_compare_exchange_strong(&dst->nonatomic, &ref, val);
 }
 
 #undef ARCH_64BIT
