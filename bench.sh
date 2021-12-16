@@ -126,7 +126,7 @@ fi
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-6.0.9/src"
+redis_dir="$localdevdir/redis-6.2.6/src"
 pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
 spec_dir="$localdevdir/../../spec2017"
@@ -541,8 +541,7 @@ function run_test {  # <test>
       run_test_cmd "mathlib" "$leandir/bin/leanpkg build"
       popd;;
     redis)
-      #redis_tail="2"
-      #run_test_cmd "redis-lpush" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t lpush"
+      # https://redis.io/topics/benchmarks
       redis_tail="1"
       run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
     alloc-test)

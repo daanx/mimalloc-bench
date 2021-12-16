@@ -40,7 +40,7 @@ version_tbb=v2021.4.0 # v2020.3
 version_tc=gperftools-2.9.1
 
 # benchmark versions
-version_redis=6.0.9
+version_redis=6.2.6
 version_lean=v3.4.2
 
 # allocators
