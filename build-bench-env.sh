@@ -11,7 +11,7 @@ case "$OSTYPE" in
     procs=`sysctl -n hw.physicalcpu`;;
   *)
     darwin=""
-    if command -v nproc; then 
+    if command -v nproc > /dev/null; then 
       procs=`nproc`
     fi;;
 esac
@@ -40,7 +40,7 @@ version_tbb=v2021.4.0 # v2020.3
 version_tc=gperftools-2.9.1
 
 # benchmark versions
-version_redis=6.0.9
+version_redis=6.2.6
 version_lean=v3.4.2
 
 # allocators
@@ -224,7 +224,7 @@ function phase {
 }
 
 function write_version {  # name, git-tag, repo
-  commit=`git log -n 1 | sed -n 's/commit \([0-9A-Fa-f]\{7\}\).*/\1/p' | cut -f1`
+	commit=$(git log -n1 --format=format:"%h")
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
 }
 
@@ -318,19 +318,19 @@ fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make CONFIG_NATIVE=false CONFIG_WERROR=false
+  make CONFIG_NATIVE=false CONFIG_WERROR=false -j $nproc
   popd
 fi
 
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
-  make library
+  make library -j $nprocs
   popd
 fi
 
 if test "$setup_mallocng" = "1"; then
   checkout mallocng $version_mallocng mallocng https://github.com/richfelker/mallocng-draft
-  make 
+  make -j $nprocs
   popd
 fi
 
@@ -345,6 +345,7 @@ fi
 
 if test "$setup_dieharder" = "1"; then
   checkout dieharder $version_dieharder dieharder https://github.com/emeryberger/DieHard "--recursive"
+	# Doesn't support parallel compilation
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -403,7 +404,7 @@ if test "$setup_rp" = "1"; then
   else
     python3 configure.py
   fi
-  ninja -j$procs
+  ninja
   popd
 fi
 
@@ -418,7 +419,7 @@ if test "$setup_sn" = "1"; then
     cd ..
   fi
   cd release
-  ninja -j$procs libsnmallocshim$extso
+  ninja libsnmallocshim$extso
   popd
 fi
 
@@ -426,7 +427,7 @@ if test "$setup_sm" = "1"; then
   checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
   sed -i "s/-Werror//" Makefile.include
   cd release
-  make
+  make -j $nprocs
   popd
 fi
 
@@ -456,7 +457,7 @@ if test "$setup_sc" = "1"; then
     fi
     build/gyp/gyp --depth=. scalloc.gyp
   fi
-  BUILDTYPE=Release make
+  BUILDTYPE=Release make -j $nprocs
   popd
 fi
 
@@ -474,7 +475,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/release
   cd out/release
   cmake ../..  $mi_use_cxx
-  make -j 4
+  make -j $nprocs
   cd ../..
 
   echo ""
@@ -483,7 +484,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/debug
   cd out/debug
   cmake ../.. -DMI_CHECK_FULL=ON $mi_use_cxx
-  make -j 4
+  make -j $nprocs
   cd ../..
 
   echo ""
@@ -492,7 +493,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/secure
   cd out/secure
   cmake ../.. $mi_use_cxx
-  make -j 4
+  make -j $nprocs
   cd ../..
   popd
 fi
@@ -595,7 +596,7 @@ if test "$setup_bench" = "1"; then
   mkdir -p out/bench
   cd out/bench
   cmake ../../bench
-  make
+  make -j $nprocs
   cd ../..
 fi
 

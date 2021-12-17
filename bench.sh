@@ -11,6 +11,7 @@ echo ""
 # --------------------------------------------------------------------
 
 alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mallocng dieharder"
+alloc_secure="dieharder hm iso mallocng scudo smi"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
@@ -34,7 +35,7 @@ tests_exclude_macos="sh6bench sh8bench redis"
 
 verbose="no"
 ldpreload="LD_PRELOAD"
-timecmd="/usr/bin/time"  # the shell builtin doesn't support all the options we need
+timecmd="$(type -P time)"  # the shell builtin doesn't have all the options we need
 darwin=""
 extso=".so"
 procs=8
@@ -125,7 +126,7 @@ fi
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-6.0.9/src"
+redis_dir="$localdevdir/redis-6.2.6/src"
 pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
 spec_dir="$localdevdir/../../spec2017"
@@ -263,6 +264,11 @@ while : ; do
       warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
     fi
     alloc_run_add_remove "$flag" "$flag_arg"    
+  elif contains "$alloc_secure" "$flag"; then
+    if ! contains "$alloc_installed" "$flag"; then
+      warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
+    fi
+    alloc_run_add_remove "$flag" "$flag_arg"    
   else
     if contains "$tests_all" "$flag"; then
       #echo "test flag: $flag"
@@ -273,6 +279,13 @@ while : ; do
         alla)
             # use all installed allocators (iterate to maintain order as specified in alloc_all)
             for alloc in $alloc_all; do 
+              if is_installed "$alloc"; then
+                alloc_run_add_remove "$alloc" "$flag_arg"
+              fi
+            done;;
+        allsa)
+            # use all "secure" installed allocators (iterate to maintain order as specified in alloc_secure)
+            for alloc in $alloc_secure; do 
               if is_installed "$alloc"; then
                 alloc_run_add_remove "$alloc" "$flag_arg"
               fi
@@ -301,6 +314,7 @@ while : ; do
             echo ""
             echo "  allt                         run all tests"
             echo "  alla                         run all allocators"
+            echo "  allsa                        run all \"secure\" allocators"
             echo "  no-<test|allocator>          do not run specific <test> or <allocator>"   
             echo ""
             echo "allocators:"
@@ -527,8 +541,7 @@ function run_test {  # <test>
       run_test_cmd "mathlib" "$leandir/bin/leanpkg build"
       popd;;
     redis)
-      #redis_tail="2"
-      #run_test_cmd "redis-lpush" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t lpush"
+      # https://redis.io/topics/benchmarks
       redis_tail="1"
       run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
     alloc-test)
