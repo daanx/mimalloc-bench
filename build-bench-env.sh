@@ -304,12 +304,12 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang lld llvm-dev unzip dos2unix bc gmp-devel wget"
+    dnfinstall "gcc-c++ clang lld llvm-dev unzip dos2unix gmp-devel wget bc"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... (sudo apt update)"
     sudo apt update
-    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
+    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo libgmp-dev wget bc"
     aptinstall "cmake python3 ruby ninja-build libtool autoconf"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir"
