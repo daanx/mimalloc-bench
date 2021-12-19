@@ -604,11 +604,7 @@ fi
 curdir=`pwd`
 
 phase "installed allocators"
-echo "" > $devdir/versions.txt
-for f in $devdir/version_*.txt; do
- cat $f >> $devdir/versions.txt
-done
-cat $devdir/versions.txt | column -t
+cat $devdir/version_*.txt | tee $devdir/versions.txt | column -t
 
 phase "done in $curdir"
 echo "run the cfrac benchmarks as:"
