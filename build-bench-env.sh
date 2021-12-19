@@ -16,7 +16,6 @@ case "$OSTYPE" in
     fi;;
 esac
 
-verbose="no"
 curdir=`pwd`
 rebuild=0
 all=0
@@ -157,8 +156,6 @@ while : ; do
         rebuild=1;;
     -j=*|--procs=*)
         procs=$flag_arg;;
-    -verbose|--verbose)
-        verbose="yes";;
     -h|--help|-\?|help|\?)
         echo "./build-bench-env [options]"
         echo ""
@@ -166,7 +163,6 @@ while : ; do
         echo ""
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
-        echo "  --verbose                    be verbose"
         echo ""
         echo "  dieharder                    setup dieharder ($version_dieharder)"
         echo "  hd                           setup hoard ($version_hd)"
