@@ -224,7 +224,7 @@ function phase {
 }
 
 function write_version {  # name, git-tag, repo
-	commit=$(git log -n1 --format=format:"%h")
+  commit=$(git log -n1 --format=format:"%h")
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
 }
 
@@ -345,7 +345,7 @@ fi
 
 if test "$setup_dieharder" = "1"; then
   checkout dieharder $version_dieharder dieharder https://github.com/emeryberger/DieHard "--recursive"
-	# Doesn't support parallel compilation
+  # Doesn't support parallel compilation
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -584,7 +584,8 @@ if test "$setup_bench" = "1"; then
   if test -f "$pdfdoc"; then
     echo "do nothing: $devdir/$pdfdoc already exists"
   else
-    wget -O "$pdfdoc" https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
+    useragent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
+    wget -O "$pdfdoc" -U "useragent" https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
   fi
   popd
 fi
