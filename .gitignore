@@ -1,7 +1,6 @@
 extern/
 out/
 bench/doc/
-bench/ebizzy/
 bench/malloc-test/
 bench/shbench/sh6bench.c
 bench/shbench/sh6bench-new.c

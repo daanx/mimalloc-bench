@@ -439,7 +439,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
       echo "run spec benchmark in: $spec_bench_dir"
       pushd "$spec_bench_dir";;
-    larson*|ebizzy|redis*|xmalloc*)
+    larson*|redis*|xmalloc*)
       outfile="$1-$2-out.txt";;
     barnes)
       infile="$benchdir/barnes/input";;
@@ -478,10 +478,6 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       echo "$1,$2: ops/sec: $ops, relative time: ${rtime}s"
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
     xmalloc*)
-      rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
-      echo "$1,$2, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
-    ebizzy)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2, relative time: ${rtime}s"
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
@@ -557,8 +553,6 @@ function run_test {  # <test>
       run_test_cmd "larsonN" "./larson 5 8 1000 5000 100 4141 $procs";;
     larson-sized)
       run_test_cmd "larsonN-sized" "./larson-sized 5 8 1000 5000 100 4141 $procs";;
-    ebizzy)
-      run_test_cmd "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128";;
     sh6bench)
       run_test_cmd "sh6benchN" "./sh6bench $procsx2";;
     sh8bench)
