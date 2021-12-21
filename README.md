@@ -120,21 +120,23 @@ The first set of benchmarks are real world programs, or are trying to mimic
 some, and consists of:
 
 - __barnes__: a hierarchical n-body particle solver \[4], simulating the
-	gravitational forces between 163840 particles. It uses relatively few
-	allocations compared to `cfrac` and `espresso` but is multithreaded.
+  gravitational forces between 163840 particles. It uses relatively few
+  allocations compared to `cfrac` and `espresso` but is multithreaded.
 - __cfrac__: by Dave Barrett, implementation of continued fraction
-	factorization, using many small short-lived allocations.
+  factorization, using many small short-lived allocations.
 - __espresso__: a programmable logic array analyzer, described by
   Grunwald, Zorn, and Henderson \[3]. in the context of cache aware memory allocation.
+- __gs__: have [ghostscript](https://www.ghostscript.com) process the entire
+  Intel Software Developer’s Manual PDF, which is around 5000 pages.
 - __leanN__:  The [Lean](https://github.com/leanprover/lean) compiler by
   de Moura _et al_, version 3.4.1,
   compiling its own standard library concurrently using N threads
   (`./lean --make -j N`). Big real-world workload with intensive
   allocations.
 - __redis__: running [redis-benchmark](https://redis.io/topics/benchmarks),
-	with 1 million requests pushing 10 new list elements and then requesting the
-	head 10 elements, and measures the requests handled per second. Simulates a
-	real-world workload.
+  with 1 million requests pushing 10 new list elements and then requesting the
+  head 10 elements, and measures the requests handled per second. Simulates a
+  real-world workload.
 - __larsonN__: by Larson and Krishnan \[2]. Simulates a server workload using 100 separate
    threads which each allocate and free many objects but leave some
    objects to be freed by other threads. Larson and Krishnan observe this
@@ -142,6 +144,7 @@ some, and consists of:
    and the benchmark simulates this.
 - __larsonN-sized__: same as the __larsonN__ except it uses sized deallocation calls which
    have a fast path in some allocators. 
+- __z3__: perform some computations in [z3](https://github.com/Z3Prover/z3).
 
 The second set of benchmarks are stress tests and consist of:
 
@@ -153,35 +156,44 @@ The second set of benchmarks are stress tests and consist of:
   in size. Using commit `94f6cb`
   ([master](https://github.com/node-dot-cpp/alloc-test), 2018-07-04)
 - __cache-scratch__: by Emery Berger \[1]. Introduced with the
-	[Hoard](https://github.com/emeryberger/Hoard) allocator to test for
-	_passive-false_ sharing of cache lines: first some small objects are
-	allocated and given to each thread; the threads free that object and allocate
-	immediately another one, and access that repeatedly. If an allocator
-	allocates objects from different threads close to each other this will lead
-	to cache-line contention.
+  [Hoard](https://github.com/emeryberger/Hoard) allocator to test for
+  _passive-false_ sharing of cache lines: first some small objects are
+  allocated and given to each thread; the threads free that object and allocate
+  immediately another one, and access that repeatedly. If an allocator
+  allocates objects from different threads close to each other this will lead
+  to cache-line contention.
+- __cache_trash__: part of [Hoard](https://github.com/emeryberger/Hoard)
+  benchmarking suite, designed to exercise heap cache locality.
+- __glibc-simple__ and __glibc-thread__: benchmarks for the [glibc](https://github.com/bminor/glibc/tree/master/benchtests).
+- __malloc-large__: part of mimalloc benchmarking suite, designed
+  to exercice large (several MiB) allocations.
+- __mleak__: check that terminate threads don't "leak" memory.
+- __rptest__: modified version of the [rpmalloc-benchmark](https://github.com/mjansson/rpmalloc-benchmark) suite.
 - __mstress__: simulates real-world server-like allocation patterns, using N threads with with allocations in powers of 2  
   where objects can migrate between threads and some have long life times. Not all threads have equal workloads and 
   after each phase all threads are destroyed and new threads created where some objects survive between phases.
+- __rbstress__: modified version of [allocator_bench](https://github.com/SamSaffron/allocator_bench),
+  allocates chunks in memory via ruby shenanigans.
 - __sh6bench__: by [MicroQuill](http://www.microquill.com) as part of
-	[SmartHeap](http://www.microquill.com/smartheap/sh_tspec.htm). Stress test
-	where some of the objects are freed in a usual last-allocated, first-freed
-	(LIFO) order, but others are freed in reverse order. Using the public
-	[source](http://www.microquill.com/smartheap/shbench/bench.zip) (retrieved
-	2019-01-02)
+  [SmartHeap](http://www.microquill.com/smartheap/sh_tspec.htm). Stress test
+  where some of the objects are freed in a usual last-allocated, first-freed
+  (LIFO) order, but others are freed in reverse order. Using the public
+  [source](http://www.microquill.com/smartheap/shbench/bench.zip) (retrieved
+  2019-01-02)
 - __sh8benchN__: by [MicroQuill](http://www.microquill.com) as part of
-	[SmartHeap](http://www.microquill.com/smartheap/sh_tspec.htm). Stress test
-	for multi-threaded allocation (with N threads) where, just as in _larson_,
-	some objects are freed by other threads, and some objects freed in reverse
-	(as in _sh6bench_). Using the public
-	[source](http://www.microquill.com/smartheap/SH8BENCH.zip) (retrieved
-	2019-01-02)
+  [SmartHeap](http://www.microquill.com/smartheap/sh_tspec.htm). Stress test
+  for multi-threaded allocation (with N threads) where, just as in _larson_,
+  some objects are freed by other threads, and some objects freed in reverse
+  (as in _sh6bench_). Using the public
+  [source](http://www.microquill.com/smartheap/SH8BENCH.zip) (retrieved
+  2019-01-02)
 - __xmalloc-testN__: by Lever and Boreham \[5] and Christian Eder. We use the
-	updated version from the
-	[SuperMalloc](https://github.com/kuszmaul/SuperMalloc) repository. This is a
-	more extreme version of the _larson_ benchmark with 100 purely allocating
-	threads, and 100 purely deallocating threads with objects of various sizes
-	migrating between them. This asymmetric producer/consumer pattern is usually
-	difficult to handle by allocators with thread-local caches.
+  updated version from the
+  [SuperMalloc](https://github.com/kuszmaul/SuperMalloc) repository. This is a
+  more extreme version of the _larson_ benchmark with 100 purely allocating
+  threads, and 100 purely deallocating threads with objects of various sizes
+  migrating between them. This asymmetric producer/consumer pattern is usually
+  difficult to handle by allocators with thread-local caches.
 
 
 ## Example

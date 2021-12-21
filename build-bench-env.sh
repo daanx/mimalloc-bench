@@ -19,7 +19,6 @@ case "$OSTYPE" in
     fi;;
 esac
 
-verbose="no"
 curdir=`pwd`
 rebuild=0
 all=0
@@ -28,7 +27,7 @@ all=0
 version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=main
-version_iso=1.0.0
+version_iso=1.1.0
 version_je=5.2.1
 version_mallocng=master
 version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
@@ -160,8 +159,6 @@ while : ; do
         rebuild=1;;
     -j=*|--procs=*)
         procs=$flag_arg;;
-    -verbose|--verbose)
-        verbose="yes";;
     -h|--help|-\?|help|\?)
         echo "./build-bench-env [options]"
         echo ""
@@ -169,7 +166,6 @@ while : ; do
         echo ""
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
-        echo "  --verbose                    be verbose"
         echo ""
         echo "  dieharder                    setup dieharder ($version_dieharder)"
         echo "  hd                           setup hoard ($version_hd)"
@@ -227,7 +223,7 @@ function phase {
 }
 
 function write_version {  # name, git-tag, repo
-	commit=$(git log -n1 --format=format:"%h")
+  commit=$(git log -n1 --format=format:"%h")
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
 }
 
@@ -321,19 +317,19 @@ fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make CONFIG_NATIVE=true CONFIG_WERROR=false -j $nproc
+  make CONFIG_NATIVE=true CONFIG_WERROR=false -j $proc
   popd
 fi
 
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
-  make library -j $nprocs
+  make library -j $procs
   popd
 fi
 
 if test "$setup_mallocng" = "1"; then
   checkout mallocng $version_mallocng mallocng https://github.com/richfelker/mallocng-draft
-  make -j $nprocs
+  make -j $procs
   popd
 fi
 
@@ -348,7 +344,7 @@ fi
 
 if test "$setup_dieharder" = "1"; then
   checkout dieharder $version_dieharder dieharder https://github.com/emeryberger/DieHard "--recursive"
-	# Doesn't support parallel compilation
+  # Doesn't support parallel compilation
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -430,7 +426,7 @@ if test "$setup_sm" = "1"; then
   checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
   sed -i "s/-Werror//" Makefile.include
   cd release
-  make -j $nprocs
+  make -j $procs
   popd
 fi
 
@@ -460,7 +456,7 @@ if test "$setup_sc" = "1"; then
     fi
     build/gyp/gyp --depth=. scalloc.gyp
   fi
-  BUILDTYPE=Release make -j $nprocs
+  BUILDTYPE=Release make -j $procs
   popd
 fi
 
@@ -478,7 +474,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/release
   cd out/release
   cmake ../..  $mi_use_cxx
-  make -j $nprocs
+  make -j $procs
   cd ../..
 
   echo ""
@@ -487,7 +483,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/debug
   cd out/debug
   cmake ../.. -DMI_CHECK_FULL=ON $mi_use_cxx
-  make -j $nprocs
+  make -j $procs
   cd ../..
 
   echo ""
@@ -496,7 +492,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/secure
   cd out/secure
   cmake ../.. $mi_use_cxx
-  make -j $nprocs
+  make -j $procs
   cd ../..
   popd
 fi
@@ -587,8 +583,8 @@ if test "$setup_bench" = "1"; then
   if test -f "$pdfdoc"; then
     echo "do nothing: $devdir/$pdfdoc already exists"
   else
-    # wget https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf
-    curl -o $pdfdoc https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
+    useragent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
+    wget -O "$pdfdoc" -U "useragent" https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
   fi
   popd
 fi
@@ -599,7 +595,7 @@ if test "$setup_bench" = "1"; then
   mkdir -p out/bench
   cd out/bench
   cmake ../../bench
-  make -j $nprocs
+  make -j $procs
   cd ../..
 fi
 
@@ -607,11 +603,7 @@ fi
 curdir=`pwd`
 
 phase "installed allocators"
-echo "" > $devdir/versions.txt
-for f in $devdir/version_*.txt; do
- cat $f >> $devdir/versions.txt
-done
-cat $devdir/versions.txt | column -t
+cat $devdir/version_*.txt | tee $devdir/versions.txt | column -t
 
 phase "done in $curdir"
 echo "run the cfrac benchmarks as:"
