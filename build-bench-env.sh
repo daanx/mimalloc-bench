@@ -34,7 +34,7 @@ version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 version_mi=v1.7.3
 version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 version_rp=4c10723
-version_sc=v1.0.0
+version_sc=master  # unmaintained since 2016
 version_scudo=main
 version_sm=709663f
 version_sn=0.5.3
@@ -93,6 +93,7 @@ while : ; do
         setup_iso=$flag_arg
         setup_je=$flag_arg
         setup_mi=$flag_arg
+        setup_sc=$flag_arg
         setup_sn=$flag_arg
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
@@ -454,6 +455,8 @@ if test "$setup_sc" = "1"; then
     else
       tools/make_deps.sh
     fi
+    sed -i "s/python/python3/" ./build/gyp/gyp
+    sed -i "s/-Werror/-Wno-stringops/" ./common.gypi
     build/gyp/gyp --depth=. scalloc.gyp
   fi
   BUILDTYPE=Release make -j $procs
