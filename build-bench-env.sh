@@ -318,19 +318,19 @@ fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make CONFIG_NATIVE=false CONFIG_WERROR=false -j $nproc
+  make CONFIG_NATIVE=false CONFIG_WERROR=false -j $proc
   popd
 fi
 
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
-  make library -j $nprocs
+  make library -j $procs
   popd
 fi
 
 if test "$setup_mallocng" = "1"; then
   checkout mallocng $version_mallocng mallocng https://github.com/richfelker/mallocng-draft
-  make -j $nprocs
+  make -j $procs
   popd
 fi
 
@@ -427,7 +427,7 @@ if test "$setup_sm" = "1"; then
   checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
   sed -i "s/-Werror//" Makefile.include
   cd release
-  make -j $nprocs
+  make -j $procs
   popd
 fi
 
@@ -457,7 +457,7 @@ if test "$setup_sc" = "1"; then
     fi
     build/gyp/gyp --depth=. scalloc.gyp
   fi
-  BUILDTYPE=Release make -j $nprocs
+  BUILDTYPE=Release make -j $procs
   popd
 fi
 
@@ -475,7 +475,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/release
   cd out/release
   cmake ../..  $mi_use_cxx
-  make -j $nprocs
+  make -j $procs
   cd ../..
 
   echo ""
@@ -484,7 +484,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/debug
   cd out/debug
   cmake ../.. -DMI_CHECK_FULL=ON $mi_use_cxx
-  make -j $nprocs
+  make -j $procs
   cd ../..
 
   echo ""
@@ -493,7 +493,7 @@ if test "$setup_mi" = "1"; then
   mkdir -p out/secure
   cd out/secure
   cmake ../.. $mi_use_cxx
-  make -j $nprocs
+  make -j $procs
   cd ../..
   popd
 fi
@@ -596,7 +596,7 @@ if test "$setup_bench" = "1"; then
   mkdir -p out/bench
   cd out/bench
   cmake ../../bench
-  make -j $nprocs
+  make -j $procs
   cd ../..
 fi
 
