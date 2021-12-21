@@ -33,7 +33,7 @@ version_mallocng=master
 version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 version_mi=v1.7.3
 version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
-version_rp=1.4.3
+version_rp=4c10723
 version_sc=v1.0.0
 version_scudo=main
 version_sm=709663f
@@ -276,9 +276,9 @@ function aptinstall {
 
 function dnfinstall {
   echo ""
-  echo "> sudo dnf install $1"
+  echo "> sudo dnf -y --quiet --nodocs install $1"
   echo ""
-  sudo dnf install $1
+  sudo dnf -y --quiet --nodocs install $1
 }
 
 function brewinstall {
@@ -303,8 +303,8 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang lld llvm-dev unzip dos2unix bc gmp-devel wget"
-    dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
+    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget"
+    dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time"
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... (sudo apt update)"
     sudo apt update
