@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eo pipefail
 
+CFLAGS='-march=native'
+CXXFLAGS='-march=native'
+
 procs=8
 extso=".so"
 case "$OSTYPE" in
@@ -314,7 +317,7 @@ fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make CONFIG_NATIVE=false CONFIG_WERROR=false -j $proc
+  make CONFIG_NATIVE=true CONFIG_WERROR=false -j $proc
   popd
 fi
 
@@ -334,7 +337,7 @@ if test "$setup_scudo" = "1"; then
   partial_checkout scudo $version_scudo scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
   cd "compiler-rt/lib/scudo/standalone"
   # TODO: make the next line prettier instead of hardcoding everything.
-  clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
+  clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions $CXXFLAGS -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
   cd -
   popd
 fi
