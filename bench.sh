@@ -92,7 +92,7 @@ lib_tbb_dir="$(dirname $lib_tbb)"
 alloc_lib_add "dieharder" "${localdevdir}/dieharder/src/libdieharder$extso"
 alloc_lib_add "hd"    "$localdevdir/Hoard/src/libhoard$extso"
 alloc_lib_add "hm"    "${localdevdir}/hm/libhardened_malloc$extso"
-alloc_lib_add "iso"   "${localdevdir}/iso/build/libisoalloc.so"  # isoalloc uses .so even on OSX
+alloc_lib_add "iso"   "${localdevdir}/iso/build/libisoalloc$extso"
 alloc_lib_add "je"    "${localdevdir}/jemalloc/lib/libjemalloc$extso"
 alloc_lib_add "mallocng" "${localdevdir}/mallocng/libmallocng$extso"
 alloc_lib_add "mesh"  "${localdevdir}/mesh/build/lib/libmesh$extso"
