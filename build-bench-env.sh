@@ -537,16 +537,7 @@ fi
 
 if test "$setup_ch" = "1"; then
   phase "build ClickHouse v19.8.3.8-stable"
-
-  pushd $devdir
-  if test -d "ClickHouse"; then
-    echo "$devdir/ClickHouse already exists; no need to git clone"
-  else
-    sudo apt-get install git pbuilder debhelper lsb-release fakeroot sudo debian-archive-keyring debian-keyring
-    git clone --recursive https://github.com/yandex/ClickHouse
-  fi
-  cd ClickHouse
-  git checkout mimalloc
+  checkout ClickHouse mimalloc ClickHouse https://github.com/yandex/ClickHouse "--recursive"
   ./release
   popd
 fi
