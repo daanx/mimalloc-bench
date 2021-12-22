@@ -531,7 +531,7 @@ if test "$setup_redis" = "1"; then
   fi
 
   cd "redis-$version_redis/src"
-  make -j $procs USE_JEMALLOC=no MALLOC=libc
+  USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
   popd
 fi
 
