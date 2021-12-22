@@ -575,7 +575,7 @@ if test "$setup_bench" = "1"; then
     echo "do nothing: $devdir/$pdfdoc already exists"
   else
     useragent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
-    wget -O "$pdfdoc" -U "useragent" https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
+    wget --no-verbose -O "$pdfdoc" -U "useragent" https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
   fi
   popd
 fi
