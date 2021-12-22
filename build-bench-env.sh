@@ -281,6 +281,13 @@ function dnfinstall {
   sudo dnf -y --quiet --nodocs install $1
 }
 
+function apkinstall {
+  echo ""
+  echo "> apk add -q $1"
+  echo ""
+  apk add -q $1
+}
+
 function brewinstall {
   echo ""
   echo "> brew install $1"
@@ -310,6 +317,10 @@ if test "$setup_packages" = "1"; then
     sudo apt update
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python3 ruby ninja-build libtool autoconf"
+  elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
+    apk update
+    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake"
+    apkinstall "samurai patch libtool git make build-base linux-headers autoconf util-linux"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir"
   fi
