@@ -24,7 +24,7 @@ rebuild=0
 all=0
 
 # allocator versions
-version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
+version_dh=1d08836bdd6f935b333ec503cd8c9634c69de590
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=main
 version_iso=1.1.0
@@ -46,7 +46,7 @@ version_redis=6.2.6
 version_lean=v3.4.2
 
 # allocators
-setup_dieharder=0
+setup_dh=0
 setup_hd=0
 setup_hm=0
 setup_iso=0
@@ -88,7 +88,7 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
-        setup_dieharder=$flag_arg
+        setup_dh=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
         setup_je=$flag_arg
@@ -117,8 +117,8 @@ while : ; do
         setup_bench=$flag_arg;;
     ch)
         setup_ch=$flag_arg;;
-    dieharder)
-          setup_dieharder=$flag_arg;;
+    dh)
+          setup_dh=$flag_arg;;
     hd)
         setup_hd=$flag_arg;;
     hm)
@@ -167,7 +167,7 @@ while : ; do
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
-        echo "  dieharder                    setup dieharder ($version_dieharder)"
+        echo "  dh                           setup dieharder ($version_dh)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
@@ -342,8 +342,8 @@ if test "$setup_scudo" = "1"; then
   popd
 fi
 
-if test "$setup_dieharder" = "1"; then
-  checkout dieharder $version_dieharder dieharder https://github.com/emeryberger/DieHard "--recursive"
+if test "$setup_dh" = "1"; then
+  checkout dh $version_dh dh https://github.com/emeryberger/DieHard "--recursive"
   # Doesn't support parallel compilation
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
