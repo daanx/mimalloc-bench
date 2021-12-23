@@ -10,8 +10,8 @@ echo ""
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mallocng dh"
-alloc_secure="dh hm iso mallocng scudo smi"
+alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mng dh"
+alloc_secure="dh hm iso mng scudo smi"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
@@ -94,7 +94,7 @@ alloc_lib_add "hd"    "$localdevdir/Hoard/src/libhoard$extso"
 alloc_lib_add "hm"    "${localdevdir}/hm/libhardened_malloc$extso"
 alloc_lib_add "iso"   "${localdevdir}/iso/build/libisoalloc$extso"
 alloc_lib_add "je"    "${localdevdir}/jemalloc/lib/libjemalloc$extso"
-alloc_lib_add "mallocng" "${localdevdir}/mallocng/libmallocng$extso"
+alloc_lib_add "mng" "${localdevdir}/mng/libmallocng$extso"
 alloc_lib_add "mesh"  "${localdevdir}/mesh/build/lib/libmesh$extso"
 alloc_lib_add "nomesh" "${localdevdir}/nomesh/build/lib/libmesh$extso"
 alloc_lib_add "rp"    "$lib_rp"
@@ -324,7 +324,7 @@ while : ; do
             echo "  hm                           use hardened_malloc"
             echo "  iso                          use isoalloc"
             echo "  je                           use jemalloc"
-            echo "  mallocng                     use mallocng"
+            echo "  mng                          use mallocng"
             echo "  mesh                         use mesh"
             echo "  mi                           use mimalloc"
             echo "  nomesh                       use mesh with meshing disabled"
@@ -371,7 +371,7 @@ if test "$verbose"="yes"; then
   echo "Installed allocators:"
   echo ""
   echo "sys:    $libc"
-  cat ${localdevdir}/versions.txt | column -t
+  column -t "$localdevdir/versions.txt"
   echo ""
 fi
 
@@ -530,7 +530,11 @@ function run_test {  # <test>
     lean)
       pushd "$leandir/library"
       # run_test_cmd "lean1" "../bin/lean --make -j 1"
-      run_test_cmd "leanN" "../bin/lean --make -j 8" # more than 8 makes it slower
+      if test $procs -gt 8; then # more than 8 makes it slower
+        run_test_cmd "leanN" "../bin/lean --make -j 8"
+      else
+        run_test_cmd "leanN" "../bin/lean --make -j $procs"
+      fi
       popd;;
     lean-mathlib)
       pushd "$leanmldir"
