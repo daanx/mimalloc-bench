@@ -371,7 +371,7 @@ if test "$verbose"="yes"; then
   echo "Installed allocators:"
   echo ""
   echo "sys:    $libc"
-  cat ${localdevdir}/versions.txt | column -t
+  column -t "$localdevdir/versions.txt"
   echo ""
 fi
 
