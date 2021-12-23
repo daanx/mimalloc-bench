@@ -314,7 +314,7 @@ if test "$setup_packages" = "1"; then
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time"
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... (sudo apt update)"
-    sudo apt update
+    sudo apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python3 ruby ninja-build libtool autoconf"
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
