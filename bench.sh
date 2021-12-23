@@ -530,7 +530,11 @@ function run_test {  # <test>
     lean)
       pushd "$leandir/library"
       # run_test_cmd "lean1" "../bin/lean --make -j 1"
-      run_test_cmd "leanN" "../bin/lean --make -j 8" # more than 8 makes it slower
+      if test $procs -gt 8; then # more than 8 makes it slower
+        run_test_cmd "leanN" "../bin/lean --make -j 8"
+      else
+        run_test_cmd "leanN" "../bin/lean --make -j $procs"
+      fi
       popd;;
     lean-mathlib)
       pushd "$leanmldir"
