@@ -320,7 +320,7 @@ if test "$setup_packages" = "1"; then
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake"
-    apkinstall "samurai patch libtool git make build-base linux-headers autoconf util-linux"
+    apkinstall "samurai libtool git build-base linux-headers autoconf util-linux"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir"
   fi
