@@ -29,7 +29,7 @@ version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=main
 version_iso=1.1.0
 version_je=5.2.1
-version_mallocng=master
+version_mng=master
 version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 version_mi=v1.7.3
 version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
@@ -51,7 +51,7 @@ setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
-setup_mallocng=0
+setup_mng=0
 setup_mesh=0
 setup_mi=0
 setup_nomesh=0
@@ -97,7 +97,7 @@ while : ; do
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
-          setup_mallocng=$flag_arg   # lacking getentropy()
+          setup_mng=$flag_arg   # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
@@ -129,8 +129,8 @@ while : ; do
         setup_je=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
-    mallocng)
-        setup_mallocng=$flag_arg;;
+    mng)
+        setup_mng=$flag_arg;;
     mesh)
         setup_mesh=$flag_arg;;
     mi)
@@ -172,7 +172,7 @@ while : ; do
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
-        echo "  mallocng                     setup mallocng ($version_mallocng)"
+        echo "  mng                          setup mallocng ($version_mng)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
@@ -327,8 +327,8 @@ if test "$setup_iso" = "1"; then
   popd
 fi
 
-if test "$setup_mallocng" = "1"; then
-  checkout mallocng $version_mallocng mallocng https://github.com/richfelker/mallocng-draft
+if test "$setup_mng" = "1"; then
+  checkout mng $version_mng mng https://github.com/richfelker/mallocng-draft
   make -j $procs
   popd
 fi
