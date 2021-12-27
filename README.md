@@ -71,6 +71,8 @@ for the versions:
 - **dieharder**: The [_DieHarder_](https://github.com/emeryberger/DieHard)
   allocator is an error-resistant memory allocator for Windows, Linux, and Mac
   OS X.
+- **gd**: The [_Guarder_](https://github.com/UTSASRG/Guarder) allocator
+  is a tunable secure allocator by the UTSA.
 - **hd**: The [_Hoard_](https://github.com/emeryberger/Hoard) allocator by
   Emery Berger \[1]. This is one of the first multi-thread scalable allocators.
 - **hm**: The [_Hardened
