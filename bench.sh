@@ -10,8 +10,8 @@ echo ""
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mng dh hml gd"
-alloc_secure="dh hm iso mng scudo smi gd"
+alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mng dh sg hml gd"
+alloc_secure="dh hm iso mng scudo smi gd sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
@@ -103,6 +103,7 @@ alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
 alloc_lib_add "rp"    "$lib_rp"
 alloc_lib_add "sc"    "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
 alloc_lib_add "scudo"  "$localdevdir/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
+alloc_lib_add "sg"    "$localdevdir/sg/libSlimGuard.so"
 alloc_lib_add "sm"    "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
 alloc_lib_add "sn"    "$localdevdir/snmalloc/release/libsnmallocshim$extso"
 alloc_lib_add "tbb"   "$lib_tbb"
@@ -340,6 +341,7 @@ while : ; do
             echo "  rp                           use rpmalloc"
             echo "  sc                           use scalloc"
             echo "  scudo                        use scudo"
+            echo "  sg                           use slimguard"
             echo "  sm                           use supermalloc"
             echo "  smi                          use secure version of mimalloc"
             echo "  sn                           use snmalloc"
