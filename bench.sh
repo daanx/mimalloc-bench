@@ -10,8 +10,8 @@ echo ""
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mng dh sg hml gd"
-alloc_secure="dh hm iso mng scudo smi gd sg"
+alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mng dh sg hml gd ff"
+alloc_secure="dh hm iso mng scudo smi gd sg ff"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
@@ -91,6 +91,7 @@ lib_tbb_dir="$(dirname $lib_tbb)"
 
 
 alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
+alloc_lib_add "ff"    "$localdevdir/ff/libffmallocnpmt$extso"
 alloc_lib_add "gd"    "$localdevdir/gd/libguarder$extso"
 alloc_lib_add "hd"    "$localdevdir/Hoard/src/libhoard$extso"
 alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
@@ -328,6 +329,7 @@ while : ; do
             echo "allocators:"
             echo "  dh                           use dieharder"
             echo "  dmi                          use debug version of mimalloc"
+            echo "  ff                           use ffmalloc"
             echo "  gd                           use guarder"
             echo "  hd                           use hoard"
             echo "  hm                           use hardened_malloc"

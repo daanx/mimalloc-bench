@@ -72,8 +72,9 @@ jobs:
       - name: Silence some git warnings
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
-        # gd: so many errors.
-        run: ./build-bench-env.sh all no-lean no-gd
+        # gd: so many errors
+        # ffmalloc.c:ffmalloc.c:674:12: error: use of undeclared identifier 'MAP_POPULATE'
+        run: ./build-bench-env.sh all no-lean no-gd no-ff
       - name: Run everything.
         run: |
           cd out/bench
