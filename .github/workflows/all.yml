@@ -17,10 +17,9 @@ jobs:
       - name: Install and build all benchmarks and allocators
         # hd: glibc-specific
         # dieharder: glibc-specific
-        # tbb: needs RTLD_DEEPBIND, but it doesn't exist on musl
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # mesh/nomesh: there is an infinite loop in the somewhere
-        run: ./build-bench-env.sh all no-dh no-hd no-tbb no-sm no-mesh no-nomesh
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh
       - name: Run everything.
         run: |
           cd out/bench
