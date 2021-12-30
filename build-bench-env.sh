@@ -38,7 +38,7 @@ version_sc=v1.0.0
 version_scudo=main
 version_sm=709663f
 version_sn=0.5.3
-version_tbb=v2021.4.0 # v2020.3
+version_tbb=883c2e5245c39624b3b5d6d56d5b203cf09eac38  # needed for musl
 version_tc=gperftools-2.9.1
 
 # benchmark versions
@@ -366,8 +366,7 @@ fi
 
 if test "$setup_tbb" = "1"; then
   checkout tbb $version_tbb tbb https://github.com/intel/tbb
-  # make tbbmalloc
-  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench
+  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench -DTBBMALLOC_PROXY_BUILD=OFF .
   make -j $procs
   popd
 fi
