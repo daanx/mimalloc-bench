@@ -13,7 +13,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Install bash
-        run: apk add bash
+        run: apk add bash git
+      - name: Silence some git warnings
+        run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
         # hd: glibc-specific
         # dieharder: glibc-specific
@@ -44,6 +46,10 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+      - name: Install git
+        run: sudo dnf -y --quiet --nodocs install git
+      - name: Silence some git warnings
+        run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
         # mi and mesh: error: '__malloc_hook' was not declared in this scope;
         run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh
