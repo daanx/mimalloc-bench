@@ -26,7 +26,7 @@ all=0
 # allocator versions
 version_dh=1d08836bdd6f935b333ec503cd8c9634c69de590
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
-version_hm=main
+version_hm=10
 version_iso=1.1.0
 version_je=5.2.1
 version_mng=master
@@ -332,7 +332,8 @@ fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make CONFIG_NATIVE=true CONFIG_WERROR=false -j $proc
+  make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light -j $proc 
+  make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=default -j $proc
   popd
 fi
 
