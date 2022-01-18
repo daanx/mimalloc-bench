@@ -16,7 +16,7 @@ alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-tests_all1="cfrac espresso barnes redis lean larson larson-sized mstress rptest" 
+tests_all1="cfrac espresso barnes redis lean larson larson-sized mstress rptest sed"
 tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
 tests_all3="lean-mathlib gs z3 spec spec-bench malloc-large mleak"
 tests_all4="malloc-test cthrash rbstress"
@@ -26,7 +26,8 @@ tests_alla="$tests_all1 $tests_all2"  # run with 'alla' command option
 
 tests_run=""
 tests_exclude=""
-tests_exclude_macos="sh6bench sh8bench redis"
+# sed: "RE error: invalid repetition count(s)" on OSX
+tests_exclude_macos="sh6bench sh8bench redis sed"
 
 
 # --------------------------------------------------------------------
@@ -36,6 +37,7 @@ tests_exclude_macos="sh6bench sh8bench redis"
 verbose="no"
 ldpreload="LD_PRELOAD"
 timecmd="$(type -P time)"  # the shell builtin doesn't have all the options we need
+sedcmd=sed
 darwin=""
 extso=".so"
 procs=8
@@ -46,7 +48,8 @@ case "$OSTYPE" in
     extso=".dylib"
     ldpreload="DYLD_INSERT_LIBRARIES"
     libc=`clang --version | head -n 1`
-    procs=`sysctl -n hw.physicalcpu`;;
+    procs=`sysctl -n hw.physicalcpu`
+    sedcmd=gsed;;
   *)
     libc=`ldd --version | head -n 1`
     libc="${libc#ldd }"
@@ -474,6 +477,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     *)
        $timecmd -a -o $benchres -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
+
   # fixup larson with relative time
   case "$1" in
     redis*)
@@ -613,6 +617,10 @@ function run_test {  # <test>
       run_test_cmd "glibc-simple" "./glibc-simple";;
     glibc-thread)
       run_test_cmd "glibc-thread" "./glibc-thread $procs";;
+    sed)
+      for i in {1..10000}; do echo "${i}.${i}.${i}.${i}" >> /tmp/sed_bench.txt; done
+      run_test_cmd "sed" 'sed -E -n /^((.|.?){64}(.|.?)?(.|.?)){8}/p /tmp/sed_bench.txt'
+      rm /tmp/sed_bench.txt;;
     spec)
       case "$run_spec_bench" in
         602) run_test_cmd "spec-602.gcc_s" "./sgcc_$spec_base.$spec_config gcc-pp.c -O5 -fipa-pta -o gcc-pp.opts-O5_-fipa-pta.s";;
