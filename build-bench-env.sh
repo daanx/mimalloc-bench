@@ -404,7 +404,7 @@ if test "$setup_je" = "1"; then
   if test -f config.status; then
     echo "$devdir/jemalloc is already configured; no need to reconfigure"
   else
-    ./autogen.sh
+    ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
   fi
   make -j $procs
   popd
