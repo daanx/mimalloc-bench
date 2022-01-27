@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -eo pipefail
+set -u
+
 # Copyright 2018-2021, Microsoft Research, Daan Leijen
 
 echo "--- Benchmarking ---"

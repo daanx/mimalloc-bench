@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eo pipefail
+set -u
 
 CFLAGS='-march=native'
 CXXFLAGS='-march=native'
