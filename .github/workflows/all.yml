@@ -19,10 +19,12 @@ jobs:
       - name: Install and build all benchmarks and allocators
         # hd: glibc-specific
         # dieharder: glibc-specific
+        # tbb: needs RTLD_DEEPBIND, but it doesn't exist on musl
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # mesh/nomesh: there is an infinite loop in the somewhere
         # tcg: installing bazel on alpine is awful
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg
+        # gd: fatal error: 'execinfo.h' file not found
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg no-gd
       - name: Run everything.
         run: |
           cd out/bench
@@ -35,7 +37,8 @@ jobs:
       - name: Silence some git warnings
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
-        run: ./build-bench-env.sh all no-lean
+        # gd: infinite loop in the redis benchmark
+        run: ./build-bench-env.sh all no-lean no-gd
       - name: Run everything.
         run: |
           cd out/bench
@@ -53,7 +56,8 @@ jobs:
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
         # mi and mesh: error: '__malloc_hook' was not declared in this scope;
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh
+        # gd: infinite loop in the redis benchmark
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd
       - name: Run everything.
         run: |
           cd out/bench
@@ -66,7 +70,8 @@ jobs:
       - name: Silence some git warnings
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
-        run: ./build-bench-env.sh all no-lean
+        # gd: so many errors.
+        run: ./build-bench-env.sh all no-lean no-gd
       - name: Run everything.
         run: |
           cd out/bench

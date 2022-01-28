@@ -25,6 +25,7 @@ all=0
 
 # allocator versions
 version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
+version_gd=master
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=11
 version_iso=1.1.0
@@ -48,6 +49,7 @@ version_lean=v3.4.2
 
 # allocators
 setup_dh=0
+setup_gd=0
 setup_hd=0
 setup_hm=0
 setup_iso=0
@@ -90,6 +92,8 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
+        setup_dh=$flag_arg
+        setup_gd=$flag_arg              
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
         setup_je=$flag_arg
@@ -100,11 +104,11 @@ while : ; do
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg     # error: unknown warning option '-Wno-attribute-alias' […] unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'?
           setup_dh=$flag_arg        
-          setup_mng=$flag_arg    # lacking getentropy()
-          setup_hm=$flag_arg     # lacking <thread.h>
+          setup_mng=$flag_arg   # lacking getentropy()
+          setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
-          setup_scudo=$flag_arg  # lacking <sys/auxv.h>
+          setup_scudo=$flag_arg     # lacking <sys/auxv.h>
           setup_sm=$flag_arg
         else
           if ! [ `uname -m` = "x86_64" ]; then
@@ -126,6 +130,8 @@ while : ; do
         setup_ch=$flag_arg;;
     dh)
           setup_dh=$flag_arg;;
+    gd)
+        setup_gd=$flag_arg;;
     hd)
         setup_hd=$flag_arg;;
     hm)
@@ -177,6 +183,7 @@ while : ; do
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
         echo "  dh                           setup dieharder ($version_dh)"
+        echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
@@ -347,7 +354,7 @@ if test "$setup_packages" = "1"; then
     echo "updating package database... (sudo apt update)"
     sudo apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
-    aptinstall "cmake python3 ruby ninja-build libtool autoconf gawk"
+    aptinstall "cmake python3 ruby ninja-build libtool autoconf  gawk"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
@@ -360,8 +367,14 @@ fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light -j $proc 
+  make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light -j $proc
   make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=default -j $proc
+  popd
+fi
+
+if test "$setup_gd" = "1"; then
+  checkout gd $version_gd gd https://github.com/UTSASRG/Guarder
+  make -j $procs
   popd
 fi
 
@@ -389,9 +402,9 @@ fi
 if test "$setup_dh" = "1"; then
   checkout dh $version_dh dh https://github.com/emeryberger/DieHard "--recursive"
   if test "$darwin" = "1"; then
-    TARGET=libdieharder make -C src -j $procs macos
+    TARGET=libdieharder make -C src macos
   else
-    TARGET=libdieharder make -C src -j $procs linux-gcc-64
+    TARGET=libdieharder make -C src linux-gcc-64
   fi
   popd
 fi
