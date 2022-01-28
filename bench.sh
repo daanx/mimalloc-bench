@@ -105,7 +105,8 @@ alloc_lib_add "scudo"  "$localdevdir/scudo/compiler-rt/lib/scudo/standalone/libs
 alloc_lib_add "sm"     "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
 alloc_lib_add "sn"     "$localdevdir/snmalloc/release/libsnmallocshim$extso"
 alloc_lib_add "tbb"    "$lib_tbb"
-alloc_lib_add "tc"     "$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
+alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
+alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 
 alloc_lib_add "mi"     "$localdevdir/mimalloc/out/release/libmimalloc$extso"
 alloc_lib_add "smi"    "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"

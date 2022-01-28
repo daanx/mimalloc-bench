@@ -21,7 +21,8 @@ jobs:
         # dieharder: glibc-specific
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # mesh/nomesh: there is an infinite loop in the somewhere
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh
+        # tcg: installing bazel on alpine is awful
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg
       - name: Run everything.
         run: |
           cd out/bench

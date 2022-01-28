@@ -40,6 +40,7 @@ version_sm=709663f
 version_sn=0.5.3
 version_tbb=883c2e5245c39624b3b5d6d56d5b203cf09eac38  # needed for musl
 version_tc=gperftools-2.9.1
+version_tcg=651fe931f11f981bc7e9552dda0aa8faa297f042
 
 # benchmark versions
 version_redis=6.2.6
@@ -62,6 +63,7 @@ setup_sm=0
 setup_sn=0
 setup_tbb=0
 setup_tc=0
+setup_tcg=0
 
 # bigger benchmarks
 setup_bench=0
@@ -96,16 +98,17 @@ while : ; do
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
+          setup_tcg=$flag_arg     # error: unknown warning option '-Wno-attribute-alias' […] unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'?
           setup_dh=$flag_arg        
-          setup_mng=$flag_arg       # lacking getentropy()
-          setup_hm=$flag_arg        # lacking <thread.h>
+          setup_mng=$flag_arg    # lacking getentropy()
+          setup_hm=$flag_arg     # lacking <thread.h>
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
-          setup_scudo=$flag_arg     # lacking <sys/auxv.h>
+          setup_scudo=$flag_arg  # lacking <sys/auxv.h>
           setup_sm=$flag_arg
         else
           if ! [ `uname -m` = "x86_64" ]; then
-            setup_dh=$flag_arg      # does not compile on macos x64
+            setup_dh=$flag_arg   # does not compile on macos x64
           fi
         fi        
         # only run Mesh's 'nomesh' configuration if asked
@@ -159,6 +162,8 @@ while : ; do
         setup_tbb=$flag_arg;;
     tc)
         setup_tc=$flag_arg;;
+    tcg)
+        setup_tcg=$flag_arg;;
     -r|--rebuild)
         rebuild=1;;
     -j=*|--procs=*)
@@ -187,6 +192,7 @@ while : ; do
         echo "  sn                           setup snmalloc ($version_sn)"
         echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
         echo "  tc                           setup tcmalloc ($version_tc)"
+        echo "  tcg                          setup Google's tcmalloc ($version_tcg)"
         echo ""
         echo "  bench                        build all local benchmarks"
         echo "  lean                         setup lean 3 benchmark"
@@ -270,7 +276,6 @@ function checkout {  # name, git-tag, directory, git repo, options
   write_version $1 $2 $4
 }
 
-
 function aptinstall {
   echo ""
   echo "> sudo apt install $1"
@@ -299,6 +304,27 @@ function brewinstall {
   brew install $1
 }
 
+function aptinstallbazel {
+  echo ""
+  echo "> installing bazel"
+  echo ""
+  aptinstall apt-transport-https curl gnupg
+  curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
+  sudo mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
+  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+  sudo apt update
+  aptinstall bazel
+}
+
+function dnfinstallbazel {
+  echo ""
+  echo "> installing bazel"
+  echo ""
+  dnfinstall dnf-plugins-core
+  sudo dnf copr -y enable vbatts/bazel
+  dnfinstall bazel4
+}
+
 if test "$all" = "1"; then
   if test "$rebuild" = "1"; then
     phase "clean $devdir for a full rebuild"
@@ -314,19 +340,21 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget"
+    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time"
+    dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... (sudo apt update)"
     sudo apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
-    aptinstall "cmake python3 ruby ninja-build libtool autoconf"
+    aptinstall "cmake python3 ruby ninja-build libtool autoconf gawk"
+    aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
-    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake"
+    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk"
     apkinstall "samurai libtool git build-base linux-headers autoconf util-linux"
   elif brew --version 2> /dev/null >/dev/null; then
-    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir"
+    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gawk bazelisk"
   fi
 fi
 
@@ -376,7 +404,7 @@ if test "$setup_tbb" = "1"; then
 fi
 
 if test "$setup_tc" = "1"; then
-  checkout tc $version_tc gperftools https://github.com/gperftools/gperftools
+  checkout tc $version_tc tc https://github.com/gperftools/gperftools
   if test -f configure; then
     echo "already configured"
   else
@@ -386,6 +414,23 @@ if test "$setup_tc" = "1"; then
   make -j $procs # ends with error on benchmark, but thats ok.
   #echo ""
   #echo "(note: the error 'Makefile:3912: recipe for target 'malloc_bench' failed' is expected)"
+  popd
+fi
+
+if test "$setup_tcg" = "1"; then
+  checkout tcg $version_tcg tcg https://github.com/google/tcmalloc
+  ORIG=""
+  if test "$darwin" = "1"; then
+    ORIG="_orig"
+  fi
+  sed -i $ORIG '/linkstatic/d' tcmalloc/BUILD
+  sed -i $ORIG '/linkstatic/d' tcmalloc/internal/BUILD
+  sed -i $ORIG '/linkstatic/d' tcmalloc/testing/BUILD
+  sed -i $ORIG '/linkstatic/d' tcmalloc/variants.bzl
+  gawk -i inplace '(f && g) {$0="linkshared = True, )"; f=0; g=0} /This library provides tcmalloc always/{f=1} /alwayslink/{g=1} 1' tcmalloc/BUILD
+  gawk -i inplace 'f{$0="cc_binary("; f=0} /This library provides tcmalloc always/{f=1} 1' tcmalloc/BUILD # Change the line after "This library…" to cc_binary (instead of cc_library)
+  gawk -i inplace '/alwayslink/ && !f{f=1; next} 1' tcmalloc/BUILD # delete only the first instance of "alwayslink"
+  bazel build tcmalloc
   popd
 fi
 
