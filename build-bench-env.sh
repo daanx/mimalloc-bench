@@ -25,6 +25,7 @@ all=0
 
 # allocator versions
 version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
+version_ff=4be6234
 version_gd=master
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=11
@@ -50,6 +51,7 @@ version_lean=v3.4.2
 
 # allocators
 setup_dh=0
+setup_ff=0
 setup_gd=0
 setup_hd=0
 setup_hm=0
@@ -95,7 +97,8 @@ while : ; do
     all|none)
         all=$flag_arg
         setup_dh=$flag_arg
-        setup_gd=$flag_arg              
+        setup_ff=$flag_arg
+        setup_gd=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
         setup_je=$flag_arg
@@ -131,6 +134,8 @@ while : ; do
         setup_bench=$flag_arg;;
     ch)
         setup_ch=$flag_arg;;
+    ff)
+        setup_ff=$flag_arg;;
     dh)
           setup_dh=$flag_arg;;
     gd)
@@ -188,6 +193,7 @@ while : ; do
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo ""
         echo "  dh                           setup dieharder ($version_dh)"
+        echo "  ff                           setup ffmalloc ($version_ff)"
         echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
@@ -387,6 +393,12 @@ fi
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
   make library -j $procs
+  popd
+fi
+
+if test "$setup_ff" = "1"; then
+  checkout ff $version_ff ff https://github.com/bwickman97/ffmalloc
+  make -j $procs
   popd
 fi
 
