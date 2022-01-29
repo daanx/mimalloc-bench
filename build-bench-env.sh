@@ -37,6 +37,7 @@ version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 version_rp=4c10723
 version_sc=v1.0.0
 version_scudo=main
+version_sg=master
 version_sm=709663f
 version_sn=0.5.3
 version_tbb=883c2e5245c39624b3b5d6d56d5b203cf09eac38  # needed for musl
@@ -61,6 +62,7 @@ setup_nomesh=0
 setup_rp=0
 setup_sc=0
 setup_scudo=0
+setup_sg=0
 setup_sm=0
 setup_sn=0
 setup_tbb=0
@@ -99,6 +101,7 @@ while : ; do
         setup_je=$flag_arg
         setup_mi=$flag_arg
         setup_sn=$flag_arg
+        setup_sg=$flag_arg
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
@@ -160,6 +163,8 @@ while : ; do
         setup_sc=$flag_arg;;
     scudo)
         setup_scudo=$flag_arg;;
+    sg)
+        setup_sg=$flag_arg;;
     sm)
         setup_sm=$flag_arg;;
     sn)
@@ -195,6 +200,7 @@ while : ; do
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
         echo "  scudo                        setup scudo ($version_scudo)"
+        echo "  sg                           setup slimguard ($version_sg)"
         echo "  sm                           setup supermalloc ($version_sm)"
         echo "  sn                           setup snmalloc ($version_sn)"
         echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
@@ -396,6 +402,12 @@ if test "$setup_scudo" = "1"; then
   # TODO: make the next line prettier instead of hardcoding everything.
   clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions $CXXFLAGS -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
   cd -
+  popd
+fi
+
+if test "$setup_sg" = "1"; then
+  checkout sg $version_sg sg https://github.com/ssrg-vt/SlimGuard
+  make -j $procs
   popd
 fi
 
