@@ -71,6 +71,8 @@ for the versions:
 - **dieharder**: The [_DieHarder_](https://github.com/emeryberger/DieHard)
   allocator is an error-resistant memory allocator for Windows, Linux, and Mac
   OS X.
+- **ff**: [ffmalloc](https://github.com/bwickman97/ffmalloc), from the Usenix
+  Security 21 [paper](https://www.usenix.org/conference/usenixsecurity21/presentation/wickman)
 - **gd**: The [_Guarder_](https://github.com/UTSASRG/Guarder) allocator
   is a tunable secure allocator by the UTSA.
 - **hd**: The [_Hoard_](https://github.com/emeryberger/Hoard) allocator by
@@ -85,7 +87,7 @@ for the versions:
   allocator by [Jason Evans](https://github.com/jasone),
   now developed at Facebook
   and widely used in practice, for example in FreeBSD and Firefox.
-- **mallocng**: [musl](https://musl.libc.org)'s memory allocator.
+- **mng**: [musl](https://musl.libc.org)'s memory allocator.
 - **mesh**: The [_mesh_](https://github.com/plasma-umass/mesh) allocator, a
   memory allocator that automatically reduces the memory footprint of C/C++
   applications. Also tested as **nomesh** with the meshing feature disabled.
@@ -101,19 +103,24 @@ for the versions:
 - **scudo**: The
   [_scudo_](https://www.llvm.org/docs/ScudoHardenedAllocator.html) allocator
   used by Fuschia and Android.
+- **sg**: The [slimguard](https://github.com/ssrg-vt/SlimGuard) allocator,
+  designed to be secure and memory-efficient.
 - **sm**: The [_Supermalloc_](https://github.com/kuszmaul/SuperMalloc)
   allocator by Bradley Kuszmaul uses hardware transactional memory to speed up
   parallel operations.
 - **sn**: The [_snmalloc_](https://github.com/microsoft/snmalloc) allocator
   is a recent concurrent message passing
   allocator by Liétar et al. \[8].
-- **sys**: The system allocator. Here we usually use the _glibc_ allocator
-  (which is originally based on _Ptmalloc2_).
-- **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
-  allocator which comes as part of
-  the Google performance tools and is used in the Chrome browser.
 - **tbb**: The Intel [TBB](https://github.com/intel/tbb) allocator that comes
   with the Thread Building Blocks (TBB) library \[7].
+- **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
+  allocator which comes as part of
+  the Google performance tools and is used in the Chrome browser, maintained
+  by the community
+- **tcg**: The [_tcmalloc_](https://github.com/google/tcmalloc)
+  allocator, maintained by Google
+- **sys**: The system allocator. Here we usually use the _glibc_ allocator
+  (which is originally based on _Ptmalloc2_).
 
 
 ## Current Benchmarks
