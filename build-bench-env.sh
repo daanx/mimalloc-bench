@@ -41,7 +41,7 @@ version_scudo=main
 version_sg=master
 version_sm=709663f
 version_sn=0.5.3
-version_tbb=883c2e5245c39624b3b5d6d56d5b203cf09eac38  # needed for musl
+version_tbb=v2021.5.0
 version_tc=gperftools-2.9.1
 version_tcg=651fe931f11f981bc7e9552dda0aa8faa297f042
 
@@ -434,8 +434,8 @@ if test "$setup_dh" = "1"; then
 fi
 
 if test "$setup_tbb" = "1"; then
-  checkout tbb $version_tbb tbb https://github.com/intel/tbb
-  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench -DTBBMALLOC_PROXY_BUILD=OFF .
+  checkout tbb $version_tbb tbb https://github.com/oneapi-src/oneTBB
+  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench .
   make -j $procs
   popd
 fi
