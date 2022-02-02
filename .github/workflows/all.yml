@@ -17,9 +17,10 @@ jobs:
       - name: Silence some git warnings
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
-        # dieharder: glibc-specific
+        # dh: glibc-specific
+        # gd: ?
         # hd: glibc-specific
-        # mesh/nomesh: there is an infinite loop in the somewhere
+        # mesh/nomesh: infinite loop?
         # sg: src/gnuwrapper.cpp:51:32: error: expected ')' before '__malloc_initialize_hook'
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # tbb: needs RTLD_DEEPBIND, but it doesn't exist on musl
@@ -28,6 +29,7 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
+          # iso: too slow
           ../../bench.sh alla allt no-iso
   build-all-ubuntu:
     runs-on: ubuntu-latest
@@ -38,11 +40,12 @@ jobs:
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
         # gd: infinite loop in the redis benchmark
-        # sg: infinite loop in redis
+        # sg: infinite loop in the redis benchmark
         run: ./build-bench-env.sh all no-lean no-gd no-sg
       - name: Run everything.
         run: |
           cd out/bench
+          # iso: too slow
           ../../bench.sh alla allt no-iso
   build-all-fedora:
     runs-on: ubuntu-latest
@@ -56,13 +59,15 @@ jobs:
       - name: Silence some git warnings
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
-        # mi and mesh: error: '__malloc_hook' was not declared in this scope;
         # gd: infinite loop in the redis benchmark
+        # mesh/nomesh: error: '__malloc_hook' was not declared in this scope;
+        # mi: error: '__malloc_hook' was not declared in this scope;
         # sg: src/gnuwrapper.cpp:55:23: error: '__malloc_hook' was not declared in this scope; did you mean 'my_malloc_hook'?
         run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-sg
       - name: Run everything.
         run: |
           cd out/bench
+          # iso: too slow
           ../../bench.sh alla allt no-iso
   build-all-osx:
     runs-on: macos-11
@@ -72,10 +77,11 @@ jobs:
       - name: Silence some git warnings
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
+        # ff: error: use of undeclared identifier 'MAP_POPULATE'
         # gd: so many errors
-        # ffmalloc.c:ffmalloc.c:674:12: error: use of undeclared identifier 'MAP_POPULATE'
         run: ./build-bench-env.sh all no-lean no-gd no-ff
       - name: Run everything.
         run: |
           cd out/bench
+          # iso: too slow
           ../../bench.sh alla allt no-iso
