@@ -19,6 +19,12 @@ case "$OSTYPE" in
     fi;;
 esac
 
+SUDO=sudo
+if [ "$EUID" -eq 0 ]; then
+  echo "[*] $0 is running as root, avoid doing this if possible."
+  SUDO=""
+fi
+
 curdir=`pwd`
 rebuild=0
 all=0
@@ -297,16 +303,16 @@ function checkout {  # name, git-tag, directory, git repo, options
 
 function aptinstall {
   echo ""
-  echo "> sudo apt install $1"
+  echo "> $SUDO apt install $1"
   echo ""
-  sudo apt install --no-install-recommends $1
+  $SUDO apt install --no-install-recommends $1
 }
 
 function dnfinstall {
   echo ""
-  echo "> sudo dnf -y --quiet --nodocs install $1"
+  echo "> $SUDO dnf -y --quiet --nodocs install $1"
   echo ""
-  sudo dnf -y --quiet --nodocs install $1
+  $SUDO dnf -y --quiet --nodocs install $1
 }
 
 function apkinstall {
@@ -329,9 +335,9 @@ function aptinstallbazel {
   echo ""
   aptinstall apt-transport-https curl gnupg
   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
-  sudo mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
-  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-  sudo apt update
+  $SUDO mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
+  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | $SUDO tee /etc/apt/sources.list.d/bazel.list
+  $SUDO apt update
   aptinstall bazel
 }
 
@@ -340,7 +346,7 @@ function dnfinstallbazel {
   echo "> installing bazel"
   echo ""
   dnfinstall dnf-plugins-core
-  sudo dnf copr -y enable vbatts/bazel
+  $SUDO dnf copr -y enable vbatts/bazel
   dnfinstall bazel4
 }
 
@@ -363,8 +369,8 @@ if test "$setup_packages" = "1"; then
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time sed"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
-    echo "updating package database... (sudo apt update)"
-    sudo apt update -qq
+    echo "updating package database... ($SUDO apt update)"
+    $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python3 ruby ninja-build libtool autoconf sed"
     aptinstallbazel
