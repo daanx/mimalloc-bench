@@ -114,7 +114,7 @@ while : ; do
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
-          setup_tcg=$flag_arg     # error: unknown warning option '-Wno-attribute-alias' […] unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'?
+          setup_tcg=$flag_arg       # lacking 'malloc.h'
           setup_dh=$flag_arg        
           setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
