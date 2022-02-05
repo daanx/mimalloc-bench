@@ -1,25 +1,20 @@
 #!/bin/bash
-# Copyright 2018-2021, Microsoft Research, Daan Leijen
-
-echo "--- Benchmarking ---"
-echo ""
-echo "Use '-h' or '--help' for help on configuration options."
-echo ""
+# Copyright 2018-2022, Microsoft Research, Daan Leijen
 
 # --------------------------------------------------------------------
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys dh ff gd hd hm hml iso je mng mesh nomesh rp sc scudo sg sm sn tbb tc tcg mi smi dmi xmi xsmi xdmi"
-alloc_secure="dh hm hml iso mng scudo smi gd sg ff"
+alloc_all="sys dh ff gd hd hm hml iso je mi mng mesh nomesh rp sc scudo sg sm smi sn tbb tc tcg dmi xmi xsmi xdmi"
+alloc_secure="dh ff gd hm hml iso mng scudo sg smi sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-tests_all1="cfrac espresso barnes redis lean larson larson-sized mstress rptest sed"
+tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed"
 tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
-tests_all3="lean-mathlib gs z3 spec spec-bench malloc-large mleak"
-tests_all4="malloc-test cthrash rbstress"
+tests_all3="larson lean-mathlib gs malloc-large mleak rbstress cthrash"
+tests_all4="z3 spec spec-bench"
 
 tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
 tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
@@ -154,6 +149,7 @@ spec_config="malloc-test-m64"
 function warning { # <message> 
   echo ""
   echo "warning: $1"
+  echo ""
 }
 
 function contains {  # <string> <substring>   does string contain substring?
@@ -276,12 +272,12 @@ while : ; do
   if contains "$alloc_all" "$flag"; then
     #echo "allocator flag: $flag"
     if ! contains "$alloc_installed" "$flag"; then
-      warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
+      warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
     fi
     alloc_run_add_remove "$flag" "$flag_arg"    
   elif contains "$alloc_secure" "$flag"; then
     if ! contains "$alloc_installed" "$flag"; then
-      warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
+      warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
     fi
     alloc_run_add_remove "$flag" "$flag_arg"    
   else
@@ -330,7 +326,7 @@ while : ; do
             echo ""
             echo "options:"
             echo "  -h, --help                   show this help"  
-            echo "  -v, --verbose                be verbose"
+            echo "  -v, --verbose                be verbose (=$verbose)"
             echo "  -j=<n>, --procs=<n>          concurrency level (=$procs)"
             echo "  -r=<n>                       number of repeats of the full suite (=$repeats)"
             echo "  -n=<n>                       number of repeats of each individual test (=$test_repeats)"
@@ -364,12 +360,19 @@ while : ; do
             echo "  sn                           use snmalloc"
             echo "  sys                          use system malloc ($libc)"
             echo "  tbb                          use Intel TBB malloc"
-            echo "  tc                           use tcmalloc"
+            echo "  tc                           use tcmalloc (from gperftools)"
+            echo "  tcg                          use tcmalloc (from Google)"
             echo ""
-            echo "tests:"
+            echo "tests included in 'allt':"
             echo "  $tests_all1"
             echo "  $tests_all2"
+            echo ""
+            echo "further tests:"
             echo "  $tests_all3 $tests_all4"
+            echo ""
+            echo "installed allocators:"
+            echo "  sys:    $libc"
+            column -t "$localdevdir/versions.txt" | sed 's/^/  /'
             echo ""
             exit 0;;
         *) warning "unknown option \"$1\"." 1>&2
@@ -378,7 +381,10 @@ while : ; do
   fi
   shift
 done
-echo "Running on $procs cores."
+
+echo "benchmarking on $procs cores."
+echo "use '-h' or '--help' for help on configuration options."
+echo ""
 export verbose
 
 
@@ -387,19 +393,18 @@ export verbose
 # Info
 # --------------------------------------------------------------------
 
-if test "$verbose"="yes"; then
-  echo "Available tests:"
+if test "$verbose" = "yes"; then
+  echo "available tests: $verbose"
   echo "  $tests_all1"
   echo "  $tests_all2"
   echo "  $tests_all3 $tests_all4"
   echo ""
-  echo "Available alloctators:"
+  echo "available allocators:"
   echo "  $alloc_all"
   echo ""
-  echo "Installed allocators:"
-  echo ""
-  echo "sys:    $libc"
-  column -t "$localdevdir/versions.txt"
+  echo "installed allocators:"
+  echo "  sys:    $libc"
+  column -t "$localdevdir/versions.txt" | sed 's/^/  /'
   echo ""
 fi
 
@@ -407,12 +412,20 @@ for tst in $tests_exclude; do
   tests_run_remove "$tst"
 done
 
-echo "Allocators: $alloc_run"
-echo "Tests     : $tests_run"
+echo "allocators: $alloc_run"
+echo "tests     : $tests_run"
 if [ ! -z "$tests_exclude" ]; then
   echo "(excluded tests: $tests_exclude)"
 fi  
-echo ""
+
+if [ -z "$tests_run" ]; then
+  warning "no tests are specified."
+  exit 1
+fi
+if [ -z "$alloc_run" ]; then
+  warning "no allocators are specified."
+  exit 1
+fi  
 
 benchres="$curdir/benchres.csv"
 run_pre_cmd=""
@@ -673,11 +686,10 @@ done
 
 sed -i.bak "s/ 0:/ /" $benchres
 echo ""
-echo "---------------------------------------------------------------"
 echo "results written to: $benchres"
 echo ""
-echo "---------------------------------------------------------------"
-echo "test      alloc   time  rss    user  sys  page-faults page-reclaims"
+echo "#------------------------------------------------------------------"
+echo "# test    alloc   time  rss    user  sys  page-faults page-reclaims"
 
 cat $benchres 
 echo ""
