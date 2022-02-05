@@ -43,6 +43,7 @@ extso=".so"
 procs=8
 repeats=1          # repeats of all tests
 test_repeats=1     # repeats per test
+sleep=0            # mini sleeps between tests seem to improve stability
 case "$OSTYPE" in
   darwin*) 
     darwin="1"
@@ -320,6 +321,8 @@ while : ; do
             repeats="$flag_arg";;
         -n=*)
             test_repeats="$flag_arg";;
+        -s=*|--sleep=*)
+            sleep="$flag_arg";;
         -v|--verbose)
             verbose="yes";;
         -h|--help|-\?|help|\?)
@@ -331,6 +334,7 @@ while : ; do
             echo "  -j=<n>, --procs=<n>          concurrency level (=$procs)"
             echo "  -r=<n>                       number of repeats of the full suite (=$repeats)"
             echo "  -n=<n>                       number of repeats of each individual test (=$test_repeats)"
+            echo "  -s=<n>, --sleep=<n>          seconds of sleep between each test (=$sleep)"
             echo ""
             echo "  allt                         run all tests"
             echo "  alla                         run all allocators"
@@ -443,6 +447,9 @@ allocfill="     "
 benchfill="           "
 
 function run_test_env_cmd { # <test name> <allocator name> <environment args> <command> <repeat>
+  if ! [ -z "$sleep" ]; then
+    sleep "$sleep"
+  fi
   echo
   echo "run $test_repeat: $1 $2: $3 $4"
   # clear temporary output
