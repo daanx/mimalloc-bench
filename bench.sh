@@ -673,8 +673,11 @@ done
 
 sed -i.bak "s/ 0:/ /" $benchres
 echo ""
-echo "# --------------------------------------------------"
-echo "# results written to: $benchres"
+echo "---------------------------------------------------------------"
+echo "results written to: $benchres"
+echo ""
+echo "---------------------------------------------------------------"
+echo "test      alloc   time  rss    user  sys  page-faults page-reclaims"
 
 cat $benchres 
 echo ""
