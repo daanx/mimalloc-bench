@@ -10,12 +10,13 @@ echo ""
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mallocng dieharder"
+alloc_all="sys dh ff gd hd hm hml iso je mng mesh nomesh rp sc scudo sg sm sn tbb tc tcg mi smi dmi xmi xsmi xdmi"
+alloc_secure="dh hm hml iso mng scudo smi gd sg ff"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-tests_all1="cfrac espresso barnes redis lean larson larson-sized mstress rptest" 
+tests_all1="cfrac espresso barnes redis lean larson larson-sized mstress rptest sed"
 tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
 tests_all3="lean-mathlib gs z3 spec spec-bench malloc-large mleak"
 tests_all4="malloc-test cthrash rbstress"
@@ -25,7 +26,8 @@ tests_alla="$tests_all1 $tests_all2"  # run with 'alla' command option
 
 tests_run=""
 tests_exclude=""
-tests_exclude_macos="sh6bench sh8bench redis"
+# sed: "RE error: invalid repetition count(s)" on OSX
+tests_exclude_macos="sh6bench sh8bench redis sed"
 
 
 # --------------------------------------------------------------------
@@ -34,7 +36,8 @@ tests_exclude_macos="sh6bench sh8bench redis"
 
 verbose="no"
 ldpreload="LD_PRELOAD"
-timecmd=/usr/bin/time
+timecmd="$(type -P time)"  # the shell builtin doesn't have all the options we need
+sedcmd=sed
 darwin=""
 extso=".so"
 procs=8
@@ -46,7 +49,8 @@ case "$OSTYPE" in
     extso=".dylib"
     ldpreload="DYLD_INSERT_LIBRARIES"
     libc=`clang --version | head -n 1`
-    procs=`sysctl -n hw.physicalcpu`;;
+    procs=`sysctl -n hw.physicalcpu`
+    sedcmd=gsed;;
   *)
     libc=`ldd --version | head -n 1`
     libc="${libc#ldd }"
@@ -89,21 +93,27 @@ lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso 
 lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
 lib_tbb_dir="$(dirname $lib_tbb)"
 
-alloc_lib_add "dieharder" "${localdevdir}/dieharder/src/libdieharder$extso"
-alloc_lib_add "hd"    "$localdevdir/Hoard/src/libhoard$extso"
-alloc_lib_add "hm"    "${localdevdir}/hm/libhardened_malloc$extso"
-alloc_lib_add "iso"   "${localdevdir}/iso/build/libisoalloc$extso"
-alloc_lib_add "je"    "${localdevdir}/jemalloc/lib/libjemalloc$extso"
-alloc_lib_add "mallocng" "${localdevdir}/mallocng/libmallocng$extso"
-alloc_lib_add "mesh"  "${localdevdir}/mesh/build/lib/libmesh$extso"
-alloc_lib_add "nomesh" "${localdevdir}/nomesh/build/lib/libmesh$extso"
-alloc_lib_add "rp"    "$lib_rp"
-alloc_lib_add "sc"    "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
-alloc_lib_add "scudo" "${localdevdir}/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
-alloc_lib_add "sm"    "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
-alloc_lib_add "sn"    "$localdevdir/snmalloc/release/libsnmallocshim$extso"
-alloc_lib_add "tbb"   "$lib_tbb"
-alloc_lib_add "tc"    "$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
+
+alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
+alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
+alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
+alloc_lib_add "hd"     "$localdevdir/Hoard/src/libhoard$extso"
+alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
+alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso"
+alloc_lib_add "iso"    "$localdevdir/iso/build/libisoalloc$extso"
+alloc_lib_add "je"     "$localdevdir/jemalloc/lib/libjemalloc$extso"
+alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
+alloc_lib_add "mng"    "$localdevdir/mng/libmallocng$extso"
+alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
+alloc_lib_add "rp"     "$lib_rp"
+alloc_lib_add "sc"     "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
+alloc_lib_add "scudo"  "$localdevdir/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
+alloc_lib_add "sg"     "$localdevdir/sg/libSlimGuard.so"
+alloc_lib_add "sm"     "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
+alloc_lib_add "sn"     "$localdevdir/snmalloc/release/libsnmallocshim$extso"
+alloc_lib_add "tbb"    "$lib_tbb"
+alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
+alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 
 alloc_lib_add "mi"    "$localdevdir/mimalloc/out/release/libmimalloc$extso"
 alloc_lib_add "smi"   "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
@@ -126,7 +136,7 @@ fi
 
 leandir="$localdevdir/lean"
 leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-6.0.9/src"
+redis_dir="$localdevdir/redis-6.2.6/src"
 pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
 spec_dir="$localdevdir/../../spec2017"
@@ -185,6 +195,9 @@ function alloc_run_add_remove { # <allocator> <add?>
 while read word _; do alloc_installed="$alloc_installed ${word%:*}"; done < ${localdevdir}/versions.txt
 if is_installed "mi"; then
   alloc_installed="$alloc_installed smi"   # secure mimalloc
+fi
+if is_installed "hm"; then
+  alloc_installed="$alloc_installed hml"   # hardened_malloc light
 fi
 
 
@@ -264,6 +277,11 @@ while : ; do
       warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
     fi
     alloc_run_add_remove "$flag" "$flag_arg"    
+  elif contains "$alloc_secure" "$flag"; then
+    if ! contains "$alloc_installed" "$flag"; then
+      warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
+    fi
+    alloc_run_add_remove "$flag" "$flag_arg"    
   else
     if contains "$tests_all" "$flag"; then
       #echo "test flag: $flag"
@@ -274,6 +292,13 @@ while : ; do
         alla)
             # use all installed allocators (iterate to maintain order as specified in alloc_all)
             for alloc in $alloc_all; do 
+              if is_installed "$alloc"; then
+                alloc_run_add_remove "$alloc" "$flag_arg"
+              fi
+            done;;
+        allsa)
+            # use all "secure" installed allocators (iterate to maintain order as specified in alloc_secure)
+            for alloc in $alloc_secure; do 
               if is_installed "$alloc"; then
                 alloc_run_add_remove "$alloc" "$flag_arg"
               fi
@@ -305,22 +330,27 @@ while : ; do
             echo ""
             echo "  allt                         run all tests"
             echo "  alla                         run all allocators"
+            echo "  allsa                        run all \"secure\" allocators"
             echo "  no-<test|allocator>          do not run specific <test> or <allocator>"   
             echo ""
             echo "allocators:"
-            echo "  dieharder                    use dieharder"
+            echo "  dh                           use dieharder"
             echo "  dmi                          use debug version of mimalloc"
+            echo "  ff                           use ffmalloc"
+            echo "  gd                           use guarder"
             echo "  hd                           use hoard"
             echo "  hm                           use hardened_malloc"
+            echo "  hml                          use hardened_malloc light"
             echo "  iso                          use isoalloc"
             echo "  je                           use jemalloc"
-            echo "  mallocng                     use mallocng"
+            echo "  mng                          use mallocng"
             echo "  mesh                         use mesh"
             echo "  mi                           use mimalloc"
             echo "  nomesh                       use mesh with meshing disabled"
             echo "  rp                           use rpmalloc"
             echo "  sc                           use scalloc"
             echo "  scudo                        use scudo"
+            echo "  sg                           use slimguard"
             echo "  sm                           use supermalloc"
             echo "  smi                          use secure version of mimalloc"
             echo "  sn                           use snmalloc"
@@ -361,7 +391,7 @@ if test "$verbose"="yes"; then
   echo "Installed allocators:"
   echo ""
   echo "sys:    $libc"
-  cat ${localdevdir}/versions.txt | column -t
+  column -t "$localdevdir/versions.txt"
   echo ""
 fi
 
@@ -432,7 +462,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
       echo "run spec benchmark in: $spec_bench_dir"
       pushd "$spec_bench_dir";;
-    larson*|ebizzy|redis*|xmalloc*)
+    larson*|redis*|xmalloc*)
       outfile="$1-$2-out.txt";;
     barnes)
       infile="$benchdir/barnes/input";;
@@ -454,6 +484,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     *)
        $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
+
   # fixup larson with relative time
   case "$1" in
     redis*)
@@ -471,10 +502,6 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       echo "$1,$2: ops/sec: $ops, relative time: ${rtime}s"
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     xmalloc*)
-      rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
-      echo "$1,$2, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
-    ebizzy)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2, relative time: ${rtime}s"
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
@@ -527,15 +554,18 @@ function run_test {  # <test>
     lean)
       pushd "$leandir/library"
       # run_test_cmd "lean1" "../bin/lean --make -j 1"
-      run_test_cmd "leanN" "../bin/lean --make -j 8" # more than 8 makes it slower
+      if test $procs -gt 8; then # more than 8 makes it slower
+        run_test_cmd "leanN" "../bin/lean --make -j 8"
+      else
+        run_test_cmd "leanN" "../bin/lean --make -j $procs"
+      fi
       popd;;
     lean-mathlib)
       pushd "$leanmldir"
       run_test_cmd "mathlib" "$leandir/bin/leanpkg build"
       popd;;
     redis)
-      #redis_tail="2"
-      #run_test_cmd "redis-lpush" "$redis_dir/redis-benchmark  -r 1000000 -n 100000 -P 16  -q -t lpush"
+      # https://redis.io/topics/benchmarks
       redis_tail="1"
       run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
     alloc-test)
@@ -551,8 +581,6 @@ function run_test {  # <test>
       run_test_cmd "larsonN" "./larson 5 8 1000 5000 100 4141 $procs";;
     larson-sized)
       run_test_cmd "larsonN-sized" "./larson-sized 5 8 1000 5000 100 4141 $procs";;
-    ebizzy)
-      run_test_cmd "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128";;
     sh6bench)
       run_test_cmd "sh6benchN" "./sh6bench $procsx2";;
     sh8bench)
@@ -596,6 +624,10 @@ function run_test {  # <test>
       run_test_cmd "glibc-simple" "./glibc-simple";;
     glibc-thread)
       run_test_cmd "glibc-thread" "./glibc-thread $procs";;
+    sed)
+      for i in {1..10000}; do echo "${i}.${i}.${i}.${i}" >> /tmp/sed_bench.txt; done
+      run_test_cmd "sed" 'sed -E -n /^((.|.?){64}(.|.?)?(.|.?)){8}/p /tmp/sed_bench.txt'
+      rm /tmp/sed_bench.txt;;
     spec)
       case "$run_spec_bench" in
         602) run_test_cmd "spec-602.gcc_s" "./sgcc_$spec_base.$spec_config gcc-pp.c -O5 -fipa-pta -o gcc-pp.opts-O5_-fipa-pta.s";;
