@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
+
 set -eo pipefail
 
 CFLAGS='-march=native'

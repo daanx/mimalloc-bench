@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2018-2022, Microsoft Research, Daan Leijen
+# Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
 
 # --------------------------------------------------------------------
 # Allocators and tests
