@@ -275,11 +275,6 @@ while : ; do
       warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
     fi
     alloc_run_add_remove "$flag" "$flag_arg"    
-  elif contains "$alloc_secure" "$flag"; then
-    if ! contains "$alloc_installed" "$flag"; then
-      warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
-    fi
-    alloc_run_add_remove "$flag" "$flag_arg"    
   else
     if contains "$tests_all" "$flag"; then
       #echo "test flag: $flag"
@@ -369,6 +364,9 @@ while : ; do
             echo ""
             echo "further tests:"
             echo "  $tests_all3 $tests_all4"
+            echo ""
+            echo "secure allocators included in 'allsa':"
+            echo "  $alloc_secure"
             echo ""
             echo "installed allocators:"
             echo "  sys:    $libc"
