@@ -531,7 +531,8 @@ function run_test_cmd {  # <test name> <command>
   echo "      " >> $benchres
   echo ""
   echo "---- $repeat: $1"  
-  for alloc in $alloc_all; do
+  for alloc in $alloc_run; do     # use order as given on the command line
+  # for alloc in $alloc_all; do   # use order as specified in $alloc_all
     if contains "$alloc_run" "$alloc"; then
       # echo "allocator: $alloc"
       alloc_lib_set "$alloc"  # sets alloc_lib to point to the allocator .so file
