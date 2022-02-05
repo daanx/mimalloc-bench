@@ -41,7 +41,8 @@ sedcmd=sed
 darwin=""
 extso=".so"
 procs=8
-repeats=1
+repeats=1          # repeats of all tests
+test_repeats=1     # repeats per test
 case "$OSTYPE" in
   darwin*) 
     darwin="1"
@@ -317,6 +318,8 @@ while : ; do
             procs="$flag_arg";;
         -r=*)
             repeats="$flag_arg";;
+        -n=*)
+            test_repeats="$flag_arg";;
         -v|--verbose)
             verbose="yes";;
         -h|--help|-\?|help|\?)
@@ -326,7 +329,8 @@ while : ; do
             echo "  -h, --help                   show this help"  
             echo "  -v, --verbose                be verbose"
             echo "  -j=<n>, --procs=<n>          concurrency level (=$procs)"
-            echo "  -r=<n>                       number of repeats (=$repeats)"
+            echo "  -r=<n>                       number of repeats of the full suite (=$repeats)"
+            echo "  -n=<n>                       number of repeats of each individual test (=$test_repeats)"
             echo ""
             echo "  allt                         run all tests"
             echo "  alla                         run all allocators"
@@ -438,9 +442,9 @@ function set_spec_bench_dir {
 allocfill="     "
 benchfill="           "
 
-function run_test_env_cmd { # <test name> <allocator name> <environment args> <command>
+function run_test_env_cmd { # <test name> <allocator name> <environment args> <command> <repeat>
   echo
-  echo "run $1 $2: $3 $4"
+  echo "run $test_repeat: $1 $2: $3 $4"
   # clear temporary output
   if [ -f "$benchres.line" ]; then
     rm "$benchres.line"
@@ -519,19 +523,21 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
 function run_test_cmd {  # <test name> <command>
   echo "      " >> $benchres
   echo ""
-  echo "---- $1"  
+  echo "---- $repeat: $1"  
   for alloc in $alloc_all; do
     if contains "$alloc_run" "$alloc"; then
       # echo "allocator: $alloc"
       alloc_lib_set "$alloc"  # sets alloc_lib to point to the allocator .so file
-      case "$alloc" in
-        sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2";;
-        dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
-        tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2";;
-        *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2";;
-      esac
+      for ((test_repeat=1; test_repeat<=$test_repeats; test_repeat++)); do
+        case "$alloc" in
+          sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2";;
+          dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
+          tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2";;
+          *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2";;
+        esac
+      done
     fi
-  done           
+  done             
 }
 
 
@@ -646,8 +652,7 @@ if [ -f "$benchres" ]; then
   rm "$benchres"
 fi
 
-for ((i=1; i<=$repeats; i++))
-do
+for ((repeat=1; repeat<=$repeats; repeat++)); do
   for tst in $tests_run; do
     run_test "$tst"
   done
@@ -661,4 +666,7 @@ done
 sed -i.bak "s/ 0:/ /" $benchres
 echo ""
 echo "# --------------------------------------------------"
+echo "# results written to: $benchres"
+
 cat $benchres 
+echo ""
