@@ -22,7 +22,7 @@ tests_all3="lean-mathlib gs z3 spec spec-bench malloc-large mleak"
 tests_all4="malloc-test cthrash rbstress"
 
 tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
-tests_alla="$tests_all1 $tests_all2"  # run with 'alla' command option
+tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
@@ -305,7 +305,7 @@ while : ; do
               fi
             done;;
         allt)
-            for tst in $tests_alla; do
+            for tst in $tests_allt; do
               tests_run_add_remove "$tst" "$flag_arg"
             done;;
         glibc)
