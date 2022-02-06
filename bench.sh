@@ -112,19 +112,22 @@ alloc_lib_add "tbb"    "$lib_tbb"
 alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 
-alloc_lib_add "mi"    "$localdevdir/mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "smi"   "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "dmi"   "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
-alloc_lib_add "xmi"   "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "xsmi"  "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "xdmi"  "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "mi"     "$localdevdir/mimalloc/out/release/libmimalloc$extso"
+alloc_lib_add "smi"    "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "dmi"    "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "xmi"    "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
+alloc_lib_add "xsmi"   "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "xdmi"   "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
 
 if test "$use_packages" = "1"; then
-  alloc_lib_add "tc"  "/usr/lib/libtcmalloc$extso"
-  alloc_lib_add "tbb" "/usr/lib/libtbbmalloc_proxy$extso"
-
+  if test -f "/usr/lib/libtcmalloc$extso"; then
+    alloc_lib_add "tc"  "/usr/lib/libtcmalloc$extso"
+  fi
+  if test -f "/usr/lib/libtbbmalloc_proxy$extso"; then
+    alloc_lib_add "tbb" "/usr/lib/libtbbmalloc_proxy$extso"
+  fi
   if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"; then
-    alloc_lib_add "tc" "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"u
+    alloc_lib_add "tc" "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"
   fi
   if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"; then
     alloc_lib_add "tbb" "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"
@@ -342,9 +345,9 @@ while : ; do
             echo "  hml                          use hardened_malloc light"
             echo "  iso                          use isoalloc"
             echo "  je                           use jemalloc"
-            echo "  mng                          use mallocng"
             echo "  mesh                         use mesh"
             echo "  mi                           use mimalloc"
+            echo "  mng                          use mallocng"
             echo "  nomesh                       use mesh with meshing disabled"
             echo "  rp                           use rpmalloc"
             echo "  sc                           use scalloc"

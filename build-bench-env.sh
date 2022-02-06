@@ -39,9 +39,9 @@ version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=11
 version_iso=1.1.0
 version_je=5.2.1
-version_mng=master
 version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 version_mi=v1.7.3
+version_mng=master
 version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 version_rp=4c10723
 version_sc=v1.0.0
@@ -65,9 +65,9 @@ setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
-setup_mng=0
 setup_mesh=0
 setup_mi=0
+setup_mng=0
 setup_nomesh=0
 setup_rp=0
 setup_sc=0
@@ -145,7 +145,7 @@ while : ; do
     ff)
         setup_ff=$flag_arg;;
     dh)
-          setup_dh=$flag_arg;;
+        setup_dh=$flag_arg;;
     gd)
         setup_gd=$flag_arg;;
     hd)
@@ -207,9 +207,9 @@ while : ; do
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
-        echo "  mng                          setup mallocng ($version_mng)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
+        echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
