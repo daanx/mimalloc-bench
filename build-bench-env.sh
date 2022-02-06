@@ -123,7 +123,7 @@ while : ; do
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
           setup_scudo=$flag_arg     # lacking <sys/auxv.h>
-          setup_sm=$flag_arg
+          setup_sm=$flag_arg        # ../src/supermalloc.h:10:31: error: expected function body after function declarator + error: use of undeclared identifier 'MADV_HUGEPAGE'
         else
           if ! [ `uname -m` = "x86_64" ]; then
             setup_dh=$flag_arg      # does not compile on macos x64
