@@ -49,7 +49,7 @@ version_scudo=main
 version_sg=master
 version_sm=709663f
 version_sn=0.5.3
-version_tbb=v2021.5.0
+version_tbb=3a7f96d  # v2021.5.0 + a fix for musl
 version_tc=gperftools-2.9.1
 version_tcg=651fe931f11f981bc7e9552dda0aa8faa297f042
 
