@@ -230,6 +230,7 @@ benchmarks as it faulted on those)
 - A [crash]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
 - Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 - [Parallel compilation](https://github.com/emeryberger/DieHard/issues/15) support in DieHarder
+- [Portability improvement](https://github.com/oneapi-src/oneTBB/pull/764) in Intel TBB malloc
 
 
 # References
