@@ -5,24 +5,24 @@
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys dh ff gd hd hm hml iso je mi mng mesh nomesh rp sc scudo sg sm smi sn tbb tc tcg dmi xmi xsmi xdmi"
-alloc_secure="dh ff gd hm hml iso mng scudo sg smi sg"
+readonly alloc_all="sys dh ff gd hd hm hml iso je mi mng mesh nomesh rp sc scudo sg sm smi sn tbb tc tcg dmi xmi xsmi xdmi"
+readonly alloc_secure="dh ff gd hm hml iso mng scudo sg smi sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed"
-tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
-tests_all3="larson lean-mathlib gs malloc-large mleak rbstress cthrash"
-tests_all4="z3 spec spec-bench"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed"
+readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
+readonly tests_all3="larson lean-mathlib gs malloc-large mleak rbstress cthrash"
+readonly tests_all4="z3 spec spec-bench"
 
-tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
-tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
+readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
+readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
 # sed: "RE error: invalid repetition count(s)" on OSX
-tests_exclude_macos="sh6bench sh8bench redis sed"
+readonly tests_exclude_macos="sh6bench sh8bench redis sed"
 
 
 # --------------------------------------------------------------------
@@ -61,7 +61,7 @@ esac
 # Check directories
 # --------------------------------------------------------------------
 
-curdir=`pwd`
+readonly curdir=`pwd`
 if ! test -f ../../build-bench-env.sh; then
   echo "error: you must run this script from the 'out/bench' directory!"
   exit 1
@@ -72,10 +72,10 @@ if ! test -d ../../extern; then
 fi
 
 pushd "../../extern" > /dev/null # up from `mimalloc-bench/out/bench`
-localdevdir=`pwd`
+readonly localdevdir=`pwd`
 popd > /dev/null
 pushd "../../bench" > /dev/null
-benchdir=`pwd`
+readonly benchdir=`pwd`
 popd > /dev/null
 
 
@@ -86,9 +86,9 @@ function alloc_lib_add {  # <allocator> <variable> <librarypath>
   alloc_libs="$1=$2 $alloc_libs"
 }
 
-lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
-lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
-lib_tbb_dir="$(dirname $lib_tbb)"
+readonly lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
+readonly lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
+readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
 
 alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
@@ -134,15 +134,15 @@ if test "$use_packages" = "1"; then
   fi
 fi
 
-leandir="$localdevdir/lean"
-leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-6.2.6/src"
-pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
+readonly leandir="$localdevdir/lean"
+readonlyOleanmldir="$leandir/../mathlib"
+readonlyOredis_dir="$localdevdir/redis-6.2.6/src"
+readonlyOpdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
-spec_dir="$localdevdir/../../spec2017"
-spec_base="base"
-spec_bench="refspeed"
-spec_config="malloc-test-m64"
+readonly spec_dir="$localdevdir/../../spec2017"
+readonly spec_base="base"
+readonly spec_bench="refspeed"
+readonly spec_config="malloc-test-m64"
 
 
 # --------------------------------------------------------------------
@@ -428,12 +428,11 @@ if [ -z "$alloc_run" ]; then
   exit 1
 fi  
 
-benchres="$curdir/benchres.csv"
-run_pre_cmd=""
+readonly benchres="$curdir/benchres.csv"
 
-procsx2=`echo "($procs*2)" | bc`
-procsx4=`echo "($procs*4)" | bc`
-procs_div2=`echo "($procs/2)" | bc`
+readonly procsx2=`echo "($procs*2)" | bc`
+readonly procsx4=`echo "($procs*4)" | bc`
+readonly procs_div2=`echo "($procs/2)" | bc`
 procs_max16="$procs" 
 if [ $procs -gt 16 ]; then
   procs_max16="16"
@@ -457,8 +456,8 @@ function set_spec_bench_dir {
 # --------------------------------------------------------------------
 # Run a test
 # --------------------------------------------------------------------
-allocfill="     "
-benchfill="           "
+readonly allocfill="     "
+readonly benchfill="           "
 
 function run_test_env_cmd { # <test name> <allocator name> <environment args> <command> <repeat>
   if ! [ -z "$sleep" ]; then
@@ -483,7 +482,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       echo "preprocess..."
       find -name '*.olean' | xargs rm;;
     spec-*)
-      spec_subdir="${1#*-}"
+      readonly spec_subdir="${1#*-}"
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
       echo "run spec benchmark in: $spec_bench_dir"
       pushd "$spec_bench_dir";;

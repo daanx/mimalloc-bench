@@ -3,7 +3,7 @@
 
 set -eo pipefail
 
-CFLAGS='-march=native'
+readonly CFLAGS='-march=native'
 CXXFLAGS='-march=native'
 
 procs=8
@@ -32,30 +32,30 @@ rebuild=0
 all=0
 
 # allocator versions
-version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
-version_ff=4be6234
-version_gd=master
-version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
-version_hm=11
-version_iso=1.1.0
-version_je=5.2.1
-version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
-version_mi=v1.7.5
-version_mng=master
-version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
-version_rp=4c10723
-version_sc=v1.0.0
-version_scudo=main
-version_sg=master
-version_sm=709663f
-version_sn=0.5.3
-version_tbb=3a7f96d  # v2021.5.0 + a fix for musl
-version_tc=gperftools-2.9.1
-version_tcg=651fe931f11f981bc7e9552dda0aa8faa297f042
+readonly version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
+readonly version_ff=4be6234
+readonly version_gd=master
+readonly version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
+readonly version_hm=11
+readonly version_iso=1.1.0
+readonly version_je=5.2.1
+readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+readonly version_mi=v1.7.5
+readonly version_mng=master
+readonly version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+readonly version_rp=4c10723
+readonly version_sc=v1.0.0
+readonly version_scudo=main
+readonly version_sg=master
+readonly version_sm=709663f
+readonly version_sn=0.5.3
+readonly version_tbb=3a7f96d  # v2021.5.0 + a fix for musl
+readonly version_tc=gperftools-2.9.1
+readonly version_tcg=651fe931f11f981bc7e9552dda0aa8faa297f042
 
 # benchmark versions
-version_redis=6.2.6
-version_lean=v3.4.2
+readonly version_redis=6.2.6
+readonly version_lean=v3.4.2
 
 # allocators
 setup_dh=0
@@ -247,7 +247,7 @@ else
 fi
 
 mkdir -p extern
-devdir="$curdir/extern"
+readonly devdir="$curdir/extern"
 
 function phase {
   cd "$curdir"
@@ -454,7 +454,7 @@ if test "$setup_tc" = "1"; then
     echo "already configured"
   else
     ./autogen.sh
-    CXXFLAGS="-w -DNDEBUG -O2" ./configure --enable-minimal --disable-debugalloc
+    CXXFLAGS="$CXXFLAGS -w -DNDEBUG -O2" ./configure --enable-minimal --disable-debugalloc
   fi
   make -j $procs # ends with error on benchmark, but thats ok.
   #echo ""
@@ -673,7 +673,7 @@ fi
 if test "$setup_bench" = "1"; then
   phase "get Intel PDF manual"
 
-  pdfdoc="325462-sdm-vol-1-2abcd-3abcd.pdf"
+  readonly  readonly pdfdoc="325462-sdm-vol-1-2abcd-3abcd.pdf"
   pushd "$devdir"
   if test -f "$pdfdoc"; then
     echo "do nothing: $devdir/$pdfdoc already exists"
