@@ -369,19 +369,22 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time sed"
+    dnfinstall "ghostscript"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
-    aptinstall "cmake python3 ruby ninja-build libtool autoconf sed"
+    aptinstall "cmake python3 ruby ninja-build libtool autoconf sed ghostscript"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk"
     apkinstall "samurai libtool git build-base linux-headers autoconf util-linux sed"
+    apkinstall "ghostscript"
   elif brew --version 2> /dev/null >/dev/null; then
-    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed bazelisk"
+    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed"
+    brewinstall "ghostscript bazelisk"
   fi
 fi
 
@@ -673,7 +676,7 @@ fi
 if test "$setup_bench" = "1"; then
   phase "get Intel PDF manual"
 
-  readonly  readonly pdfdoc="325462-sdm-vol-1-2abcd-3abcd.pdf"
+  readonly pdfdoc="325462-sdm-vol-1-2abcd-3abcd.pdf"
   pushd "$devdir"
   if test -f "$pdfdoc"; then
     echo "do nothing: $devdir/$pdfdoc already exists"

@@ -11,9 +11,9 @@ alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed gs"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
-readonly tests_all3="larson lean-mathlib gs malloc-large mleak rbstress cthrash"
+readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench"
 
 readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
@@ -135,9 +135,9 @@ if test "$use_packages" = "1"; then
 fi
 
 readonly leandir="$localdevdir/lean"
-readonlyOleanmldir="$leandir/../mathlib"
-readonlyOredis_dir="$localdevdir/redis-6.2.6/src"
-readonlyOpdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
+readonly leanmldir="$leandir/../mathlib"
+readonly redis_dir="$localdevdir/redis-6.2.6/src"
+readonly pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
