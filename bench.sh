@@ -1,6 +1,15 @@
 #!/bin/bash
 # Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
 
+if grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
+  echo "Running on Debian or Ubuntu: errors are considered fatal"
+  set -exo pipefail
+elif brew --version 2> /dev/null >/dev/null; then
+  echo "Running on OSX: errors are considered fatal"
+  set -exo pipefail
+fi
+
+
 # --------------------------------------------------------------------
 # Allocators and tests
 # --------------------------------------------------------------------
@@ -49,7 +58,7 @@ case "$OSTYPE" in
     procs=`sysctl -n hw.physicalcpu`
     sedcmd=gsed;;
   *)
-    libc=`ldd --version | head -n 1`
+    libc=`ldd --version 2>&1 | head -n 1` || true
     libc="${libc#ldd }"
     if command -v nproc > /dev/null; then 
       procs=`nproc`
