@@ -3,10 +3,10 @@
 
 if grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
   echo "Running on Debian or Ubuntu: errors are considered fatal"
-  set -exo pipefail
+  set -eo pipefail
 elif brew --version 2> /dev/null >/dev/null; then
   echo "Running on OSX: errors are considered fatal"
-  set -exo pipefail
+  set -eo pipefail
 fi
 
 
