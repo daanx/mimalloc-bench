@@ -674,15 +674,17 @@ if test "$setup_bench" = "1"; then
 fi
 
 if test "$setup_bench" = "1"; then
-  phase "get Intel PDF manual"
+  phase "get large PDF document"
 
-  readonly pdfdoc="325462-sdm-vol-1-2abcd-3abcd.pdf"
+  readonly pdfdoc="large.pdf"
+  readonly pdfurl="https://raw.githubusercontent.com/geekaaron/Resources/master/resources/Writing_a_Simple_Operating_System--from_Scratch.pdf "
+  #readonly pdfurl="https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf"
   pushd "$devdir"
   if test -f "$pdfdoc"; then
     echo "do nothing: $devdir/$pdfdoc already exists"
   else
     useragent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
-    wget --no-verbose -O "$pdfdoc" -U "useragent" https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
+    wget --no-verbose -O "$pdfdoc" -U "useragent" $pdfurl
   fi
   popd
 fi

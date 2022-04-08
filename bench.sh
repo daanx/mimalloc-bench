@@ -146,7 +146,8 @@ fi
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-6.2.6/src"
-readonly pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
+readonly pdfdoc="$localdevdir/large.pdf" 
+                
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
