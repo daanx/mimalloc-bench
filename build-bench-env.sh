@@ -376,6 +376,7 @@ if test "$setup_packages" = "1"; then
     $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python3 ruby ninja-build libtool autoconf sed ghostscript time"
+    aptinstall "curl automake"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
