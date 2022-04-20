@@ -541,7 +541,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     glibc-thread)
       ops=`cat "$1-$2-out.txt" | sed -n 's/\([0-9\.]*\).*/\1/p'`
-      rtime=`echo "scale=3; (10000000000 / $ops)" | bc`
+      rtime=`echo "scale=3; (1000000000 / $ops)" | bc`
       echo "$1,$2: iterations: ${ops}, relative time: ${rtime}s"
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     spec-*)
@@ -603,6 +603,8 @@ function run_test {  # <test>
       popd;;
     redis)
       # https://redis.io/topics/benchmarks
+      #redis_tail="20"
+      #run_test_cmd "redis" "$redis_dir/redis-benchmark -q -r 1000 -n 10000";;
       redis_tail="1"
       run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
     alloc-test)
