@@ -40,7 +40,7 @@ readonly version_hm=11
 readonly version_iso=1.1.0
 readonly version_je=5.2.1
 readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
-readonly version_mi=v1.7.5
+readonly version_mi=v1.7.6
 readonly version_mng=master
 readonly version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 readonly version_rp=4c10723
@@ -376,6 +376,7 @@ if test "$setup_packages" = "1"; then
     $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python3 ruby ninja-build libtool autoconf sed ghostscript time"
+    aptinstall "curl automake"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
@@ -573,14 +574,9 @@ if test "$setup_mi" = "1"; then
   echo ""
   echo "- build mimalloc release"
 
-  mi_use_cxx=""
-  if test "$darwin" = "1"; then
-    mi_use_cxx="-DMI_USE_CXX=ON"
-  fi
-
   mkdir -p out/release
   cd out/release
-  cmake ../..  $mi_use_cxx
+  cmake ../..
   make -j $procs
   cd ../..
 
@@ -589,7 +585,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/debug
   cd out/debug
-  cmake ../.. -DMI_CHECK_FULL=ON $mi_use_cxx
+  cmake ../.. -DMI_CHECK_FULL=ON
   make -j $procs
   cd ../..
 
@@ -598,7 +594,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/secure
   cd out/secure
-  cmake ../.. $mi_use_cxx
+  cmake ../..
   make -j $procs
   cd ../..
   popd

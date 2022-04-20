@@ -40,7 +40,8 @@ jobs:
       - name: Install and build all benchmarks and allocators
         # gd: infinite loop in the redis benchmark
         # sg: infinite loop in the redis benchmark
-        run: ./build-bench-env.sh all no-lean no-gd no-sg
+        # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
+        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff
       - name: Run everything.
         run: |
           cd out/bench
