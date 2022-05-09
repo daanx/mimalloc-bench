@@ -14,8 +14,8 @@ fi
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff gd hd hm hml iso je mi mng mesh nomesh rp sc scudo sg sm smi sn tbb tc tcg dmi xmi xsmi xdmi"
-readonly alloc_secure="dh ff gd hm hml iso mng scudo sg smi sg"
+readonly alloc_all="sys dh ff gd hd hm hml iso je mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
+readonly alloc_secure="dh ff gd hm hml iso mi-sec mng scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
@@ -117,16 +117,17 @@ alloc_lib_add "scudo"  "$localdevdir/scudo/compiler-rt/lib/scudo/standalone/libs
 alloc_lib_add "sg"     "$localdevdir/sg/libSlimGuard.so"
 alloc_lib_add "sm"     "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
 alloc_lib_add "sn"     "$localdevdir/snmalloc/release/libsnmallocshim$extso"
+alloc_lib_add "sn-sec" "$localdevdir/snmalloc/release/libsnmallocshim-checks$extso"
 alloc_lib_add "tbb"    "$lib_tbb"
 alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 
 alloc_lib_add "mi"     "$localdevdir/mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "smi"    "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "dmi"    "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "mi-sec"    "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "mi-dbg"    "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
 alloc_lib_add "xmi"    "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "xsmi"   "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "xdmi"   "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "xmi-sec"   "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "xmi-dbg"   "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
 
 if test "$use_packages" = "1"; then
   if test -f "/usr/lib/libtcmalloc$extso"; then
@@ -205,10 +206,13 @@ function alloc_run_add_remove { # <allocator> <add?>
 # read in the installed allocators
 while read word _; do alloc_installed="$alloc_installed ${word%:*}"; done < ${localdevdir}/versions.txt
 if is_installed "mi"; then
-  alloc_installed="$alloc_installed smi"   # secure mimalloc
+  alloc_installed="$alloc_installed mi-sec"   # secure mimalloc
 fi
 if is_installed "hm"; then
   alloc_installed="$alloc_installed hml"   # hardened_malloc light
+fi
+if is_installed "sn"; then
+  alloc_installed="$alloc_installed sn-sec"   # secure snmalloc
 fi
 
 
@@ -357,6 +361,7 @@ while : ; do
             echo "  je                           use jemalloc"
             echo "  mesh                         use mesh"
             echo "  mi                           use mimalloc"
+            echo "  mi-sec                       use secure version of mimalloc"
             echo "  mng                          use mallocng"
             echo "  nomesh                       use mesh with meshing disabled"
             echo "  rp                           use rpmalloc"
@@ -364,8 +369,8 @@ while : ; do
             echo "  scudo                        use scudo"
             echo "  sg                           use slimguard"
             echo "  sm                           use supermalloc"
-            echo "  smi                          use secure version of mimalloc"
             echo "  sn                           use snmalloc"
+            echo "  sn-sec                       use secure version of snmalloc"
             echo "  sys                          use system malloc ($libc)"
             echo "  tbb                          use Intel TBB malloc"
             echo "  tc                           use tcmalloc (from gperftools)"

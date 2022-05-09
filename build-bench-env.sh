@@ -526,7 +526,7 @@ if test "$setup_sn" = "1"; then
     cd ..
   fi
   cd release
-  ninja libsnmallocshim$extso
+  ninja libsnmallocshim$extso libsnmallocshim-checks$extso
   popd
 fi
 
