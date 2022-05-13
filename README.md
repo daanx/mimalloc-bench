@@ -114,11 +114,11 @@ for the versions:
 - **tbb**: The Intel [TBB](https://github.com/intel/tbb) allocator that comes
   with the Thread Building Blocks (TBB) library \[7].
 - **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
-  allocator which comes as part of
-  the Google performance tools and is used in the Chrome browser, maintained
-  by the community
+  allocator which comes as part of the Google performance tools,
+  now maintained by the commuity.
 - **tcg**: The [_tcmalloc_](https://github.com/google/tcmalloc)
-  allocator, maintained by Google
+  allocator, maintained and [used](https://cloud.google.com/blog/topics/systems/trading-off-malloc-costs-and-fleet-efficiency)
+  by Google.
 - **sys**: The system allocator. Here we usually use the _glibc_ allocator
   (which is originally based on _Ptmalloc2_).
 
