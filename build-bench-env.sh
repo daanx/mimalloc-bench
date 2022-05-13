@@ -51,7 +51,7 @@ readonly version_sm=709663f
 readonly version_sn=0.6.0
 readonly version_tbb=3a7f96d  # v2021.5.0 + a fix for musl
 readonly version_tc=gperftools-2.9.1
-readonly version_tcg=651fe931f11f981bc7e9552dda0aa8faa297f042
+readonly version_tcg=f818385c4b7afd6b4fb6fb999ca05959171cdd95
 
 # benchmark versions
 readonly version_redis=6.2.6
