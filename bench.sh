@@ -14,7 +14,7 @@ fi
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff gd hd hm hml iso je mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
+readonly alloc_all="sys dh ff gd hd hm hml iso je lp mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mng scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
@@ -108,6 +108,7 @@ alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
 alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso"
 alloc_lib_add "iso"    "$localdevdir/iso/build/libisoalloc$extso"
 alloc_lib_add "je"     "$localdevdir/jemalloc/lib/libjemalloc$extso"
+alloc_lib_add "lp"     "$localdevdir/lp/Source/bmalloc/libpas/build-cmake-default/Release/libpas_lib$extso"
 alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
 alloc_lib_add "mng"    "$localdevdir/mng/libmallocng$extso"
 alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
@@ -359,6 +360,7 @@ while : ; do
             echo "  hml                          use hardened_malloc light"
             echo "  iso                          use isoalloc"
             echo "  je                           use jemalloc"
+            echo "  lp                           use libpas"
             echo "  mesh                         use mesh"
             echo "  mi                           use mimalloc"
             echo "  mi-sec                       use secure version of mimalloc"

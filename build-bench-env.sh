@@ -3,7 +3,7 @@
 
 set -eo pipefail
 
-readonly CFLAGS='-march=native'
+CFLAGS='-march=native'
 CXXFLAGS='-march=native'
 
 procs=8
@@ -39,6 +39,7 @@ readonly version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
 readonly version_iso=1.2.1
 readonly version_je=5.3.0
+readonly version_lp=main
 readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 readonly version_mi=v1.7.6
 readonly version_mng=master
@@ -65,6 +66,7 @@ setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
+setup_lp=0
 setup_mesh=0
 setup_mi=0
 setup_mng=0
@@ -120,6 +122,7 @@ while : ; do
           setup_dh=$flag_arg        
           setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
+          setup_lp=$flag_arg        # TODO(jvoisin)
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
           setup_scudo=$flag_arg     # lacking <sys/auxv.h>
@@ -156,6 +159,8 @@ while : ; do
         setup_iso=$flag_arg;;
     je)
         setup_je=$flag_arg;;
+    lp)
+        setup_lp=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
     mng)
@@ -207,6 +212,7 @@ while : ; do
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
+        echo "  lp                           setup libpas ($version_lp)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
         echo "  mng                          setup mallocng ($version_mng)"
@@ -369,20 +375,20 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk"
     dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time sed"
-    dnfinstall "ghostscript"
+    dnfinstall "ghostscript libatomic"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
     aptinstall "cmake python3 ruby ninja-build libtool autoconf sed ghostscript time"
-    aptinstall "curl automake"
+    aptinstall "curl automake libatomic1"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk"
     apkinstall "samurai libtool git build-base linux-headers autoconf util-linux sed"
-    apkinstall "ghostscript"
+    apkinstall "ghostscript libatomic"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed"
     brewinstall "ghostscript bazelisk"
@@ -425,6 +431,25 @@ if test "$setup_scudo" = "1"; then
   cd "compiler-rt/lib/scudo/standalone"
   # TODO: make the next line prettier instead of hardcoding everything.
   clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions $CXXFLAGS -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
+  cd -
+  popd
+fi
+
+if test "$setup_lp" = "1"; then
+  partial_checkout lp $version_lp lp https://github.com/WebKit/WebKit "Source/bmalloc/libpas"
+  cd "Source/bmalloc/libpas"
+  ORIG=""
+  if test "$darwin" = "1"; then
+    ORIG="_orig"
+  fi
+  sed -i $ORIG '/Werror/d' CMakeLists.txt
+  # Remove once/if https://github.com/WebKit/WebKit/pull/1219 is merged
+  sed -i $ORIG 's/cmake --build $build_dir --parallel/cmake --build $build_dir --target pas_lib --parallel/' build.sh
+  if test "$darwin" = "1"; then
+    ./build.sh
+  else
+    CC=clang CXX=clang++ LDFLAGS='-lpthread -latomic -pthread' bash ./build.sh -s cmake -v default -t pas_lib
+  fi
   cd -
   popd
 fi
