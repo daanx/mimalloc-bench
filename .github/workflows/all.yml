@@ -80,8 +80,7 @@ jobs:
       - name: Install and build all benchmarks and allocators
         # ff: error: use of undeclared identifier 'MAP_POPULATE'
         # gd: so many errors
-        # lp: TODO(jvoisin)
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-lp
+        run: ./build-bench-env.sh all no-lean no-gd no-ff
       - name: Run everything.
         run: |
           cd out/bench

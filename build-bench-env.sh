@@ -112,6 +112,7 @@ while : ; do
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
         setup_je=$flag_arg
+        setup_lp=$flag_arg
         setup_mi=$flag_arg
         setup_sn=$flag_arg
         setup_sg=$flag_arg
@@ -122,7 +123,6 @@ while : ; do
           setup_dh=$flag_arg        
           setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
-          setup_lp=$flag_arg        # TODO(jvoisin)
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
           setup_scudo=$flag_arg     # lacking <sys/auxv.h>
@@ -446,7 +446,7 @@ if test "$setup_lp" = "1"; then
   # Remove once/if https://github.com/WebKit/WebKit/pull/1219 is merged
   sed -i $ORIG 's/cmake --build $build_dir --parallel/cmake --build $build_dir --target pas_lib --parallel/' build.sh
   if test "$darwin" = "1"; then
-    ./build.sh
+    ./build.sh -s cmake -v default -t pas_lib
   else
     CC=clang CXX=clang++ LDFLAGS='-lpthread -latomic -pthread' bash ./build.sh -s cmake -v default -t pas_lib
   fi
