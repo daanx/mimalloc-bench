@@ -87,6 +87,8 @@ for the versions:
   allocator by [Jason Evans](https://github.com/jasone),
   now developed at Facebook
   and widely used in practice, for example in FreeBSD and Firefox.
+- **lp**: The [_libpas_](https://github.com/WebKit/WebKit/tree/main/Source/bmalloc/libpas)
+  allocator, used by [WebKit](https://webkit.org).
 - **mng**: [musl](https://musl.libc.org)'s memory allocator.
 - **mesh**: The [_mesh_](https://github.com/plasma-umass/mesh) allocator, a
   memory allocator that automatically reduces the memory footprint of C/C++
