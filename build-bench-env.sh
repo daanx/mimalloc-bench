@@ -33,7 +33,7 @@ all=0
 
 # allocator versions
 readonly version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
-readonly version_ff=4be6234
+readonly version_ff=master  # ~unmaintained
 readonly version_gd=master
 readonly version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
