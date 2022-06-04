@@ -55,7 +55,7 @@ readonly version_tc=gperftools-2.10
 readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 
 # benchmark versions
-readonly version_redis=6.2.6
+readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
 
 # allocators
