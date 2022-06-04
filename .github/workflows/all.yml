@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+      - name: Enable the testing repository
+        run: echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
       - name: Install bash
         run: apk add bash git
       - name: Silence some git warnings
