@@ -1,32 +1,37 @@
 #!/bin/bash
-# Copyright 2018-2021, Microsoft Research, Daan Leijen
+# Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
 
-echo "--- Benchmarking ---"
-echo ""
-echo "Use '-h' or '--help' for help on configuration options."
-echo ""
+if grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
+  echo "Running on Debian or Ubuntu: errors are considered fatal"
+  set -eo pipefail
+elif brew --version 2> /dev/null >/dev/null; then
+  echo "Running on OSX: errors are considered fatal"
+  set -eo pipefail
+fi
+
 
 # --------------------------------------------------------------------
 # Allocators and tests
 # --------------------------------------------------------------------
 
-alloc_all="sys je xmi mi tc sp sm sn tbb hd mesh nomesh sc scudo hm iso dmi smi xdmi xsmi mallocng dieharder"
-alloc_secure="dieharder hm iso mallocng scudo smi"
+readonly alloc_all="sys dh ff gd hd hm hml iso je lp mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
+readonly alloc_secure="dh ff gd hm hml iso mi-sec mng scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-tests_all1="cfrac espresso barnes redis lean larson larson-sized mstress rptest" 
-tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
-tests_all3="lean-mathlib gs z3 spec spec-bench malloc-large mleak"
-tests_all4="malloc-test cthrash rbstress"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed gs"
+readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
+readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
+readonly tests_all4="z3 spec spec-bench"
 
-tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
-tests_alla="$tests_all1 $tests_all2"  # run with 'alla' command option
+readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
+readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
-tests_exclude_macos="sh6bench sh8bench redis"
+# sed: "RE error: invalid repetition count(s)" on OSX
+readonly tests_exclude_macos="sh6bench sh8bench redis sed"
 
 
 # --------------------------------------------------------------------
@@ -36,9 +41,13 @@ tests_exclude_macos="sh6bench sh8bench redis"
 verbose="no"
 ldpreload="LD_PRELOAD"
 timecmd="$(type -P time)"  # the shell builtin doesn't have all the options we need
+sedcmd=sed
 darwin=""
 extso=".so"
 procs=8
+repeats=1          # repeats of all tests
+test_repeats=1     # repeats per test
+sleep=0            # mini sleeps between tests seem to improve stability
 case "$OSTYPE" in
   darwin*) 
     darwin="1"
@@ -46,9 +55,10 @@ case "$OSTYPE" in
     extso=".dylib"
     ldpreload="DYLD_INSERT_LIBRARIES"
     libc=`clang --version | head -n 1`
-    procs=`sysctl -n hw.physicalcpu`;;
+    procs=`sysctl -n hw.physicalcpu`
+    sedcmd=gsed;;
   *)
-    libc=`ldd --version | head -n 1`
+    libc=`ldd --version 2>&1 | head -n 1` || true
     libc="${libc#ldd }"
     if command -v nproc > /dev/null; then 
       procs=`nproc`
@@ -60,7 +70,7 @@ esac
 # Check directories
 # --------------------------------------------------------------------
 
-curdir=`pwd`
+readonly curdir=`pwd`
 if ! test -f ../../build-bench-env.sh; then
   echo "error: you must run this script from the 'out/bench' directory!"
   exit 1
@@ -71,10 +81,10 @@ if ! test -d ../../extern; then
 fi
 
 pushd "../../extern" > /dev/null # up from `mimalloc-bench/out/bench`
-localdevdir=`pwd`
+readonly localdevdir=`pwd`
 popd > /dev/null
 pushd "../../bench" > /dev/null
-benchdir=`pwd`
+readonly benchdir=`pwd`
 popd > /dev/null
 
 
@@ -85,54 +95,66 @@ function alloc_lib_add {  # <allocator> <variable> <librarypath>
   alloc_libs="$1=$2 $alloc_libs"
 }
 
-lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
-lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
-lib_tbb_dir="$(dirname $lib_tbb)"
+readonly lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
+readonly lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
+readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
-alloc_lib_add "dieharder" "${localdevdir}/dieharder/src/libdieharder$extso"
-alloc_lib_add "hd"    "$localdevdir/Hoard/src/libhoard$extso"
-alloc_lib_add "hm"    "${localdevdir}/hm/libhardened_malloc$extso"
-alloc_lib_add "iso"   "${localdevdir}/iso/build/libisoalloc.so"  # isoalloc uses .so even on OSX
-alloc_lib_add "je"    "${localdevdir}/jemalloc/lib/libjemalloc$extso"
-alloc_lib_add "mallocng" "${localdevdir}/mallocng/libmallocng$extso"
-alloc_lib_add "mesh"  "${localdevdir}/mesh/build/lib/libmesh$extso"
-alloc_lib_add "nomesh" "${localdevdir}/nomesh/build/lib/libmesh$extso"
-alloc_lib_add "rp"    "$lib_rp"
-alloc_lib_add "sc"    "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
-alloc_lib_add "scudo" "${localdevdir}/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
-alloc_lib_add "sm"    "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
-alloc_lib_add "sn"    "$localdevdir/snmalloc/release/libsnmallocshim$extso"
-alloc_lib_add "tbb"   "$lib_tbb"
-alloc_lib_add "tc"    "$localdevdir/gperftools/.libs/libtcmalloc_minimal$extso"
 
-alloc_lib_add "mi"    "$localdevdir/mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "smi"   "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "dmi"   "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
-alloc_lib_add "xmi"   "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "xsmi"  "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "xdmi"  "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
+alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
+alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
+alloc_lib_add "hd"     "$localdevdir/Hoard/src/libhoard$extso"
+alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
+alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso"
+alloc_lib_add "iso"    "$localdevdir/iso/build/libisoalloc$extso"
+alloc_lib_add "je"     "$localdevdir/jemalloc/lib/libjemalloc$extso"
+alloc_lib_add "lp"     "$localdevdir/lp/Source/bmalloc/libpas/build-cmake-default/Release/libpas_lib$extso"
+alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
+alloc_lib_add "mng"    "$localdevdir/mng/libmallocng$extso"
+alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
+alloc_lib_add "rp"     "$lib_rp"
+alloc_lib_add "sc"     "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
+alloc_lib_add "scudo"  "$localdevdir/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
+alloc_lib_add "sg"     "$localdevdir/sg/libSlimGuard.so"
+alloc_lib_add "sm"     "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
+alloc_lib_add "sn"     "$localdevdir/snmalloc/release/libsnmallocshim$extso"
+alloc_lib_add "sn-sec" "$localdevdir/snmalloc/release/libsnmallocshim-checks$extso"
+alloc_lib_add "tbb"    "$lib_tbb"
+alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
+alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
+
+alloc_lib_add "mi"     "$localdevdir/mimalloc/out/release/libmimalloc$extso"
+alloc_lib_add "mi-sec"    "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "mi-dbg"    "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "xmi"    "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
+alloc_lib_add "xmi-sec"   "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "xmi-dbg"   "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
 
 if test "$use_packages" = "1"; then
-  alloc_lib_add "tc"  "/usr/lib/libtcmalloc$extso"
-  alloc_lib_add "tbb" "/usr/lib/libtbbmalloc_proxy$extso"
-
+  if test -f "/usr/lib/libtcmalloc$extso"; then
+    alloc_lib_add "tc"  "/usr/lib/libtcmalloc$extso"
+  fi
+  if test -f "/usr/lib/libtbbmalloc_proxy$extso"; then
+    alloc_lib_add "tbb" "/usr/lib/libtbbmalloc_proxy$extso"
+  fi
   if test -f "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"; then
-    alloc_lib_add "tc" "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"u
+    alloc_lib_add "tc" "/usr/lib/x86_64-linux-gnu/libtcmalloc$extso"
   fi
   if test -f "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"; then
     alloc_lib_add "tbb" "/usr/lib/x86_64-linux-gnu/libtbbmalloc_proxy$extso"
   fi
 fi
 
-leandir="$localdevdir/lean"
-leanmldir="$leandir/../mathlib"
-redis_dir="$localdevdir/redis-6.2.6/src"
-pdfdoc="$localdevdir/325462-sdm-vol-1-2abcd-3abcd.pdf"
+readonly leandir="$localdevdir/lean"
+readonly leanmldir="$leandir/../mathlib"
+readonly redis_dir="$localdevdir/redis-6.2.6/src"
+readonly pdfdoc="$localdevdir/large.pdf" 
+                
 
-spec_dir="$localdevdir/../../spec2017"
-spec_base="base"
-spec_bench="refspeed"
-spec_config="malloc-test-m64"
+readonly spec_dir="$localdevdir/../../spec2017"
+readonly spec_base="base"
+readonly spec_bench="refspeed"
+readonly spec_config="malloc-test-m64"
 
 
 # --------------------------------------------------------------------
@@ -142,6 +164,7 @@ spec_config="malloc-test-m64"
 function warning { # <message> 
   echo ""
   echo "warning: $1"
+  echo ""
 }
 
 function contains {  # <string> <substring>   does string contain substring?
@@ -184,7 +207,13 @@ function alloc_run_add_remove { # <allocator> <add?>
 # read in the installed allocators
 while read word _; do alloc_installed="$alloc_installed ${word%:*}"; done < ${localdevdir}/versions.txt
 if is_installed "mi"; then
-  alloc_installed="$alloc_installed smi"   # secure mimalloc
+  alloc_installed="$alloc_installed mi-sec"   # secure mimalloc
+fi
+if is_installed "hm"; then
+  alloc_installed="$alloc_installed hml"   # hardened_malloc light
+fi
+if is_installed "sn"; then
+  alloc_installed="$alloc_installed sn-sec"   # secure snmalloc
 fi
 
 
@@ -246,7 +275,7 @@ while : ; do
   flag="$1"
   case "$flag" in
     *=*)  flag_arg="${flag#*=}"
-          flag="${flag%=*}";;
+          flag="${flag%=*}=";;
     no-*) flag_arg="0"
           flag="${flag#no-}";;
     none) flag_arg="0" ;;
@@ -261,12 +290,7 @@ while : ; do
   if contains "$alloc_all" "$flag"; then
     #echo "allocator flag: $flag"
     if ! contains "$alloc_installed" "$flag"; then
-      warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
-    fi
-    alloc_run_add_remove "$flag" "$flag_arg"    
-  elif contains "$alloc_secure" "$flag"; then
-    if ! contains "$alloc_installed" "$flag"; then
-      warning "allocator '$flag' selected but it is not installed ($alloc_installed)"
+      warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
     fi
     alloc_run_add_remove "$flag" "$flag_arg"    
   else
@@ -291,7 +315,7 @@ while : ; do
               fi
             done;;
         allt)
-            for tst in $tests_alla; do
+            for tst in $tests_allt; do
               tests_run_add_remove "$tst" "$flag_arg"
             done;;
         glibc)
@@ -300,8 +324,14 @@ while : ; do
         spec=*)
             test_run_add "spec"
             run_spec_bench="$flag_arg";;
-        -j|--procs)
+        -j=*|--procs=*)
             procs="$flag_arg";;
+        -r=*)
+            repeats="$flag_arg";;
+        -n=*)
+            test_repeats="$flag_arg";;
+        -s=*|--sleep=*)
+            sleep="$flag_arg";;
         -v|--verbose)
             verbose="yes";;
         -h|--help|-\?|help|\?)
@@ -309,8 +339,11 @@ while : ; do
             echo ""
             echo "options:"
             echo "  -h, --help                   show this help"  
-            echo "  -v, --verbose                be verbose"
-            echo "  -j<n>, --procs=<n>           concurrency level (=$procs)"
+            echo "  -v, --verbose                be verbose (=$verbose)"
+            echo "  -j=<n>, --procs=<n>          concurrency level (=$procs)"
+            echo "  -r=<n>                       number of repeats of the full suite (=$repeats)"
+            echo "  -n=<n>                       number of repeats of each individual test (=$test_repeats)"
+            echo "  -s=<n>, --sleep=<n>          seconds of sleep between each test (=$sleep)"
             echo ""
             echo "  allt                         run all tests"
             echo "  alla                         run all allocators"
@@ -318,30 +351,46 @@ while : ; do
             echo "  no-<test|allocator>          do not run specific <test> or <allocator>"   
             echo ""
             echo "allocators:"
-            echo "  dieharder                    use dieharder"
+            echo "  dh                           use dieharder"
             echo "  dmi                          use debug version of mimalloc"
+            echo "  ff                           use ffmalloc"
+            echo "  gd                           use guarder"
             echo "  hd                           use hoard"
             echo "  hm                           use hardened_malloc"
+            echo "  hml                          use hardened_malloc light"
             echo "  iso                          use isoalloc"
             echo "  je                           use jemalloc"
-            echo "  mallocng                     use mallocng"
+            echo "  lp                           use libpas"
             echo "  mesh                         use mesh"
             echo "  mi                           use mimalloc"
+            echo "  mi-sec                       use secure version of mimalloc"
+            echo "  mng                          use mallocng"
             echo "  nomesh                       use mesh with meshing disabled"
             echo "  rp                           use rpmalloc"
             echo "  sc                           use scalloc"
             echo "  scudo                        use scudo"
+            echo "  sg                           use slimguard"
             echo "  sm                           use supermalloc"
-            echo "  smi                          use secure version of mimalloc"
             echo "  sn                           use snmalloc"
+            echo "  sn-sec                       use secure version of snmalloc"
             echo "  sys                          use system malloc ($libc)"
             echo "  tbb                          use Intel TBB malloc"
-            echo "  tc                           use tcmalloc"
+            echo "  tc                           use tcmalloc (from gperftools)"
+            echo "  tcg                          use tcmalloc (from Google)"
             echo ""
-            echo "tests:"
+            echo "tests included in 'allt':"
             echo "  $tests_all1"
             echo "  $tests_all2"
+            echo ""
+            echo "further tests:"
             echo "  $tests_all3 $tests_all4"
+            echo ""
+            echo "secure allocators included in 'allsa':"
+            echo "  $alloc_secure"
+            echo ""
+            echo "installed allocators:"
+            echo "  sys:    $libc"
+            column -t "$localdevdir/versions.txt" | sed 's/^/  /'
             echo ""
             exit 0;;
         *) warning "unknown option \"$1\"." 1>&2
@@ -350,7 +399,10 @@ while : ; do
   fi
   shift
 done
-echo "Running on $procs cores."
+
+echo "benchmarking on $procs cores."
+echo "use '-h' or '--help' for help on configuration options."
+echo ""
 export verbose
 
 
@@ -359,19 +411,18 @@ export verbose
 # Info
 # --------------------------------------------------------------------
 
-if test "$verbose"="yes"; then
-  echo "Available tests:"
+if test "$verbose" = "yes"; then
+  echo "available tests: $verbose"
   echo "  $tests_all1"
   echo "  $tests_all2"
   echo "  $tests_all3 $tests_all4"
   echo ""
-  echo "Available alloctators:"
+  echo "available allocators:"
   echo "  $alloc_all"
   echo ""
-  echo "Installed allocators:"
-  echo ""
-  echo "sys:    $libc"
-  cat ${localdevdir}/versions.txt | column -t
+  echo "installed allocators:"
+  echo "  sys:    $libc"
+  column -t "$localdevdir/versions.txt" | sed 's/^/  /'
   echo ""
 fi
 
@@ -379,15 +430,22 @@ for tst in $tests_exclude; do
   tests_run_remove "$tst"
 done
 
-echo "Allocators: $alloc_run"
-echo "Tests     : $tests_run"
+echo "allocators: $alloc_run"
+echo "tests     : $tests_run"
 if [ ! -z "$tests_exclude" ]; then
   echo "(excluded tests: $tests_exclude)"
 fi  
-echo ""
 
-benchres="$curdir/benchres.csv"
-run_pre_cmd=""
+if [ -z "$tests_run" ]; then
+  warning "no tests are specified."
+  exit 1
+fi
+if [ -z "$alloc_run" ]; then
+  warning "no allocators are specified."
+  exit 1
+fi  
+
+readonly benchres="$curdir/benchres.csv"
 
 procsx2=$((procs * 2))
 procsx4=$((procs * 4))
@@ -412,13 +470,19 @@ function set_spec_bench_dir {
 # --------------------------------------------------------------------
 # Run a test
 # --------------------------------------------------------------------
-allocfill="     "
-benchfill="           "
+readonly allocfill="     "
+readonly benchfill="           "
 
-function run_test_env_cmd { # <test name> <allocator name> <environment args> <command>
+function run_test_env_cmd { # <test name> <allocator name> <environment args> <command> <repeat>
+  if ! [ -z "$sleep" ]; then
+    sleep "$sleep"
+  fi
   echo
-  echo "run $1 $2: $3 $4"
-  # cat $benchres
+  echo "run $test_repeat: $1 $2: $3 $4"
+  # clear temporary output
+  if [ -f "$benchres.line" ]; then
+    rm "$benchres.line"
+  fi
   outfile="$curdir/$1-$2-out.txt"
   infile="/dev/null"
 #  outfile="/dev/null"
@@ -432,11 +496,11 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       echo "preprocess..."
       find -name '*.olean' | xargs rm;;
     spec-*)
-      spec_subdir="${1#*-}"
+      readonly spec_subdir="${1#*-}"
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
       echo "run spec benchmark in: $spec_bench_dir"
       pushd "$spec_bench_dir";;
-    larson*|ebizzy|redis*|xmalloc*)
+    larson*|redis*|xmalloc*)
       outfile="$1-$2-out.txt";;
     barnes)
       infile="$benchdir/barnes/input";;
@@ -444,7 +508,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     redis*)
        echo "start server"
-       $timecmd -a -o $benchres -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
        sleep 1s
        $redis_dir/redis-cli flushall
        sleep 1s
@@ -456,59 +520,59 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        sleep 1s
        ;;
     *)
-       $timecmd -a -o $benchres -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
+
   # fixup larson with relative time
   case "$1" in
     redis*)
       ops=`tail -$redis_tail "$outfile" | sed -n 's/.*: \([0-9\.]*\) requests per second.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1 $2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     larson*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/.* time: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     rptest*)
       ops=`cat "$1-$2-out.txt" | sed -n 's/.*\.\.\.\([0-9]*\) memory ops.*/\1/p'`
       rtime=`echo "scale=3; (2000000 / $ops)" | bc`
       echo "$1,$2: ops/sec: $ops, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     xmalloc*)
       rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
       echo "$1,$2, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
-    ebizzy)
-      rtime=`cat "$1-$2-out.txt" | sed -n 's/rtime: \([0-9\.]*\).*/\1/p'`
-      echo "$1,$2, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     glibc-thread)
       ops=`cat "$1-$2-out.txt" | sed -n 's/\([0-9\.]*\).*/\1/p'`
-      rtime=`echo "scale=3; (10000000000 / $ops)" | bc`
+      rtime=`echo "scale=3; (1000000000 / $ops)" | bc`
       echo "$1,$2: iterations: ${ops}, relative time: ${rtime}s"
-      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" $benchres;;
+      sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
     spec-*)
       popd;;
   esac
-  tail -n1 $benchres
+  cat "$benchres.line" | tee -a $benchres
 }
 
 function run_test_cmd {  # <test name> <command>
   echo "      " >> $benchres
   echo ""
-  echo "---- $1"  
-  for alloc in $alloc_all; do
+  echo "---- $repeat: $1"  
+  for alloc in $alloc_run; do     # use order as given on the command line
+  # for alloc in $alloc_all; do   # use order as specified in $alloc_all
     if contains "$alloc_run" "$alloc"; then
       # echo "allocator: $alloc"
       alloc_lib_set "$alloc"  # sets alloc_lib to point to the allocator .so file
-      case "$alloc" in
-        sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2";;
-        dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
-        tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2";;
-        *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2";;
-      esac
+      for ((test_repeat=1; test_repeat<=$test_repeats; test_repeat++)); do
+        case "$alloc" in
+          sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2";;
+          dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
+          tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2";;
+          *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2";;
+        esac
+      done
     fi
-  done           
+  done             
 }
 
 
@@ -531,7 +595,11 @@ function run_test {  # <test>
     lean)
       pushd "$leandir/library"
       # run_test_cmd "lean1" "../bin/lean --make -j 1"
-      run_test_cmd "leanN" "../bin/lean --make -j 8" # more than 8 makes it slower
+      if test $procs -gt 8; then # more than 8 makes it slower
+        run_test_cmd "leanN" "../bin/lean --make -j 8"
+      else
+        run_test_cmd "leanN" "../bin/lean --make -j $procs"
+      fi
       popd;;
     lean-mathlib)
       pushd "$leanmldir"
@@ -539,6 +607,8 @@ function run_test {  # <test>
       popd;;
     redis)
       # https://redis.io/topics/benchmarks
+      #redis_tail="20"
+      #run_test_cmd "redis" "$redis_dir/redis-benchmark -q -r 1000 -n 10000";;
       redis_tail="1"
       run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
     alloc-test)
@@ -554,8 +624,6 @@ function run_test {  # <test>
       run_test_cmd "larsonN" "./larson 5 8 1000 5000 100 4141 $procs";;
     larson-sized)
       run_test_cmd "larsonN-sized" "./larson-sized 5 8 1000 5000 100 4141 $procs";;
-    ebizzy)
-      run_test_cmd "ebizzy" "./ebizzy -t $procs -M -S 2 -s 128";;
     sh6bench)
       run_test_cmd "sh6benchN" "./sh6bench $procsx2";;
     sh8bench)
@@ -599,6 +667,10 @@ function run_test {  # <test>
       run_test_cmd "glibc-simple" "./glibc-simple";;
     glibc-thread)
       run_test_cmd "glibc-thread" "./glibc-thread $procs";;
+    sed)
+      for i in {1..10000}; do echo "${i}.${i}.${i}.${i}" >> /tmp/sed_bench.txt; done
+      run_test_cmd "sed" 'sed -E -n /^((.|.?){64}(.|.?)?(.|.?)){8}/p /tmp/sed_bench.txt'
+      rm /tmp/sed_bench.txt;;
     spec)
       case "$run_spec_bench" in
         602) run_test_cmd "spec-602.gcc_s" "./sgcc_$spec_base.$spec_config gcc-pp.c -O5 -fipa-pta -o gcc-pp.opts-O5_-fipa-pta.s";;
@@ -612,8 +684,15 @@ function run_test {  # <test>
   esac
 }
 
-for tst in $tests_run; do
-  run_test "$tst"
+# Clear previous results
+if [ -f "$benchres" ]; then
+  rm "$benchres"
+fi
+
+for ((repeat=1; repeat<=$repeats; repeat++)); do
+  for tst in $tests_run; do
+    run_test "$tst"
+  done
 done
 
 
@@ -623,5 +702,10 @@ done
 
 sed -i.bak "s/ 0:/ /" $benchres
 echo ""
-echo "# --------------------------------------------------"
+echo "results written to: $benchres"
+echo ""
+echo "#------------------------------------------------------------------"
+echo "# test    alloc   time  rss    user  sys  page-faults page-reclaims"
+
 cat $benchres 
+echo ""

@@ -1,5 +1,10 @@
 #!/bin/bash
+# Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
+
 set -eo pipefail
+
+CFLAGS='-march=native'
+CXXFLAGS='-march=native'
 
 procs=8
 extso=".so"
@@ -16,50 +21,65 @@ case "$OSTYPE" in
     fi;;
 esac
 
-verbose="no"
+SUDO=sudo
+if [ "$EUID" -eq 0 ]; then
+  echo "[*] $0 is running as root, avoid doing this if possible."
+  SUDO=""
+fi
+
 curdir=`pwd`
 rebuild=0
 all=0
 
 # allocator versions
-version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
-version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
-version_hm=main
-version_iso=1.0.0
-version_je=5.2.1
-version_mallocng=master
-version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
-version_mi=v1.7.3
-version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
-version_rp=1.4.3
-version_sc=v1.0.0
-version_scudo=main
-version_sm=709663f
-version_sn=0.5.3
-version_tbb=v2021.4.0 # v2020.3
-version_tc=gperftools-2.9.1
+readonly version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
+readonly version_ff=4be6234
+readonly version_gd=master
+readonly version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
+readonly version_hm=11
+readonly version_iso=1.2.1
+readonly version_je=5.3.0
+readonly version_lp=main
+readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+readonly version_mi=v1.7.6
+readonly version_mng=master
+readonly version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+readonly version_rp=1.4.4
+readonly version_sc=v1.0.0
+readonly version_scudo=main
+readonly version_sg=master
+readonly version_sm=709663f
+readonly version_sn=0.6.0
+readonly version_tbb=3a7f96d  # v2021.5.0 + a fix for musl
+readonly version_tc=gperftools-2.9.1
+readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 
 # benchmark versions
-version_redis=6.2.6
-version_lean=v3.4.2
+readonly version_redis=6.2.6
+readonly version_lean=v3.4.2
 
 # allocators
-setup_dieharder=0
+setup_dh=0
+setup_ff=0
+setup_gd=0
 setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
-setup_mallocng=0
+setup_lp=0
 setup_mesh=0
 setup_mi=0
+setup_mng=0
 setup_nomesh=0
 setup_rp=0
 setup_sc=0
 setup_scudo=0
+setup_sg=0
 setup_sm=0
 setup_sn=0
 setup_tbb=0
 setup_tc=0
+setup_tcg=0
 
 # bigger benchmarks
 setup_bench=0
@@ -86,21 +106,31 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
-        setup_dieharder=$flag_arg
+        setup_dh=$flag_arg
+        setup_ff=$flag_arg
+        setup_gd=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
         setup_je=$flag_arg
+        setup_lp=$flag_arg
         setup_mi=$flag_arg
         setup_sn=$flag_arg
+        setup_sg=$flag_arg
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
-          setup_mallocng=$flag_arg   # lacking getentropy()
+          setup_tcg=$flag_arg       # lacking 'malloc.h'
+          setup_dh=$flag_arg        
+          setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
           setup_scudo=$flag_arg     # lacking <sys/auxv.h>
-          setup_sm=$flag_arg
+          setup_sm=$flag_arg        # ../src/supermalloc.h:10:31: error: expected function body after function declarator + error: use of undeclared identifier 'MADV_HUGEPAGE'
+        else
+          if ! [ `uname -m` = "x86_64" ]; then
+            setup_dh=$flag_arg      # does not compile on macos x64
+          fi
         fi        
         # only run Mesh's 'nomesh' configuration if asked
         #   setup_nomesh=$flag_arg
@@ -115,8 +145,12 @@ while : ; do
         setup_bench=$flag_arg;;
     ch)
         setup_ch=$flag_arg;;
-    dieharder)
-          setup_dieharder=$flag_arg;;
+    ff)
+        setup_ff=$flag_arg;;
+    dh)
+        setup_dh=$flag_arg;;
+    gd)
+        setup_gd=$flag_arg;;
     hd)
         setup_hd=$flag_arg;;
     hm)
@@ -125,10 +159,12 @@ while : ; do
         setup_iso=$flag_arg;;
     je)
         setup_je=$flag_arg;;
+    lp)
+        setup_lp=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
-    mallocng)
-        setup_mallocng=$flag_arg;;
+    mng)
+        setup_mng=$flag_arg;;
     mesh)
         setup_mesh=$flag_arg;;
     mi)
@@ -145,6 +181,8 @@ while : ; do
         setup_sc=$flag_arg;;
     scudo)
         setup_scudo=$flag_arg;;
+    sg)
+        setup_sg=$flag_arg;;
     sm)
         setup_sm=$flag_arg;;
     sn)
@@ -153,12 +191,12 @@ while : ; do
         setup_tbb=$flag_arg;;
     tc)
         setup_tc=$flag_arg;;
+    tcg)
+        setup_tcg=$flag_arg;;
     -r|--rebuild)
         rebuild=1;;
     -j=*|--procs=*)
         procs=$flag_arg;;
-    -verbose|--verbose)
-        verbose="yes";;
     -h|--help|-\?|help|\?)
         echo "./build-bench-env [options]"
         echo ""
@@ -166,24 +204,28 @@ while : ; do
         echo ""
         echo "  --procs=<n>                  number of processors (=$procs)"
         echo "  --rebuild                    force re-clone and re-build for given tools"
-        echo "  --verbose                    be verbose"
         echo ""
-        echo "  dieharder                    setup dieharder ($version_dieharder)"
+        echo "  dh                           setup dieharder ($version_dh)"
+        echo "  ff                           setup ffmalloc ($version_ff)"
+        echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
-        echo "  mallocng                     setup mallocng ($version_mallocng)"
+        echo "  lp                           setup libpas ($version_lp)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
+        echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
         echo "  scudo                        setup scudo ($version_scudo)"
+        echo "  sg                           setup slimguard ($version_sg)"
         echo "  sm                           setup supermalloc ($version_sm)"
         echo "  sn                           setup snmalloc ($version_sn)"
         echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
         echo "  tc                           setup tcmalloc ($version_tc)"
+        echo "  tcg                          setup Google's tcmalloc ($version_tcg)"
         echo ""
         echo "  bench                        build all local benchmarks"
         echo "  lean                         setup lean 3 benchmark"
@@ -211,7 +253,7 @@ else
 fi
 
 mkdir -p extern
-devdir="$curdir/extern"
+readonly devdir="$curdir/extern"
 
 function phase {
   cd "$curdir"
@@ -224,7 +266,7 @@ function phase {
 }
 
 function write_version {  # name, git-tag, repo
-	commit=$(git log -n1 --format=format:"%h")
+  commit=$(git log -n1 --format=format:"%h")
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
 }
 
@@ -267,19 +309,25 @@ function checkout {  # name, git-tag, directory, git repo, options
   write_version $1 $2 $4
 }
 
-
 function aptinstall {
   echo ""
-  echo "> sudo apt install $1"
+  echo "> $SUDO apt install $1"
   echo ""
-  sudo apt install --no-install-recommends $1
+  $SUDO apt install --no-install-recommends $1
 }
 
 function dnfinstall {
   echo ""
-  echo "> sudo dnf install $1"
+  echo "> $SUDO dnf -y --quiet --nodocs install $1"
   echo ""
-  sudo dnf install $1
+  $SUDO dnf -y --quiet --nodocs install $1
+}
+
+function apkinstall {
+  echo ""
+  echo "> apk add -q $1"
+  echo ""
+  apk add -q $1
 }
 
 function brewinstall {
@@ -287,6 +335,27 @@ function brewinstall {
   echo "> brew install $1"
   echo ""
   brew install $1
+}
+
+function aptinstallbazel {
+  echo ""
+  echo "> installing bazel"
+  echo ""
+  aptinstall apt-transport-https curl gnupg
+  curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
+  $SUDO mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
+  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | $SUDO tee /etc/apt/sources.list.d/bazel.list
+  $SUDO apt update
+  aptinstall bazel
+}
+
+function dnfinstallbazel {
+  echo ""
+  echo "> installing bazel"
+  echo ""
+  dnfinstall dnf-plugins-core
+  $SUDO dnf copr -y enable vbatts/bazel
+  dnfinstall bazel4
 }
 
 if test "$all" = "1"; then
@@ -304,33 +373,56 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang lld llvm-dev unzip dos2unix gmp-devel wget bc"
-    dnfinstall "cmake python3 ruby ninja-build libtool autoconf"
+    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk"
+    dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time sed"
+    dnfinstall "ghostscript libatomic"
+    dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
-    echo "updating package database... (sudo apt update)"
-    sudo apt update
-    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo libgmp-dev wget bc"
-    aptinstall "cmake python3 ruby ninja-build libtool autoconf"
+    echo "updating package database... ($SUDO apt update)"
+    $SUDO apt update -qq
+    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
+    aptinstall "cmake python3 ruby ninja-build libtool autoconf sed ghostscript time"
+    aptinstall "curl automake libatomic1"
+    aptinstallbazel
+  elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
+    apk update
+    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk"
+    apkinstall "samurai libtool git build-base linux-headers autoconf util-linux sed"
+    apkinstall "ghostscript libatomic"
   elif brew --version 2> /dev/null >/dev/null; then
-    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir"
+    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed"
+    brewinstall "ghostscript bazelisk"
   fi
 fi
 
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
-  make CONFIG_NATIVE=false CONFIG_WERROR=false -j $nproc
+  make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light -j $proc
+  make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=default -j $proc
+  popd
+fi
+
+if test "$setup_gd" = "1"; then
+  checkout gd $version_gd gd https://github.com/UTSASRG/Guarder
+  make -j $procs
   popd
 fi
 
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
-  make library -j $nprocs
+  make library -j $procs
   popd
 fi
 
-if test "$setup_mallocng" = "1"; then
-  checkout mallocng $version_mallocng mallocng https://github.com/richfelker/mallocng-draft
-  make -j $nprocs
+if test "$setup_ff" = "1"; then
+  checkout ff $version_ff ff https://github.com/bwickman97/ffmalloc
+  make -j $procs
+  popd
+fi
+
+if test "$setup_mng" = "1"; then
+  checkout mng $version_mng mng https://github.com/richfelker/mallocng-draft
+  make -j $procs
   popd
 fi
 
@@ -338,14 +430,38 @@ if test "$setup_scudo" = "1"; then
   partial_checkout scudo $version_scudo scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
   cd "compiler-rt/lib/scudo/standalone"
   # TODO: make the next line prettier instead of hardcoding everything.
-  clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
+  clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions $CXXFLAGS -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
   cd -
   popd
 fi
 
-if test "$setup_dieharder" = "1"; then
-  checkout dieharder $version_dieharder dieharder https://github.com/emeryberger/DieHard "--recursive"
-	# Doesn't support parallel compilation
+if test "$setup_lp" = "1"; then
+  partial_checkout lp $version_lp lp https://github.com/WebKit/WebKit "Source/bmalloc/libpas"
+  cd "Source/bmalloc/libpas"
+  ORIG=""
+  if test "$darwin" = "1"; then
+    ORIG="_orig"
+  fi
+  sed -i $ORIG '/Werror/d' CMakeLists.txt
+  # Remove once/if https://github.com/WebKit/WebKit/pull/1219 is merged
+  sed -i $ORIG 's/cmake --build $build_dir --parallel/cmake --build $build_dir --target pas_lib --parallel/' build.sh
+  if test "$darwin" = "1"; then
+    ./build.sh -s cmake -v default -t pas_lib
+  else
+    CC=clang CXX=clang++ LDFLAGS='-lpthread -latomic -pthread' bash ./build.sh -s cmake -v default -t pas_lib
+  fi
+  cd -
+  popd
+fi
+
+if test "$setup_sg" = "1"; then
+  checkout sg $version_sg sg https://github.com/ssrg-vt/SlimGuard
+  make -j $procs
+  popd
+fi
+
+if test "$setup_dh" = "1"; then
+  checkout dh $version_dh dh https://github.com/emeryberger/DieHard "--recursive"
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -355,24 +471,40 @@ if test "$setup_dieharder" = "1"; then
 fi
 
 if test "$setup_tbb" = "1"; then
-  checkout tbb $version_tbb tbb https://github.com/intel/tbb
-  # make tbbmalloc
-  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench
+  checkout tbb $version_tbb tbb https://github.com/oneapi-src/oneTBB
+  cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench .
   make -j $procs
   popd
 fi
 
 if test "$setup_tc" = "1"; then
-  checkout tc $version_tc gperftools https://github.com/gperftools/gperftools
+  checkout tc $version_tc tc https://github.com/gperftools/gperftools
   if test -f configure; then
     echo "already configured"
   else
     ./autogen.sh
-    CXXFLAGS="-w -DNDEBUG -O2" ./configure --enable-minimal 
+    CXXFLAGS="$CXXFLAGS -w -DNDEBUG -O2" ./configure --enable-minimal --disable-debugalloc
   fi
   make -j $procs # ends with error on benchmark, but thats ok.
   #echo ""
   #echo "(note: the error 'Makefile:3912: recipe for target 'malloc_bench' failed' is expected)"
+  popd
+fi
+
+if test "$setup_tcg" = "1"; then
+  checkout tcg $version_tcg tcg https://github.com/google/tcmalloc
+  ORIG=""
+  if test "$darwin" = "1"; then
+    ORIG="_orig"
+  fi
+  sed -i $ORIG '/linkstatic/d' tcmalloc/BUILD
+  sed -i $ORIG '/linkstatic/d' tcmalloc/internal/BUILD
+  sed -i $ORIG '/linkstatic/d' tcmalloc/testing/BUILD
+  sed -i $ORIG '/linkstatic/d' tcmalloc/variants.bzl
+  gawk -i inplace '(f && g) {$0="linkshared = True, )"; f=0; g=0} /This library provides tcmalloc always/{f=1} /alwayslink/{g=1} 1' tcmalloc/BUILD
+  gawk -i inplace 'f{$0="cc_binary("; f=0} /This library provides tcmalloc always/{f=1} 1' tcmalloc/BUILD # Change the line after "This library…" to cc_binary (instead of cc_library)
+  gawk -i inplace '/alwayslink/ && !f{f=1; next} 1' tcmalloc/BUILD # delete only the first instance of "alwayslink"
+  bazel build -c opt tcmalloc
   popd
 fi
 
@@ -391,7 +523,7 @@ if test "$setup_je" = "1"; then
   if test -f config.status; then
     echo "$devdir/jemalloc is already configured; no need to reconfigure"
   else
-    ./autogen.sh
+    ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
   fi
   make -j $procs
   popd
@@ -419,7 +551,7 @@ if test "$setup_sn" = "1"; then
     cd ..
   fi
   cd release
-  ninja libsnmallocshim$extso
+  ninja libsnmallocshim$extso libsnmallocshim-checks$extso
   popd
 fi
 
@@ -427,7 +559,7 @@ if test "$setup_sm" = "1"; then
   checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
   sed -i "s/-Werror//" Makefile.include
   cd release
-  make -j $nprocs
+  make -j $procs
   popd
 fi
 
@@ -457,7 +589,7 @@ if test "$setup_sc" = "1"; then
     fi
     build/gyp/gyp --depth=. scalloc.gyp
   fi
-  BUILDTYPE=Release make -j $nprocs
+  BUILDTYPE=Release make -j $procs
   popd
 fi
 
@@ -467,15 +599,10 @@ if test "$setup_mi" = "1"; then
   echo ""
   echo "- build mimalloc release"
 
-  mi_use_cxx=""
-  if test "$darwin" = "1"; then
-    mi_use_cxx="-DMI_USE_CXX=ON"
-  fi
-
   mkdir -p out/release
   cd out/release
-  cmake ../..  $mi_use_cxx
-  make -j $nprocs
+  cmake ../..
+  make -j $procs
   cd ../..
 
   echo ""
@@ -483,8 +610,8 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/debug
   cd out/debug
-  cmake ../.. -DMI_CHECK_FULL=ON $mi_use_cxx
-  make -j $nprocs
+  cmake ../.. -DMI_CHECK_FULL=ON
+  make -j $procs
   cd ../..
 
   echo ""
@@ -492,8 +619,8 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/secure
   cd out/secure
-  cmake ../.. $mi_use_cxx
-  make -j $nprocs
+  cmake ../..
+  make -j $procs
   cd ../..
   popd
 fi
@@ -532,22 +659,13 @@ if test "$setup_redis" = "1"; then
   fi
 
   cd "redis-$version_redis/src"
-  make -j $procs USE_JEMALLOC=no MALLOC=libc
+  USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
   popd
 fi
 
 if test "$setup_ch" = "1"; then
   phase "build ClickHouse v19.8.3.8-stable"
-
-  pushd $devdir
-  if test -d "ClickHouse"; then
-    echo "$devdir/ClickHouse already exists; no need to git clone"
-  else
-    sudo apt-get install git pbuilder debhelper lsb-release fakeroot sudo debian-archive-keyring debian-keyring
-    git clone --recursive https://github.com/yandex/ClickHouse
-  fi
-  cd ClickHouse
-  git checkout mimalloc
+  checkout ClickHouse mimalloc ClickHouse https://github.com/yandex/ClickHouse "--recursive"
   ./release
   popd
 fi
@@ -577,15 +695,17 @@ if test "$setup_bench" = "1"; then
 fi
 
 if test "$setup_bench" = "1"; then
-  phase "get Intel PDF manual"
+  phase "get large PDF document"
 
-  pdfdoc="325462-sdm-vol-1-2abcd-3abcd.pdf"
+  readonly pdfdoc="large.pdf"
+  readonly pdfurl="https://raw.githubusercontent.com/geekaaron/Resources/master/resources/Writing_a_Simple_Operating_System--from_Scratch.pdf "
+  #readonly pdfurl="https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf"
   pushd "$devdir"
   if test -f "$pdfdoc"; then
     echo "do nothing: $devdir/$pdfdoc already exists"
   else
-    # wget https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf
-    curl -o $pdfdoc https://www.intel.com/content/dam/develop/external/us/en/documents/325462-sdm-vol-1-2abcd-3abcd-508360.pdf
+    useragent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
+    wget --no-verbose -O "$pdfdoc" -U "useragent" $pdfurl
   fi
   popd
 fi
@@ -596,7 +716,7 @@ if test "$setup_bench" = "1"; then
   mkdir -p out/bench
   cd out/bench
   cmake ../../bench
-  make -j $nprocs
+  make -j $procs
   cd ../..
 fi
 
@@ -604,11 +724,7 @@ fi
 curdir=`pwd`
 
 phase "installed allocators"
-echo "" > $devdir/versions.txt
-for f in $devdir/version_*.txt; do
- cat $f >> $devdir/versions.txt
-done
-cat $devdir/versions.txt | column -t
+cat $devdir/version_*.txt 2>/dev/null | tee $devdir/versions.txt | column -t
 
 phase "done in $curdir"
 echo "run the cfrac benchmarks as:"

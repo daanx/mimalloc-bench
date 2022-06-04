@@ -145,7 +145,11 @@ malloc_benchmark_loop (void **ptr_arr)
       free (ptr_arr[next_idx]);
 
       void* p = ptr_arr[next_idx] = malloc (next_block);
-      
+
+      // touch the allocated memory
+      for(int i = 0; i < next_block; i++) {
+        ((char*)p)[i] = (char)i;
+      }
       iters++;
     }
 
