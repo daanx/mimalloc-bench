@@ -447,13 +447,10 @@ fi
 
 readonly benchres="$curdir/benchres.csv"
 
-readonly procsx2=`echo "($procs*2)" | bc`
-readonly procsx4=`echo "($procs*4)" | bc`
-readonly procs_div2=`echo "($procs/2)" | bc`
-procs_max16="$procs" 
-if [ $procs -gt 16 ]; then
-  procs_max16="16"
-fi
+procsx2=$((procs * 2))
+procsx4=$((procs * 4))
+procs_div2=$((procs / 2))
+procs_max16=$((procs > 16 ? 16 : procs))
 
 function set_spec_bench_dir {
   if test -f "$1.0000/compare.out"; then
