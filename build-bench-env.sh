@@ -373,25 +373,25 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk"
-    dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time sed"
-    dnfinstall "ghostscript libatomic"
+    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
+      cmake python3 ruby ninja-build libtool autoconf git patch time sed \
+      ghostscript libatomic"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
-    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
-    aptinstall "cmake python3 ruby ninja-build libtool autoconf sed ghostscript time"
-    aptinstall "curl automake libatomic1"
+    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
+      cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
+      curl automake libatomic1"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
-    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk"
-    apkinstall "samurai libtool git build-base linux-headers autoconf util-linux sed"
-    apkinstall "ghostscript libatomic"
+    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
+      samurai libtool git build-base linux-headers autoconf util-linux sed \
+      ghostscript libatomic"
   elif brew --version 2> /dev/null >/dev/null; then
-    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed"
-    brewinstall "ghostscript bazelisk"
+    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
+      ghostscript bazelisk"
   fi
 fi
 
