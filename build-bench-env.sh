@@ -302,7 +302,7 @@ function checkout {  # name, git-tag, directory, git repo, options
   if test -d "$3"; then
     echo "$devdir/$3 already exists; no need to git clone"
   else
-    git clone $5 $4 $3
+    git clone --depth=1 --filter=blob:none $5 $4 $3
   fi
   cd "$3"
   git checkout $2
