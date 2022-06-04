@@ -32,25 +32,25 @@ rebuild=0
 all=0
 
 # allocator versions
-readonly version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
+readonly version_dh=master   # ~unmaintained
 readonly version_ff=4be6234
-readonly version_gd=master
-readonly version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
+readonly version_gd=master   # ~unmaintained since 2021
+readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
 readonly version_iso=1.2.1
 readonly version_je=5.3.0
 readonly version_lp=main
 readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 readonly version_mi=v1.7.6
-readonly version_mng=master
-readonly version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+readonly version_mng=master  # ~unmaintained
+readonly version_nomesh=$version_mesh
 readonly version_rp=1.4.4
 readonly version_sc=v1.0.0
 readonly version_scudo=main
-readonly version_sg=master
-readonly version_sm=709663f
+readonly version_sg=master   # ~unmaintained since 2021
+readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.0
-readonly version_tbb=3a7f96d  # v2021.5.0 + a fix for musl
+readonly version_tbb=3a7f96d # v2021.5.0 + a fix for musl
 readonly version_tc=gperftools-2.10
 readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 
