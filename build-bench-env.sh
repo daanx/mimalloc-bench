@@ -388,7 +388,7 @@ if test "$setup_packages" = "1"; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk"
     apkinstall "samurai libtool git build-base linux-headers autoconf util-linux sed"
-    apkinstall "ghostscript libatomic bazel4"
+    apkinstall "ghostscript libatomic bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed"
     brewinstall "ghostscript bazelisk"
