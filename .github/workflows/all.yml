@@ -84,5 +84,4 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt
