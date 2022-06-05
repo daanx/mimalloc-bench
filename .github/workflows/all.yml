@@ -28,8 +28,7 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt
   build-all-ubuntu:
     runs-on: ubuntu-latest
     steps:
@@ -45,8 +44,7 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt
   build-all-fedora:
     runs-on: ubuntu-latest
     container:
@@ -68,8 +66,7 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt
   build-all-osx:
     runs-on: macos-11
     steps:
