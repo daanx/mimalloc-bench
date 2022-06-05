@@ -233,7 +233,7 @@ benchmarks as it faulted on those)
 - Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 - [Parallel compilation](https://github.com/emeryberger/DieHard/issues/15) support in DieHarder
 - [Portability improvement](https://github.com/oneapi-src/oneTBB/pull/764) in Intel TBB malloc
-- [Portability improvement]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
+- [Portability](https://github.com/google/tcmalloc/issues/128) [improvements]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
 
 
 # References
