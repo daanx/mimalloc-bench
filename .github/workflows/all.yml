@@ -29,8 +29,7 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt
   build-all-ubuntu:
     runs-on: ubuntu-latest
     steps:
@@ -46,8 +45,7 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt
   build-all-fedora:
     runs-on: ubuntu-latest
     container:
@@ -69,8 +67,7 @@ jobs:
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt
   build-all-osx:
     runs-on: macos-11
     steps:
@@ -79,11 +76,10 @@ jobs:
       - name: Silence some git warnings
         run: git config --global advice.detachedHead false
       - name: Install and build all benchmarks and allocators
-        # ff: error: use of undeclared identifier 'MAP_POPULATE'
+        # ff:ffmalloc.c:1140:14: error: implicit declaration of function 'sched_getcpu' is invalid in C99 [-Werror,-Wimplicit-function-declaration] 
         # gd: so many errors
         run: ./build-bench-env.sh all no-lean no-gd no-ff
       - name: Run everything.
         run: |
           cd out/bench
-          # iso: too slow
-          ../../bench.sh alla allt no-iso
+          ../../bench.sh alla allt

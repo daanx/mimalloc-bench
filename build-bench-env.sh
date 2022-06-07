@@ -32,30 +32,30 @@ rebuild=0
 all=0
 
 # allocator versions
-readonly version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2
+readonly version_dh=master   # ~unmaintained
 readonly version_ff=4be6234
-readonly version_gd=master
-readonly version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
+readonly version_gd=master   # ~unmaintained since 2021
+readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
 readonly version_iso=1.2.1
 readonly version_je=5.3.0
 readonly version_lp=main
 readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 readonly version_mi=v1.7.6
-readonly version_mng=master
-readonly version_nomesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
+readonly version_mng=master  # ~unmaintained
+readonly version_nomesh=$version_mesh
 readonly version_rp=1.4.4
 readonly version_sc=v1.0.0
 readonly version_scudo=main
-readonly version_sg=master
-readonly version_sm=709663f
+readonly version_sg=master   # ~unmaintained since 2021
+readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.0
-readonly version_tbb=3a7f96d  # v2021.5.0 + a fix for musl
-readonly version_tc=gperftools-2.9.1
+readonly version_tbb=3a7f96d # v2021.5.0 + a fix for musl
+readonly version_tc=gperftools-2.10
 readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 
 # benchmark versions
-readonly version_redis=6.2.6
+readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
 
 # allocators
@@ -373,25 +373,25 @@ if test "$setup_packages" = "1"; then
   phase "install packages"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
-    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk"
-    dnfinstall "cmake python3 ruby ninja-build libtool autoconf git patch time sed"
-    dnfinstall "ghostscript libatomic"
+    dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
+      cmake python3 ruby ninja-build libtool autoconf git patch time sed \
+      ghostscript libatomic"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
-    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget"
-    aptinstall "cmake python3 ruby ninja-build libtool autoconf sed ghostscript time"
-    aptinstall "curl automake libatomic1"
+    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
+      cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
+      curl automake libatomic1"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
-    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk"
-    apkinstall "samurai libtool git build-base linux-headers autoconf util-linux sed"
-    apkinstall "ghostscript libatomic bazel@testing"
+    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
+      samurai libtool git build-base linux-headers autoconf util-linux sed \
+      ghostscript libatomic bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
-    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed"
-    brewinstall "ghostscript bazelisk"
+    brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
+      ghostscript bazelisk"
   fi
 fi
 
