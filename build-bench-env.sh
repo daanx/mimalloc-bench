@@ -139,10 +139,10 @@ while : ; do
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
-        #setup_rocksdb=$flag_arg
+        setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
         #setup_ch=$flag_arg
-        #setup_packages=$flag_arg
+        setup_packages=$flag_arg
         ;;
     bench)
         setup_bench=$flag_arg;;
@@ -681,7 +681,7 @@ if test "$setup_rocksdb" = "1"; then
   fi
   cd rocksdb
   git checkout "$version_rocksdb"
-  DISABLE_JEMALLOC=1 make all -j 12
+  DISABLE_JEMALLOC=1 make all -j $procs
   popd
 fi
 
