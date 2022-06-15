@@ -57,6 +57,7 @@ readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
+readonly version_rocksdb=v7.3.1
 
 # allocators
 setup_dh=0
@@ -86,6 +87,7 @@ setup_bench=0
 setup_ch=0
 setup_lean=0
 setup_redis=0
+setup_rocksdb=0
 
 # various
 setup_packages=0
@@ -137,9 +139,10 @@ while : ; do
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
+        #setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
         #setup_ch=$flag_arg
-        setup_packages=$flag_arg
+        #setup_packages=$flag_arg
         ;;
     bench)
         setup_bench=$flag_arg;;
@@ -175,6 +178,8 @@ while : ; do
         setup_packages=$flag_arg;;
     redis)
         setup_redis=$flag_arg;;
+    rocksdb)
+        setup_rocksdb=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
     sc)
@@ -231,6 +236,7 @@ while : ; do
         echo "  lean                         setup lean 3 benchmark"
         echo "  packages                     setup required packages"
         echo "  redis                        setup redis benchmark"
+        echo "  rocksdb                      setup rocksdb benchmark"
         echo ""
         echo "Prefix an option with 'no-' to disable an option"
         exit 0;;
@@ -382,7 +388,8 @@ if test "$setup_packages" = "1"; then
     $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
-      curl automake libatomic1"
+      curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
+      liblz4-dev libzstd-dev"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
@@ -660,6 +667,21 @@ if test "$setup_redis" = "1"; then
 
   cd "redis-$version_redis/src"
   USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
+  popd
+fi
+
+if test "$setup_rocksdb" = "1"; then
+  phase "build rocksdb $version_rocksdb"
+
+  pushd $devdir
+  if test -d "rocksdb"; then
+    echo "$devdir/rocksdb already exists; no need to download it"
+  else
+    git clone https://github.com/facebook/rocksdb.git
+  fi
+  cd rocksdb
+  git checkout "$version_rocksdb"
+  DISABLE_JEMALLOC=1 make all -j 12
   popd
 fi
 

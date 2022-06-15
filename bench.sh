@@ -23,14 +23,14 @@ alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofi
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
-readonly tests_all4="z3 spec spec-bench"
+readonly tests_all4="z3 spec spec-bench rocksdb"
 
 readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
 readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
-readonly tests_exclude_macos="sh6bench sh8bench redis"
+readonly tests_exclude_macos="sh6bench sh8bench redis rocksdb"
 
 
 # --------------------------------------------------------------------
@@ -148,7 +148,7 @@ readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-6.2.7/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
-                
+readonly rocksdb_dir="$localdevdir/rocksdb"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
@@ -499,7 +499,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
       echo "run spec benchmark in: $spec_bench_dir"
       pushd "$spec_bench_dir";;
-    larson*|redis*|xmalloc*)
+    larson*|redis*|xmalloc*|rocksdb*)
       outfile="$1-$2-out.txt";;
     barnes)
       infile="$benchdir/barnes/input";;
@@ -610,6 +610,8 @@ function run_test {  # <test>
       #run_test_cmd "redis" "$redis_dir/redis-benchmark -q -r 1000 -n 10000";;
       redis_tail="1"
       run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
+    rocksdb)
+      run_test_cmd "rocksdb" "$rocksdb_dir/db_bench --benchmarks=fillrandom";;
     alloc-test)
       run_test_cmd "alloc-test1" "./alloc-test 1"
       if test "$procs" != "1"; then
