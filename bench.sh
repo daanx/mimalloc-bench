@@ -20,7 +20,7 @@ alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed gs"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench"
@@ -30,8 +30,7 @@ readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
-# sed: "RE error: invalid repetition count(s)" on OSX
-readonly tests_exclude_macos="sh6bench sh8bench redis sed"
+readonly tests_exclude_macos="sh6bench sh8bench redis"
 
 
 # --------------------------------------------------------------------
@@ -124,8 +123,8 @@ alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 
 alloc_lib_add "mi"     "$localdevdir/mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "mi-sec"    "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "mi-dbg"    "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "mi-sec" "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "mi-dbg" "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
 alloc_lib_add "xmi"    "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
 alloc_lib_add "xmi-sec"   "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
 alloc_lib_add "xmi-dbg"   "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
@@ -667,10 +666,6 @@ function run_test {  # <test>
       run_test_cmd "glibc-simple" "./glibc-simple";;
     glibc-thread)
       run_test_cmd "glibc-thread" "./glibc-thread $procs";;
-    sed)
-      for i in {1..10000}; do echo "${i}.${i}.${i}.${i}" >> /tmp/sed_bench.txt; done
-      run_test_cmd "sed" 'sed -E -n /^((.|.?){64}(.|.?)?(.|.?)){8}/p /tmp/sed_bench.txt'
-      rm /tmp/sed_bench.txt;;
     spec)
       case "$run_spec_bench" in
         602) run_test_cmd "spec-602.gcc_s" "./sgcc_$spec_base.$spec_config gcc-pp.c -O5 -fipa-pta -o gcc-pp.opts-O5_-fipa-pta.s";;
