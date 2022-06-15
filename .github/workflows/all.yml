@@ -15,7 +15,9 @@ jobs:
       - name: Install bash
         run: apk add bash git
       - name: Silence some git warnings
-        run: git config --global advice.detachedHead false
+        run: |
+          git config --global advice.detachedHead false
+          git config --global init.defaultBranch main
       - name: Install and build all benchmarks and allocators
         # dh: glibc-specific
         # gd: ?
@@ -35,7 +37,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Silence some git warnings
-        run: git config --global advice.detachedHead false
+        run: |
+          git config --global advice.detachedHead false
+          git config --global init.defaultBranch main
       - name: Install and build all benchmarks and allocators
         # gd: infinite loop in the redis benchmark
         # sg: infinite loop in the redis benchmark
@@ -55,7 +59,9 @@ jobs:
       - name: Install git
         run: sudo dnf -y --quiet --nodocs install git
       - name: Silence some git warnings
-        run: git config --global advice.detachedHead false
+        run: |
+          git config --global advice.detachedHead false
+          git config --global init.defaultBranch main
       - name: Install and build all benchmarks and allocators
         # gd: infinite loop in the redis benchmark
         # mesh/nomesh: error: '__malloc_hook' was not declared in this scope;
@@ -73,7 +79,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Silence some git warnings
-        run: git config --global advice.detachedHead false
+        run: |
+          git config --global advice.detachedHead false
+          git config --global init.defaultBranch main
       - name: Install and build all benchmarks and allocators
         # ff:ffmalloc.c:1140:14: error: implicit declaration of function 'sched_getcpu' is invalid in C99 [-Werror,-Wimplicit-function-declaration] 
         # gd: so many errors
