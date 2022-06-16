@@ -30,7 +30,7 @@ readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
-readonly tests_exclude_macos="sh6bench sh8bench redis rocksdb"
+readonly tests_exclude_macos="sh6bench sh8bench redis"
 
 
 # --------------------------------------------------------------------
