@@ -672,16 +672,8 @@ fi
 
 if test "$setup_rocksdb" = "1"; then
   phase "build rocksdb $version_rocksdb"
-
-  pushd $devdir
-  if test -d "rocksdb"; then
-    echo "$devdir/rocksdb already exists; no need to download it"
-  else
-    git clone https://github.com/facebook/rocksdb.git
-  fi
-  cd rocksdb
-  git checkout "$version_rocksdb"
-  DISABLE_JEMALLOC=1 make all -j $procs
+  checkout rocksdb $version_rocksdb rocksdb https://github.com/facebook/rocksdb.git
+  DISABLE_JEMALLOC=1 make db_bench -j $procs
   popd
 fi
 
