@@ -461,7 +461,9 @@ if test "$setup_sg" = "1"; then
 fi
 
 if test "$setup_dh" = "1"; then
-  checkout dh $version_dh dh https://github.com/emeryberger/DieHard "--recursive"
+  checkout dh $version_dh dh https://github.com/emeryberger/DieHard
+  # remove all the historical useless junk
+  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -526,6 +528,8 @@ if test "$setup_je" = "1"; then
     ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
   fi
   make -j $procs
+  [ "$CI" ] && rm -rf ./src/*.o  # jemalloc has like ~100MiB of object files
+  [ "$CI" ] && rm -rf ./lib/*.a  # jemalloc produces 80MiB of static files
   popd
 fi
 
@@ -644,6 +648,7 @@ if test "$setup_lean" = "1"; then
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
   echo "make -j$procs"
   make -j $procs
+  rm -rf ./tests/  # we don't need tests
   popd
 fi
 
