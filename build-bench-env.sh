@@ -649,7 +649,6 @@ if test "$setup_lean" = "1"; then
   echo "make -j$procs"
   make -j $procs
   rm -rf ./tests/  # we don't need tests
-  rm -rf ./libleanshared.so  ./libleanstatic.a  # we don't need tests
   popd
 fi
 
