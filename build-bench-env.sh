@@ -528,6 +528,8 @@ if test "$setup_je" = "1"; then
     ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
   fi
   make -j $procs
+  [ "$CI" ] && rm -rf ./src/*.o  # jemalloc has like ~100MiB of object files
+  [ "$CI" ] && rm -rf ./lib/*.a  # jemalloc produces 80MiB of static files
   popd
 fi
 
