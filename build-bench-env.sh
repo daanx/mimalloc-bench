@@ -398,7 +398,7 @@ if test "$setup_packages" = "1"; then
       ghostscript libatomic gflags-dev"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
-      ghostscript bazelisk gflags"
+      ghostscript bazelisk gflagsi snappy"
   fi
 fi
 
@@ -672,7 +672,11 @@ fi
 
 if test "$setup_rocksdb" = "1"; then
   checkout rocksdb $version_rocksdb rocksdb https://github.com/facebook/rocksdb.git
-  DISABLE_JEMALLOC=1 make db_bench -j $procs
+  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
+    DISABLE_WARNING_AS_ERROR=1 USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
+  else
+    DISABLE_JEMALLOC=1 make db_bench -j $procs
+  fi
   popd
 fi
 
