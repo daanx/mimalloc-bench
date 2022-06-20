@@ -461,7 +461,9 @@ if test "$setup_sg" = "1"; then
 fi
 
 if test "$setup_dh" = "1"; then
-  checkout dh $version_dh dh https://github.com/emeryberger/DieHard "--recursive"
+  checkout dh $version_dh dh https://github.com/emeryberger/DieHard
+  # remove all the historical useless junk
+  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
