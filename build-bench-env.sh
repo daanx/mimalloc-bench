@@ -668,6 +668,7 @@ if test "$setup_redis" = "1"; then
   else
     wget --no-verbose "http://download.redis.io/releases/redis-$version_redis.tar.gz"
     tar xzf "redis-$version_redis.tar.gz"
+    rm "./redis-$version_redis.tar.gz"
   fi
 
   cd "redis-$version_redis/src"
