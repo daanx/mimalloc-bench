@@ -57,7 +57,7 @@ readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
-readonly version_rocksdb=v7.3.1
+readonly version_rocksdb=7.3.1
 
 # allocators
 setup_dh=0
@@ -640,12 +640,24 @@ fi
 phase "install benchmarks"
 
 if test "$setup_rocksdb" = "1"; then
-  checkout rocksdb $version_rocksdb rocksdb https://github.com/facebook/rocksdb.git
+  phase "build rocksdb $version_rocksdb"
+
+  pushd "$devdir"
+  if test -d "redis-$version_rocksdb"; then
+    echo "$devdir/rocksdb-$version_rocksdb already exists; no need to download it"
+  else
+    wget --no-verbose "https://github.com/facebook/rocksdb/archive/refs/tags/v7.3.1.tar.gz" -O rocksdb-$version_rocksdb.tar.gz
+    tar xzf "rocksdb-$version_rocksdb.tar.gz"
+    rm "./rocksdb-$version_rocksdb.tar.gz"
+  fi
+
+  cd "rocksdb-$version_rocksdb"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     DISABLE_WARNING_AS_ERROR=1 USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
   else
     DISABLE_JEMALLOC=1 make db_bench -j $procs
   fi
+  find . -name "*.o" -exec rm -f {} \;
   popd
 fi
 
