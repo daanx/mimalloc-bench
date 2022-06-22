@@ -653,7 +653,7 @@ if test "$setup_rocksdb" = "1"; then
 
   cd "rocksdb-$version_rocksdb"
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
-    DISABLE_WARNING_AS_ERROR=1 USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
+    DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 make db_bench -j $procs
   else
     DISABLE_JEMALLOC=1 make db_bench -j $procs
   fi
