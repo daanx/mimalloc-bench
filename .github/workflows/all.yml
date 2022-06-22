@@ -43,9 +43,10 @@ jobs:
           git config --global init.defaultBranch main
       - name: Install and build all benchmarks and allocators
         # gd: infinite loop in the redis benchmark
+        # lt: breaks on sh8benchN
         # sg: infinite loop in the redis benchmark
         # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
-        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff
+        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-lt
       - name: Run everything.
         run: |
           cd out/bench
