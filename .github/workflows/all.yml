@@ -22,12 +22,13 @@ jobs:
         # dh: glibc-specific
         # gd: ?
         # hd: glibc-specific
+        # lt: return type 'struct mallinfo' is incomplete
         # mesh/nomesh: infinite loop?
         # sg: src/gnuwrapper.cpp:51:32: error: expected ')' before '__malloc_initialize_hook'
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # tcg: installing bazel on alpine is awful
         # lf: crashes redis server
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg no-gd no-sg no-lf
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg no-gd no-sg no-lf no-lt
       - name: Run everything.
         run: |
           cd out/bench
@@ -43,10 +44,11 @@ jobs:
           git config --global init.defaultBranch main
       - name: Install and build all benchmarks and allocators
         # gd: infinite loop in the redis benchmark
+        # lt: breaks on sh8benchN
         # sg: infinite loop in the redis benchmark
         # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
         # lf: crashes redis server
-        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-lf
+        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-lf no-lt
       - name: Run everything.
         run: |
           cd out/bench
