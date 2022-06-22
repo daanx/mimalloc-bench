@@ -39,6 +39,7 @@ readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
 readonly version_iso=1.2.2
 readonly version_je=5.3.0
+readonly version_lf=master  # ~unmaintained since 2018
 readonly version_lp=main
 readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 readonly version_mi=v1.7.6
@@ -66,6 +67,7 @@ setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
+setup_lf=0
 setup_lp=0
 setup_mesh=0
 setup_mi=0
@@ -121,6 +123,7 @@ while : ; do
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg       # lacking 'malloc.h'
           setup_dh=$flag_arg        
+          setup_lf=$flag_arg
           setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
@@ -159,6 +162,8 @@ while : ; do
         setup_iso=$flag_arg;;
     je)
         setup_je=$flag_arg;;
+    lf)
+        setup_lf=$flag_arg;;
     lp)
         setup_lp=$flag_arg;;
     lean)
@@ -212,6 +217,7 @@ while : ; do
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
+        echo "  lf                           setup lockfree-malloc ($version_lf)"
         echo "  lp                           setup libpas ($version_lp)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
@@ -411,6 +417,12 @@ fi
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
   make library -j $procs
+  popd
+fi
+
+if test "$setup_lf" = "1"; then
+  checkout lf $version_lf lf https://github.com/Begun/lockfree-malloc
+  make -j $procs liblite-malloc-shared.so
   popd
 fi
 
