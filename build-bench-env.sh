@@ -110,6 +110,7 @@ while : ; do
         all=$flag_arg
         setup_dh=$flag_arg
         setup_ff=$flag_arg
+        setup_fg=$flag_arg
         setup_gd=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
