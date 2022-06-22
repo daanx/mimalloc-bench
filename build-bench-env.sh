@@ -639,6 +639,16 @@ fi
 
 phase "install benchmarks"
 
+if test "$setup_rocksdb" = "1"; then
+  checkout rocksdb $version_rocksdb rocksdb https://github.com/facebook/rocksdb.git
+  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
+    DISABLE_WARNING_AS_ERROR=1 USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
+  else
+    DISABLE_JEMALLOC=1 make db_bench -j $procs
+  fi
+  popd
+fi
+
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
 
@@ -673,16 +683,6 @@ if test "$setup_redis" = "1"; then
 
   cd "redis-$version_redis/src"
   USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
-  popd
-fi
-
-if test "$setup_rocksdb" = "1"; then
-  checkout rocksdb $version_rocksdb rocksdb https://github.com/facebook/rocksdb.git
-  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
-    DISABLE_WARNING_AS_ERROR=1 USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
-  else
-    DISABLE_JEMALLOC=1 make db_bench -j $procs
-  fi
   popd
 fi
 
