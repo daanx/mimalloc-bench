@@ -22,11 +22,12 @@ jobs:
         # dh: glibc-specific
         # gd: ?
         # hd: glibc-specific
+        # lt: return type 'struct mallinfo' is incomplete
         # mesh/nomesh: infinite loop?
         # sg: src/gnuwrapper.cpp:51:32: error: expected ')' before '__malloc_initialize_hook'
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # tcg: installing bazel on alpine is awful
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg no-gd no-sg
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg no-gd no-sg no-lt
       - name: Run everything.
         run: |
           cd out/bench
