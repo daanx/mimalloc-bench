@@ -124,6 +124,7 @@ while : ; do
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg       # lacking 'malloc.h'
           setup_dh=$flag_arg        
+          setup_fg=$flag_arg
           setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
