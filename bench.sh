@@ -14,7 +14,7 @@ fi
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff gd hd hm hml iso je lf lp lt mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lp lt mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mng scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
@@ -101,6 +101,7 @@ readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
 alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
+alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
 alloc_lib_add "hd"     "$localdevdir/Hoard/src/libhoard$extso"
 alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
@@ -355,6 +356,7 @@ while : ; do
             echo "  dh                           use dieharder"
             echo "  dmi                          use debug version of mimalloc"
             echo "  ff                           use ffmalloc"
+            echo "  fg                           use freeguard"
             echo "  gd                           use guarder"
             echo "  hd                           use hoard"
             echo "  hm                           use hardened_malloc"
