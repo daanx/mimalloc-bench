@@ -148,7 +148,7 @@ readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-6.2.7/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
-readonly rocksdb_dir="$localdevdir/rocksdb"
+readonly rocksdb_dir="$localdevdir/rocksdb-7.3.1"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
