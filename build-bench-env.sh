@@ -681,7 +681,7 @@ if test "$setup_rocksdb" = "1"; then
   else
     DISABLE_JEMALLOC=1 make db_bench -j $procs
   fi
-  find . -name "*.o" -exec rm -f {} \;
+  find . -name '*.o' -delete
   popd
 fi
 
