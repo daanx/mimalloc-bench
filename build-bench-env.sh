@@ -39,7 +39,9 @@ readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
 readonly version_iso=1.2.2
 readonly version_je=5.3.0
+readonly version_lf=master  # ~unmaintained since 2018
 readonly version_lp=main
+readonly version_lt=master  # ~ unmaintained since 2019
 readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 readonly version_mi=v1.7.6
 readonly version_mng=master  # ~unmaintained
@@ -67,7 +69,9 @@ setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
+setup_lf=0
 setup_lp=0
+setup_lt=0
 setup_mesh=0
 setup_mi=0
 setup_mng=0
@@ -122,7 +126,9 @@ while : ; do
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg       # lacking 'malloc.h'
-          setup_dh=$flag_arg        
+          setup_dh=$flag_arg 
+          setup_lf=$flag_arg
+          setup_lt=$flag_arg        # GNU only
           setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
@@ -162,8 +168,12 @@ while : ; do
         setup_iso=$flag_arg;;
     je)
         setup_je=$flag_arg;;
+    lf)
+        setup_lf=$flag_arg;;
     lp)
         setup_lp=$flag_arg;;
+    lt)
+        setup_lt=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
     mng)
@@ -217,7 +227,9 @@ while : ; do
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
+        echo "  lf                           setup lockfree-malloc ($version_lf)"
         echo "  lp                           setup libpas ($version_lp)"
+        echo "  lt                           setup ltmalloc ($version_lt)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
         echo "  mng                          setup mallocng ($version_mng)"
@@ -421,6 +433,12 @@ if test "$setup_iso" = "1"; then
   popd
 fi
 
+if test "$setup_lf" = "1"; then
+  checkout lf $version_lf lf https://github.com/Begun/lockfree-malloc
+  make -j $procs liblite-malloc-shared.so
+  popd
+fi
+
 if test "$setup_ff" = "1"; then
   checkout ff $version_ff ff https://github.com/bwickman97/ffmalloc
   make -j $procs
@@ -458,6 +476,12 @@ if test "$setup_lp" = "1"; then
     CC=clang CXX=clang++ LDFLAGS='-lpthread -latomic -pthread' bash ./build.sh -s cmake -v default -t pas_lib
   fi
   cd -
+  popd
+fi
+
+if test "$setup_lt" = "1"; then
+  checkout lt $version_lt lt https://github.com/r-lyeh-archived/ltalloc
+  make -j $procs -C gnu.make.lib
   popd
 fi
 
