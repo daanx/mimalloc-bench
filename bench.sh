@@ -610,11 +610,9 @@ function run_test {  # <test>
       run_test_cmd "mathlib" "$leandir/bin/leanpkg build"
       popd;;
     redis)
-      # https://redis.io/topics/benchmarks
-      #redis_tail="20"
-      #run_test_cmd "redis" "$redis_dir/redis-benchmark -q -r 1000 -n 10000";;
+      # https://redis.io/docs/reference/optimization/benchmarks/
       redis_tail="1"
-      run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
+      run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 100000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
     alloc-test)
       run_test_cmd "alloc-test1" "./alloc-test 1"
       if test "$procs" != "1"; then
