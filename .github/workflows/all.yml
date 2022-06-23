@@ -75,7 +75,8 @@ jobs:
         # sg: src/gnuwrapper.cpp:55:23: error: '__malloc_hook' was not declared in this scope; did you mean 'my_malloc_hook'?
         # rp: mixing declarations and code is incompatible with standards before C99
         # lf: crashes redis server
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-sg no-rp no-lf
+        # fg: crashes redis server
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-sg no-rp no-lf no-fg
       - name: Run everything.
         run: |
           cd out/bench
