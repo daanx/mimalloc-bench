@@ -34,6 +34,7 @@ all=0
 # allocator versions
 readonly version_dh=master   # ~unmaintained
 readonly version_ff=4be6234
+readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
@@ -64,6 +65,7 @@ readonly version_rocksdb=7.3.1
 # allocators
 setup_dh=0
 setup_ff=0
+setup_fg=0
 setup_gd=0
 setup_hd=0
 setup_hm=0
@@ -114,6 +116,7 @@ while : ; do
         all=$flag_arg
         setup_dh=$flag_arg
         setup_ff=$flag_arg
+        setup_fg=$flag_arg
         setup_gd=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
@@ -126,7 +129,8 @@ while : ; do
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg       # lacking 'malloc.h'
-          setup_dh=$flag_arg 
+          setup_dh=$flag_arg
+          setup_fg=$flag_arg
           setup_lf=$flag_arg
           setup_lt=$flag_arg        # GNU only
           setup_mng=$flag_arg       # lacking getentropy()
@@ -156,6 +160,8 @@ while : ; do
         setup_ch=$flag_arg;;
     ff)
         setup_ff=$flag_arg;;
+    fg)
+        setup_fg=$flag_arg;;
     dh)
         setup_dh=$flag_arg;;
     gd)
@@ -222,6 +228,7 @@ while : ; do
         echo ""
         echo "  dh                           setup dieharder ($version_dh)"
         echo "  ff                           setup ffmalloc ($version_ff)"
+        echo "  fg                           setup ffreeguard ($version_fg)"
         echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
@@ -457,6 +464,12 @@ if test "$setup_scudo" = "1"; then
   # TODO: make the next line prettier instead of hardcoding everything.
   clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions $CXXFLAGS -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
   cd -
+  popd
+fi
+
+if test "$setup_fg" = "1"; then
+  checkout "fg" $version_fg "fg" https://github.com/UTSASRG/FreeGuard
+  make -j $procs SSE2RNG=1
   popd
 fi
 
