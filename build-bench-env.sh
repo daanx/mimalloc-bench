@@ -60,6 +60,7 @@ readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
+readonly version_rocksdb=7.3.1
 
 # allocators
 setup_dh=0
@@ -92,6 +93,7 @@ setup_bench=0
 setup_ch=0
 setup_lean=0
 setup_redis=0
+setup_rocksdb=0
 
 # various
 setup_packages=0
@@ -147,6 +149,7 @@ while : ; do
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
+        setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
@@ -191,6 +194,8 @@ while : ; do
         setup_packages=$flag_arg;;
     redis)
         setup_redis=$flag_arg;;
+    rocksdb)
+        setup_rocksdb=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
     sc)
@@ -250,6 +255,7 @@ while : ; do
         echo "  lean                         setup lean 3 benchmark"
         echo "  packages                     setup required packages"
         echo "  redis                        setup redis benchmark"
+        echo "  rocksdb                      setup rocksdb benchmark"
         echo ""
         echo "Prefix an option with 'no-' to disable an option"
         exit 0;;
@@ -394,23 +400,24 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby ninja-build libtool autoconf git patch time sed \
-      ghostscript libatomic"
+      ghostscript libatomic which gflags-devel"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
-      curl automake libatomic1"
+      curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
+      liblz4-dev libzstd-dev"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
       samurai libtool git build-base linux-headers autoconf util-linux sed \
-      ghostscript libatomic"
+      ghostscript libatomic gflags-dev"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
-      ghostscript bazelisk"
+      ghostscript bazelisk gflags snappy"
   fi
 fi
 
@@ -668,6 +675,28 @@ fi
 
 
 phase "install benchmarks"
+
+if test "$setup_rocksdb" = "1"; then
+  phase "build rocksdb $version_rocksdb"
+
+  pushd "$devdir"
+  if test -d "redis-$version_rocksdb"; then
+    echo "$devdir/rocksdb-$version_rocksdb already exists; no need to download it"
+  else
+    wget --no-verbose "https://github.com/facebook/rocksdb/archive/refs/tags/v7.3.1.tar.gz" -O rocksdb-$version_rocksdb.tar.gz
+    tar xzf "rocksdb-$version_rocksdb.tar.gz"
+    rm "./rocksdb-$version_rocksdb.tar.gz"
+  fi
+
+  cd "rocksdb-$version_rocksdb"
+  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
+    DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 make db_bench -j $procs
+  else
+    DISABLE_JEMALLOC=1 make db_bench -j $procs
+  fi
+  find . -name '*.o' -delete
+  popd
+fi
 
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"

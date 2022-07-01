@@ -21,7 +21,7 @@ alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
-readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
+readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench"
 
@@ -151,7 +151,7 @@ readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-6.2.7/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
-                
+readonly rocksdb_dir="$localdevdir/rocksdb-7.3.1"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
@@ -504,7 +504,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
       echo "run spec benchmark in: $spec_bench_dir"
       pushd "$spec_bench_dir";;
-    larson*|redis*|xmalloc*)
+    larson*|redis*|xmalloc*|rocksdb*)
       outfile="$1-$2-out.txt";;
     barnes)
       infile="$benchdir/barnes/input";;
@@ -613,6 +613,8 @@ function run_test {  # <test>
       # https://redis.io/docs/reference/optimization/benchmarks/
       redis_tail="1"
       run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 100000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
+    rocksdb)
+      run_test_cmd "rocksdb" "$rocksdb_dir/db_bench --benchmarks=fillrandom";;
     alloc-test)
       run_test_cmd "alloc-test1" "./alloc-test 1"
       if test "$procs" != "1"; then

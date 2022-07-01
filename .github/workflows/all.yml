@@ -50,7 +50,8 @@ jobs:
         # lf: crashes redis server
         # sg: infinite loop in the redis benchmark
         # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
-        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-fg no-lt no-lf 
+        # hoard: crashes on rocksdb
+        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-fg no-lt no-lf no-hd
       - name: Run everything.
         run: |
           cd out/bench
