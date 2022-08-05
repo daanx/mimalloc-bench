@@ -14,14 +14,14 @@ fi
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff gd hd hm hml iso je lp mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lp lt mi mi-sec mng mesh nomesh rp sc scudo sg sm sn sn-sec tbb tc tcg dmi xmi xsmi xdmi"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mng scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest sed gs"
-readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
+readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench"
 
@@ -30,9 +30,14 @@ readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
-# sed: "RE error: invalid repetition count(s)" on OSX
-readonly tests_exclude_macos="sh6bench sh8bench redis sed"
+readonly tests_exclude_macos="sh6bench sh8bench redis"
 
+# --------------------------------------------------------------------
+# benchmark versions
+# --------------------------------------------------------------------
+
+readonly version_redis=6.2.7
+readonly version_rocksdb=7.3.1
 
 # --------------------------------------------------------------------
 # Environment
@@ -102,13 +107,16 @@ readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
 alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
+alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
 alloc_lib_add "hd"     "$localdevdir/Hoard/src/libhoard$extso"
 alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
 alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso"
 alloc_lib_add "iso"    "$localdevdir/iso/build/libisoalloc$extso"
 alloc_lib_add "je"     "$localdevdir/jemalloc/lib/libjemalloc$extso"
+alloc_lib_add "lf"     "$localdevdir/lf/liblite-malloc-shared$extso"
 alloc_lib_add "lp"     "$localdevdir/lp/Source/bmalloc/libpas/build-cmake-default/Release/libpas_lib$extso"
+alloc_lib_add "lt"     "$localdevdir/lt/gnu.make.lib/libltalloc$extso"
 alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
 alloc_lib_add "mng"    "$localdevdir/mng/libmallocng$extso"
 alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
@@ -124,8 +132,8 @@ alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 
 alloc_lib_add "mi"     "$localdevdir/mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "mi-sec"    "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "mi-dbg"    "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "mi-sec" "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "mi-dbg" "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
 alloc_lib_add "xmi"    "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
 alloc_lib_add "xmi-sec"   "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
 alloc_lib_add "xmi-dbg"   "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
@@ -147,9 +155,9 @@ fi
 
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
-readonly redis_dir="$localdevdir/redis-6.2.7/src"
+readonly redis_dir="$localdevdir/redis-$version_redis/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
-                
+readonly rocksdb_dir="$localdevdir/rocksdb-$version_rocksdb"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
@@ -354,6 +362,7 @@ while : ; do
             echo "  dh                           use dieharder"
             echo "  dmi                          use debug version of mimalloc"
             echo "  ff                           use ffmalloc"
+            echo "  fg                           use freeguard"
             echo "  gd                           use guarder"
             echo "  hd                           use hoard"
             echo "  hm                           use hardened_malloc"
@@ -361,6 +370,7 @@ while : ; do
             echo "  iso                          use isoalloc"
             echo "  je                           use jemalloc"
             echo "  lp                           use libpas"
+            echo "  lf                           use lockfree-malloc"
             echo "  mesh                         use mesh"
             echo "  mi                           use mimalloc"
             echo "  mi-sec                       use secure version of mimalloc"
@@ -500,7 +510,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
       echo "run spec benchmark in: $spec_bench_dir"
       pushd "$spec_bench_dir";;
-    larson*|redis*|xmalloc*)
+    larson*|redis*|xmalloc*|rocksdb*)
       outfile="$1-$2-out.txt";;
     barnes)
       infile="$benchdir/barnes/input";;
@@ -606,11 +616,11 @@ function run_test {  # <test>
       run_test_cmd "mathlib" "$leandir/bin/leanpkg build"
       popd;;
     redis)
-      # https://redis.io/topics/benchmarks
-      #redis_tail="20"
-      #run_test_cmd "redis" "$redis_dir/redis-benchmark -q -r 1000 -n 10000";;
+      # https://redis.io/docs/reference/optimization/benchmarks/
       redis_tail="1"
-      run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 1000000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
+      run_test_cmd "redis" "$redis_dir/redis-benchmark -r 1000000 -n 100000 -q -P 16 lpush a 1 2 3 4 5 lrange a 1 5";;
+    rocksdb)
+      run_test_cmd "rocksdb" "$rocksdb_dir/db_bench --benchmarks=fillrandom";;
     alloc-test)
       run_test_cmd "alloc-test1" "./alloc-test 1"
       if test "$procs" != "1"; then
@@ -667,10 +677,6 @@ function run_test {  # <test>
       run_test_cmd "glibc-simple" "./glibc-simple";;
     glibc-thread)
       run_test_cmd "glibc-thread" "./glibc-thread $procs";;
-    sed)
-      for i in {1..10000}; do echo "${i}.${i}.${i}.${i}" >> /tmp/sed_bench.txt; done
-      run_test_cmd "sed" 'sed -E -n /^((.|.?){64}(.|.?)?(.|.?)){8}/p /tmp/sed_bench.txt'
-      rm /tmp/sed_bench.txt;;
     spec)
       case "$run_spec_bench" in
         602) run_test_cmd "spec-602.gcc_s" "./sgcc_$spec_base.$spec_config gcc-pp.c -O5 -fipa-pta -o gcc-pp.opts-O5_-fipa-pta.s";;

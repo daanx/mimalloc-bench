@@ -34,12 +34,15 @@ all=0
 # allocator versions
 readonly version_dh=master   # ~unmaintained
 readonly version_ff=4be6234
+readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
-readonly version_iso=1.2.1
+readonly version_iso=1.2.3
 readonly version_je=5.3.0
+readonly version_lf=master  # ~unmaintained since 2018
 readonly version_lp=main
+readonly version_lt=master  # ~ unmaintained since 2019
 readonly version_mesh=7ef171c7870c8da1c52ff3d78482421f46beb94c
 readonly version_mi=v1.7.6
 readonly version_mng=master  # ~unmaintained
@@ -57,16 +60,20 @@ readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
+readonly version_rocksdb=7.3.1
 
 # allocators
 setup_dh=0
 setup_ff=0
+setup_fg=0
 setup_gd=0
 setup_hd=0
 setup_hm=0
 setup_iso=0
 setup_je=0
+setup_lf=0
 setup_lp=0
+setup_lt=0
 setup_mesh=0
 setup_mi=0
 setup_mng=0
@@ -86,6 +93,7 @@ setup_bench=0
 setup_ch=0
 setup_lean=0
 setup_redis=0
+setup_rocksdb=0
 
 # various
 setup_packages=0
@@ -108,6 +116,7 @@ while : ; do
         all=$flag_arg
         setup_dh=$flag_arg
         setup_ff=$flag_arg
+        setup_fg=$flag_arg
         setup_gd=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
@@ -120,7 +129,10 @@ while : ; do
         setup_tc=$flag_arg
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg       # lacking 'malloc.h'
-          setup_dh=$flag_arg        
+          setup_dh=$flag_arg
+          setup_fg=$flag_arg
+          setup_lf=$flag_arg
+          setup_lt=$flag_arg        # GNU only
           setup_mng=$flag_arg       # lacking getentropy()
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
@@ -137,6 +149,7 @@ while : ; do
         # bigger benchmarks
         setup_lean=$flag_arg
         setup_redis=$flag_arg
+        setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
@@ -147,6 +160,8 @@ while : ; do
         setup_ch=$flag_arg;;
     ff)
         setup_ff=$flag_arg;;
+    fg)
+        setup_fg=$flag_arg;;
     dh)
         setup_dh=$flag_arg;;
     gd)
@@ -159,8 +174,12 @@ while : ; do
         setup_iso=$flag_arg;;
     je)
         setup_je=$flag_arg;;
+    lf)
+        setup_lf=$flag_arg;;
     lp)
         setup_lp=$flag_arg;;
+    lt)
+        setup_lt=$flag_arg;;
     lean)
         setup_lean=$flag_arg;;
     mng)
@@ -175,6 +194,8 @@ while : ; do
         setup_packages=$flag_arg;;
     redis)
         setup_redis=$flag_arg;;
+    rocksdb)
+        setup_rocksdb=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
     sc)
@@ -207,12 +228,15 @@ while : ; do
         echo ""
         echo "  dh                           setup dieharder ($version_dh)"
         echo "  ff                           setup ffmalloc ($version_ff)"
+        echo "  fg                           setup ffreeguard ($version_fg)"
         echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
+        echo "  lf                           setup lockfree-malloc ($version_lf)"
         echo "  lp                           setup libpas ($version_lp)"
+        echo "  lt                           setup ltmalloc ($version_lt)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
         echo "  mng                          setup mallocng ($version_mng)"
@@ -231,6 +255,7 @@ while : ; do
         echo "  lean                         setup lean 3 benchmark"
         echo "  packages                     setup required packages"
         echo "  redis                        setup redis benchmark"
+        echo "  rocksdb                      setup rocksdb benchmark"
         echo ""
         echo "Prefix an option with 'no-' to disable an option"
         exit 0;;
@@ -375,23 +400,24 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby ninja-build libtool autoconf git patch time sed \
-      ghostscript libatomic"
+      ghostscript libatomic which gflags-devel"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
-      curl automake libatomic1"
+      curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
+      liblz4-dev libzstd-dev"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
       samurai libtool git build-base linux-headers autoconf util-linux sed \
-      ghostscript libatomic bazel@testing"
+      ghostscript libatomic gflags-dev azel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
-      ghostscript bazelisk"
+      ghostscript bazelisk gflags snappy"
   fi
 fi
 
@@ -411,6 +437,12 @@ fi
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso iso https://github.com/struct/isoalloc
   make library -j $procs
+  popd
+fi
+
+if test "$setup_lf" = "1"; then
+  checkout lf $version_lf lf https://github.com/Begun/lockfree-malloc
+  make -j $procs liblite-malloc-shared.so
   popd
 fi
 
@@ -435,6 +467,12 @@ if test "$setup_scudo" = "1"; then
   popd
 fi
 
+if test "$setup_fg" = "1"; then
+  checkout "fg" $version_fg "fg" https://github.com/UTSASRG/FreeGuard
+  make -j $procs SSE2RNG=1
+  popd
+fi
+
 if test "$setup_lp" = "1"; then
   partial_checkout lp $version_lp lp https://github.com/WebKit/WebKit "Source/bmalloc/libpas"
   cd "Source/bmalloc/libpas"
@@ -454,6 +492,12 @@ if test "$setup_lp" = "1"; then
   popd
 fi
 
+if test "$setup_lt" = "1"; then
+  checkout lt $version_lt lt https://github.com/r-lyeh-archived/ltalloc
+  make -j $procs -C gnu.make.lib
+  popd
+fi
+
 if test "$setup_sg" = "1"; then
   checkout sg $version_sg sg https://github.com/ssrg-vt/SlimGuard
   make -j $procs
@@ -461,7 +505,9 @@ if test "$setup_sg" = "1"; then
 fi
 
 if test "$setup_dh" = "1"; then
-  checkout dh $version_dh dh https://github.com/emeryberger/DieHard "--recursive"
+  checkout dh $version_dh dh https://github.com/emeryberger/DieHard
+  # remove all the historical useless junk
+  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -526,6 +572,8 @@ if test "$setup_je" = "1"; then
     ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
   fi
   make -j $procs
+  [ "$CI" ] && rm -rf ./src/*.o  # jemalloc has like ~100MiB of object files
+  [ "$CI" ] && rm -rf ./lib/*.a  # jemalloc produces 80MiB of static files
   popd
 fi
 
@@ -628,6 +676,28 @@ fi
 
 phase "install benchmarks"
 
+if test "$setup_rocksdb" = "1"; then
+  phase "build rocksdb $version_rocksdb"
+
+  pushd "$devdir"
+  if test -d "redis-$version_rocksdb"; then
+    echo "$devdir/rocksdb-$version_rocksdb already exists; no need to download it"
+  else
+    wget --no-verbose "https://github.com/facebook/rocksdb/archive/refs/tags/v7.3.1.tar.gz" -O rocksdb-$version_rocksdb.tar.gz
+    tar xzf "rocksdb-$version_rocksdb.tar.gz"
+    rm "./rocksdb-$version_rocksdb.tar.gz"
+  fi
+
+  cd "rocksdb-$version_rocksdb"
+  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
+    DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 make db_bench -j $procs
+  else
+    DISABLE_JEMALLOC=1 make db_bench -j $procs
+  fi
+    [ "$CI" ] && find . -name '*.o' -delete
+  popd
+fi
+
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
 
@@ -644,6 +714,7 @@ if test "$setup_lean" = "1"; then
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
   echo "make -j$procs"
   make -j $procs
+  rm -rf ./tests/  # we don't need tests
   popd
 fi
 
@@ -656,6 +727,7 @@ if test "$setup_redis" = "1"; then
   else
     wget --no-verbose "http://download.redis.io/releases/redis-$version_redis.tar.gz"
     tar xzf "redis-$version_redis.tar.gz"
+    rm "./redis-$version_redis.tar.gz"
   fi
 
   cd "redis-$version_redis/src"
