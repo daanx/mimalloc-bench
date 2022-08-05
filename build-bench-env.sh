@@ -33,7 +33,7 @@ all=0
 
 # allocator versions
 readonly version_dh=master   # ~unmaintained
-readonly version_ff=4be6234
+readonly version_ff=master   # ~unmaintained since 2021
 readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
