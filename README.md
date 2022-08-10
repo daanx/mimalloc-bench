@@ -234,6 +234,7 @@ benchmarks as it faulted on those)
 - [Parallel compilation](https://github.com/emeryberger/DieHard/issues/15) support in DieHarder
 - [Portability improvement](https://github.com/oneapi-src/oneTBB/pull/764) in Intel TBB malloc
 - [Portability](https://github.com/google/tcmalloc/issues/128) [improvements]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
+- [Improved double-free detection]( https://github.com/microsoft/snmalloc/pull/550 ) in snmalloc
 
 
 # References
