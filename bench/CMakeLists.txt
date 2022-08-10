@@ -110,3 +110,8 @@ target_link_libraries(glibc-simple pthread)
 
 add_executable(glibc-thread glibc-bench/bench-malloc-thread.c)
 target_link_libraries(glibc-thread pthread)
+
+file(GLOB MY_SECURITY_BINARIES
+  "security/*"
+)
+file(COPY ${MY_SECURITY_BINARIES} DESTINATION security/)
