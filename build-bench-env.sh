@@ -703,15 +703,7 @@ fi
 
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
-
-  pushd $devdir
-  if test -d lean; then
-    echo "$devdir/lean already exists; no need to git clone"
-  else
-    git clone https://github.com/leanprover/lean
-  fi
-  cd lean
-  git checkout "$version_lean"
+  checkout lean $version_lean lean https://github.com/leanprover/lean
   mkdir -p out/release
   cd out/release
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
