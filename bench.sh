@@ -285,17 +285,14 @@ while : ; do
     yes|on|true)  flag_arg="1";;
     no|off|false) flag_arg="0";;
   esac
-  #echo "option: $flag, arg: $flag_arg"
 
   if contains "$alloc_all" "$flag"; then
-    #echo "allocator flag: $flag"
     if ! contains "$alloc_installed" "$flag"; then
       warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
     fi
     alloc_run_add_remove "$flag" "$flag_arg"    
   else
     if contains "$tests_all" "$flag"; then
-      #echo "test flag: $flag"
       tests_run_add_remove "$flag" "$flag_arg"
     else
       case "$flag" in
@@ -574,9 +571,8 @@ function run_test_cmd {  # <test name> <command>
   for alloc in $alloc_run; do     # use order as given on the command line
   # for alloc in $alloc_all; do   # use order as specified in $alloc_all
     if contains "$alloc_run" "$alloc"; then
-      # echo "allocator: $alloc"
       alloc_lib_set "$alloc"  # sets alloc_lib to point to the allocator .so file
-      for ((test_repeat=1; test_repeat<=$test_repeats; test_repeat++)); do
+      for i in {1..$test_repeats}; do
         case "$alloc" in
           sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2";;
           dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
@@ -607,7 +603,6 @@ function run_test {  # <test>
       run_test_cmd "gs" "gs -dBATCH -dNODISPLAY $pdfdoc";;
     lean)
       pushd "$leandir/library"
-      # run_test_cmd "lean1" "../bin/lean --make -j 1"
       if test $procs -gt 8; then # more than 8 makes it slower
         run_test_cmd "leanN" "../bin/lean --make -j 8"
       else
@@ -642,10 +637,7 @@ function run_test {  # <test>
     sh8bench)
       run_test_cmd "sh8benchN" "./sh8bench $procsx2";;
     xmalloc-test)
-      #tds=`echo "$procs/2" | bc`
-      run_test_cmd "xmalloc-testN" "./xmalloc-test -w $procs -t 5 -s 64"
-      #run_test_cmd "xmalloc-fixedN" "./xmalloc-test -w 100 -t 5 -s 128"
-      ;;
+      run_test_cmd "xmalloc-testN" "./xmalloc-test -w $procs -t 5 -s 64";;
     cthrash)
       run_test_cmd "cache-thrash1" "./cache-thrash 1 1000 1 2000000 $procs"
       if test "$procs" != "1"; then
@@ -657,7 +649,6 @@ function run_test {  # <test>
         run_test_cmd "cache-scratchN" "./cache-scratch $procs 1000 1 2000000 $procs"
       fi;;
     malloc-large)
-      # run_test_cmd "malloc-large-old" "./malloc-large-old"
       run_test_cmd "malloc-large" "./malloc-large";;
     z3)
       run_test_cmd "z3" "z3 -smt2 $benchdir/z3/test1.smt2";;
@@ -672,10 +663,7 @@ function run_test {  # <test>
       run_test_cmd "mleak10"  "./mleak 5"
       run_test_cmd "mleak100" "./mleak 50";;
     rptest)
-      run_test_cmd "rptestN" "./rptest $procs 0 1 2 500 1000 100 8 16000"
-      # run_test_cmd "rptestN" "./rptest $procs 0 1 2 500 1000 100 8 128000"
-      # run_test_cmd "rptestN" "./rptest $procs 0 1 2 500 1000 100 8 512000"
-      ;;
+      run_test_cmd "rptestN" "./rptest $procs 0 1 2 500 1000 100 8 16000";;
     glibc-simple)
       run_test_cmd "glibc-simple" "./glibc-simple";;
     glibc-thread)
@@ -696,9 +684,7 @@ function run_test {  # <test>
 }
 
 # Clear previous results
-if [ -f "$benchres" ]; then
-  rm "$benchres"
-fi
+rm "$benchres"
 rm -f ./security-*-out.txt
 
 for ((repeat=1; repeat<=$repeats; repeat++)); do
