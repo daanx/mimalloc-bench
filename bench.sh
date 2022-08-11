@@ -1,14 +1,6 @@
 #!/bin/bash
 # Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
 
-if grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
-  echo "Running on Debian or Ubuntu: errors are considered fatal"
-  set -eo pipefail
-elif brew --version 2> /dev/null >/dev/null; then
-  echo "Running on OSX: errors are considered fatal"
-  set -eo pipefail
-fi
-
 
 # --------------------------------------------------------------------
 # Allocators and tests
@@ -23,7 +15,7 @@ alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofi
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
-readonly tests_all4="z3 spec spec-bench"
+readonly tests_all4="z3 spec spec-bench security"
 
 readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
 readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
@@ -529,6 +521,18 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        $redis_dir/redis-cli shutdown
        sleep 1s
        ;;
+    security)
+       echo $2 >> $outfile
+       for file in security/*.c
+       do
+          binary=${file%.*}
+          if /usr/bin/env $3 ./$binary 2>/dev/null | grep --text -q 'NOT_CAUGHT'; then
+                  echo "[-] $binary" >> "$outfile"
+          else
+                  echo "[+] $binary" >> "$outfile"
+          fi
+       done
+       ;;
     *)
        $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
@@ -561,11 +565,10 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     spec-*)
       popd;;
   esac
-  cat "$benchres.line" | tee -a $benchres
+  test -f "$benchres.line" && cat "$benchres.line" | tee -a $benchres
 }
 
 function run_test_cmd {  # <test name> <command>
-  echo "      " >> $benchres
   echo ""
   echo "---- $repeat: $1"  
   for alloc in $alloc_run; do     # use order as given on the command line
@@ -685,6 +688,8 @@ function run_test {  # <test>
         648) run_test_cmd "spec-648.exchange2_s" "./exchange2_s_base.malloc-test-m64 6";;
         *) echo "error: unknown spec benchmark";;
       esac;;
+    security)
+      run_test_cmd "security";;
     *)
       warning "skipping unknown test: $1";;
   esac
@@ -694,6 +699,7 @@ function run_test {  # <test>
 if [ -f "$benchres" ]; then
   rm "$benchres"
 fi
+rm -f ./security-*-out.txt
 
 for ((repeat=1; repeat<=$repeats; repeat++)); do
   for tst in $tests_run; do
@@ -705,13 +711,19 @@ done
 # --------------------------------------------------------------------
 # Wrap up
 # --------------------------------------------------------------------
+if test -f "$benchres"; then
+  sed -i.bak "s/ 0:/ /" $benchres
+  echo ""
+  echo "results written to: $benchres"
+  echo ""
+  echo "#------------------------------------------------------------------"
+  echo "# test    alloc   time  rss    user  sys  page-faults page-reclaims"
 
-sed -i.bak "s/ 0:/ /" $benchres
-echo ""
-echo "results written to: $benchres"
-echo ""
-echo "#------------------------------------------------------------------"
-echo "# test    alloc   time  rss    user  sys  page-faults page-reclaims"
-
-cat $benchres 
-echo ""
+  cat $benchres
+  echo ""
+fi
+for file in security-*-out.txt
+do
+  cat "$file"
+  echo ""
+done
