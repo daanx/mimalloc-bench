@@ -617,14 +617,14 @@ fi
 if test "$setup_mesh" = "1"; then
   checkout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
   cmake .
-  make  # cannot run in parallel 
+  make  # https://github.com/plasma-umass/Mesh/issues/96
   popd
 fi
 
 if test "$setup_nomesh" = "1"; then
   checkout nomesh $version_nomesh nomesh https://github.com/plasma-umass/mesh
   cmake . -DDISABLE_MESHING=ON
-  make  # cannot run in parallel 
+  make  # https://github.com/plasma-umass/Mesh/issues/96
   popd
 fi
 
