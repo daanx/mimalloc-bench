@@ -29,11 +29,11 @@ jobs:
         # sg: src/gnuwrapper.cpp:51:32: error: expected ')' before '__malloc_initialize_hook'
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # tcg: installing bazel on alpine is awful
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg no-gd no-sg no-fg no-lf no-lt
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-tcg no-gd no-sg no-fg no-lf no-lt security
       - name: Run everything.
         run: |
           cd out/bench
-          ../../bench.sh alla allt
+          ../../bench.sh alla allt security
   build-all-ubuntu:
     runs-on: ubuntu-latest
     steps:
@@ -51,11 +51,11 @@ jobs:
         # sg: infinite loop in the redis benchmark
         # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
         # hoard: crashes on rocksdb
-        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-fg no-lt no-lf no-hd
+        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-fg no-lt no-lf no-hd security
       - name: Run everything.
         run: |
           cd out/bench
-          ../../bench.sh alla allt
+          ../../bench.sh alla allt security
   build-all-fedora:
     runs-on: ubuntu-latest
     container:
@@ -77,11 +77,11 @@ jobs:
         # rp: mixing declarations and code is incompatible with standards before C99
         # lf: crashes redis server
         # fg: crashes redis server
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-sg no-rp no-lf no-fg
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-sg no-rp no-lf no-fg security
       - name: Run everything.
         run: |
           cd out/bench
-          ../../bench.sh alla allt
+          ../../bench.sh alla allt security
   build-all-osx:
     runs-on: macos-11
     steps:
@@ -95,8 +95,8 @@ jobs:
         # ff:ffmalloc.c:1140:14: error: implicit declaration of function 'sched_getcpu' is invalid in C99 [-Werror,-Wimplicit-function-declaration] 
         # fg: unknown type name 'pthread_spinlock_t'; did you mean 'pthread_rwlock_t'?
         # gd: so many errors
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg
+        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg security
       - name: Run everything.
         run: |
           cd out/bench
-          ../../bench.sh alla allt
+          ../../bench.sh alla allt security
