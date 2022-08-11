@@ -504,7 +504,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       popd;;
     mathlib)
       echo "preprocess..."
-      find -name '*.olean' | xargs rm;;
+      find . -name '*.olean' -delete;;
     spec-*)
       readonly spec_subdir="${1#*-}"
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
