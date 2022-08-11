@@ -670,7 +670,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/secure
   cd out/secure
-  cmake ../..
+  cmake ../.. -DMI_SECURE=ON
   make -j $procs
   cd ../..
   popd
