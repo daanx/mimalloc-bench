@@ -8,6 +8,7 @@ int main(void) {
     memset(p, 'A', 256 * 1024);
 
     puts("NOT_CAUGHT");
+    fflush(stdout);
 
     return 0;
 }

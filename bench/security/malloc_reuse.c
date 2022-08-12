@@ -13,6 +13,7 @@ int main(void) {
 
     if (p == q)
 	    puts("NOT_CAUGHT");
+    fflush(stdout);
 
     return 0;
 }

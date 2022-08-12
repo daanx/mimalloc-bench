@@ -11,5 +11,6 @@ int main(void) {
     fptr();
 
     puts("NOT_CAUGHT");
+    fflush(stdout);
     return 0;
 }

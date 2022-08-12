@@ -9,5 +9,6 @@ int main() {
     free(p);
 
     puts("NOT_CAUGHT");
+    fflush(stdout);
     return 0;
 }
