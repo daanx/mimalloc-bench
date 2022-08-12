@@ -525,15 +525,19 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
           binary=${file%.*}
           tmpfile="$1-$2-tmp.txt"
           (/usr/bin/env $3 ./$binary || echo CRASHED ) 2>/dev/null > "$tmpfile"
-          if grep --text -q 'CRASHED' "$tmpfile"; then
-            if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
+          if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
+            if grep --text -q 'CRASHED' "$tmpfile"; then
               echo "[t] $binary" >> "$outfile"
+              echo "[t] $binary"
             else
-              echo "[+] $binary" >> "$outfile"
+              echo "[-] $binary" >> "$outfile"
+              echo "[-] $binary"
             fi
           else
-            echo "[-] $binary" >> "$outfile"
+            echo "[+] $binary" >> "$outfile"
+            echo "[+] $binary"
           fi
+          cat "$tmpfile"
        done
        ;;
     *)

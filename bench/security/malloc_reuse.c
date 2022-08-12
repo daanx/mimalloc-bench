@@ -12,8 +12,10 @@ int main(void) {
     p = malloc(8);
 
     if (p == q)
-	    puts("NOT_CAUGHT");
-    fflush(stdout);
+    {
+        puts("NOT_CAUGHT");
+        fflush(stdout);
+    }
 
     return 0;
 }
