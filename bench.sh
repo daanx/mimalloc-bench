@@ -528,14 +528,11 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
           if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
             if grep --text -q 'CRASHED' "$tmpfile"; then
               echo "[t] $binary" >> "$outfile"
-              echo "[t] $binary"
             else
               echo "[-] $binary" >> "$outfile"
-              echo "[-] $binary"
             fi
           else
             echo "[+] $binary" >> "$outfile"
-            echo "[+] $binary"
           fi
           cat "$tmpfile"
        done
