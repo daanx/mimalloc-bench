@@ -151,14 +151,11 @@ while : ; do
         setup_redis=$flag_arg
         setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
-        setup_security=$flag_arg
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
     bench)
         setup_bench=$flag_arg;;
-    security)
-        setup_security=$flag_arg;;
     ch)
         setup_ch=$flag_arg;;
     ff)
@@ -734,13 +731,6 @@ if test "$setup_ch" = "1"; then
   phase "build ClickHouse v19.8.3.8-stable"
   checkout ClickHouse mimalloc ClickHouse https://github.com/yandex/ClickHouse "--recursive"
   ./release
-  popd
-fi
-
-if test "$setup_security" = "1"; then
-  phase "build the security benchmark"
-  pushd "bench/security"
-  make -j $procs
   popd
 fi
 
