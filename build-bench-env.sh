@@ -228,7 +228,7 @@ while : ; do
         echo ""
         echo "  dh                           setup dieharder ($version_dh)"
         echo "  ff                           setup ffmalloc ($version_ff)"
-        echo "  fg                           setup ffreeguard ($version_fg)"
+        echo "  fg                           setup freeguard ($version_fg)"
         echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
