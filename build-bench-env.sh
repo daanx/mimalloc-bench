@@ -607,6 +607,7 @@ fi
 
 if test "$setup_sm" = "1"; then
   checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
+  rm -rf ./doc ./paper "./short-talk"
   sed -i "s/-Werror//" Makefile.include
   cd release
   make -j $procs
