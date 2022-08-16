@@ -55,7 +55,7 @@ readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.0
 readonly version_tbb=3a7f96d # v2021.5.0 + a fix for musl
 readonly version_tc=gperftools-2.10
-readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
+readonly version_tcg=859a590b7dfe70cd29728198ebb16a8f71d81252
 
 # benchmark versions
 readonly version_redis=6.2.7
@@ -411,10 +411,12 @@ if test "$setup_packages" = "1"; then
       liblz4-dev libzstd-dev"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
+    echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
       samurai libtool git build-base linux-headers autoconf util-linux sed \
       ghostscript libatomic gflags-dev"
+    apkinstall "bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
       ghostscript bazelisk gflags snappy"
