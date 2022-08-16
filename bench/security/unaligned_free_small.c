@@ -6,5 +6,6 @@ int main(void) {
     free(p + 1);
 
     puts("NOT_CAUGHT");
+    fflush(stdout);
     return 0;
 }

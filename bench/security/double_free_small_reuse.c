@@ -4,11 +4,10 @@
 int main() {
     void *p = malloc(8);
     free(p);
-
-    for(int i=0; i<1024; i++)
-        free(malloc(8));
-
     free(p);
+
+    for (size_t i=0; i< 1024 * 256; i++)
+        free(malloc(8));
 
     puts("NOT_CAUGHT");
     fflush(stdout);

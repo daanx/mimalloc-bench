@@ -10,6 +10,7 @@ int main(void) {
     for (int i=0; i<8; i++) {
         if (p[i] != 0) {
             puts("NOT_CAUGHT");
+            fflush(stdout);
             return 0;
         }
     }

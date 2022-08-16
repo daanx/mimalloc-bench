@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 int main(void) {
-    char *p = malloc(8);
-    free(p);
-    memset(p, 'A', 8);
+    char *p = malloc(16);
+    char* q = p + 1024 * 1024 * 1024;
+    free(q);
 
     puts("NOT_CAUGHT");
     fflush(stdout);
-
     return 0;
 }

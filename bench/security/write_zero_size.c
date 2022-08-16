@@ -9,5 +9,6 @@ int main() {
     *p = 'A';
 
     puts("NOT_CAUGHT");
+    fflush(stdout);
     return 0;
 }

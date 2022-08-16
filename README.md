@@ -206,6 +206,9 @@ The second set of benchmarks are stress tests and consist of:
   migrating between them. This asymmetric producer/consumer pattern is usually
   difficult to handle by allocators with thread-local caches.
 
+Finally, there is a
+[security benchmark](https://github.com/daanx/mimalloc-bench/tree/master/bench/security)
+aiming at checking basic security properties of allocators.
 
 ## Example
 

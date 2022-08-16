@@ -55,7 +55,7 @@ readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.0
 readonly version_tbb=3a7f96d # v2021.5.0 + a fix for musl
 readonly version_tc=gperftools-2.10
-readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
+readonly version_tcg=859a590b7dfe70cd29728198ebb16a8f71d81252
 
 # benchmark versions
 readonly version_redis=6.2.7
@@ -151,14 +151,11 @@ while : ; do
         setup_redis=$flag_arg
         setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
-        setup_security=$flag_arg
         #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
     bench)
         setup_bench=$flag_arg;;
-    security)
-        setup_security=$flag_arg;;
     ch)
         setup_ch=$flag_arg;;
     ff)
@@ -373,7 +370,7 @@ function aptinstallbazel {
   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
   $SUDO mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
   echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | $SUDO tee /etc/apt/sources.list.d/bazel.list
-  $SUDO apt update
+  $SUDO apt update -qq
   aptinstall bazel
 }
 
@@ -414,10 +411,12 @@ if test "$setup_packages" = "1"; then
       liblz4-dev libzstd-dev"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
+    echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
       samurai libtool git build-base linux-headers autoconf util-linux sed \
       ghostscript libatomic gflags-dev"
+    apkinstall "bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
       ghostscript bazelisk gflags snappy"
@@ -510,7 +509,7 @@ fi
 if test "$setup_dh" = "1"; then
   checkout dh $version_dh dh https://github.com/emeryberger/DieHard
   # remove all the historical useless junk
-  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/
+  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/ ./docs
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -617,14 +616,14 @@ fi
 if test "$setup_mesh" = "1"; then
   checkout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
   cmake .
-  make  # cannot run in parallel 
+  make  # https://github.com/plasma-umass/Mesh/issues/96
   popd
 fi
 
 if test "$setup_nomesh" = "1"; then
   checkout nomesh $version_nomesh nomesh https://github.com/plasma-umass/mesh
   cmake . -DDISABLE_MESHING=ON
-  make  # cannot run in parallel 
+  make  # https://github.com/plasma-umass/Mesh/issues/96
   popd
 fi
 
@@ -670,7 +669,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/secure
   cd out/secure
-  cmake ../..
+  cmake ../.. -DMI_SECURE=ON
   make -j $procs
   cd ../..
   popd
@@ -703,15 +702,7 @@ fi
 
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
-
-  pushd $devdir
-  if test -d lean; then
-    echo "$devdir/lean already exists; no need to git clone"
-  else
-    git clone https://github.com/leanprover/lean
-  fi
-  cd lean
-  git checkout "$version_lean"
+  checkout lean $version_lean lean https://github.com/leanprover/lean
   mkdir -p out/release
   cd out/release
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
@@ -742,13 +733,6 @@ if test "$setup_ch" = "1"; then
   phase "build ClickHouse v19.8.3.8-stable"
   checkout ClickHouse mimalloc ClickHouse https://github.com/yandex/ClickHouse "--recursive"
   ./release
-  popd
-fi
-
-if test "$setup_security" = "1"; then
-  phase "build the security benchmark"
-  pushd "bench/security"
-  make -j $procs
   popd
 fi
 
@@ -806,7 +790,7 @@ fi
 curdir=`pwd`
 
 phase "installed allocators"
-cat $devdir/version_*.txt 2>/dev/null | tee $devdir/versions.txt | column -t
+cat $devdir/version_*.txt 2>/dev/null | tee $devdir/versions.txt | column -t || true
 
 phase "done in $curdir"
 echo "run the cfrac benchmarks as:"

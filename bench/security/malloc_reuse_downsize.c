@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 /* This test checks that pointers aren't immediately re-used between
- * allocations. */
+ * an allocation and a smaller one. */
 
 int main(void) {
-    void *p = malloc(8);
+    void *p = malloc(256);
     void *q = p;
     free(p);
 

@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 int main(void) {
     char *p = malloc(8);
+    p[8 - 1 + 32] ^= 'A'; // XOR is used to avoid the test having a 1/256 chance to fail
     free(p);
-    memset(p, 'A', 8);
 
     puts("NOT_CAUGHT");
     fflush(stdout);
