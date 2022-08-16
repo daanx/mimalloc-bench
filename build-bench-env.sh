@@ -228,7 +228,7 @@ while : ; do
         echo ""
         echo "  dh                           setup dieharder ($version_dh)"
         echo "  ff                           setup ffmalloc ($version_ff)"
-        echo "  fg                           setup ffreeguard ($version_fg)"
+        echo "  fg                           setup freeguard ($version_fg)"
         echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
@@ -509,7 +509,7 @@ fi
 if test "$setup_dh" = "1"; then
   checkout dh $version_dh https://github.com/emeryberger/DieHard
   # remove all the historical useless junk
-  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/
+  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/ ./docs
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -607,6 +607,7 @@ fi
 
 if test "$setup_sm" = "1"; then
   checkout sm $version_sm https://github.com/kuszmaul/SuperMalloc
+  rm -rf ./doc ./paper "./short-talk"
   sed -i "s/-Werror//" Makefile.include
   cd release
   make -j $procs
