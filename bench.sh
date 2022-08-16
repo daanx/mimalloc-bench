@@ -533,6 +533,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
           else
             echo "[+] $binary" >> "$outfile"
           fi
+	  rm -f "./$tempfile"
        done
        ;;
     *)
