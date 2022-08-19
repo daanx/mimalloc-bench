@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
+
 int main(void) {
-    char *p = malloc(256 * 1024);
-    for (int i=0; i<256 * 1024; i++) {
+    char *p = malloc(ALLOCATION_SIZE);
+    for (int i=0; i< ALLOCATION_SIZE; i++) {
         if (p[i] != 0) {
-            puts("NOT_CAUGHT");
-            fflush(stdout);
+            NOT_CAUGHT();
             return 0;
         }
     }
