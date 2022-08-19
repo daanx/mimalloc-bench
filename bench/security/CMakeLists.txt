@@ -4,9 +4,9 @@ file(GLOB MY_SECURITY_TESTS
 
 foreach(f ${MY_SECURITY_TESTS})
   get_filename_component (exe_name ${f} NAME_WE)
-  set (exe_name_small "${exe_name}_small")
-  set (exe_name_small "${exe_name}_medium")
-  set (exe_name_large "${exe_name}_large")
+  set (exe_name_small  "${exe_name}_small")
+  set (exe_name_medium "${exe_name}_medium")
+  set (exe_name_large  "${exe_name}_large")
   message(STATUS "Compiling ${f} ${exe_name}")
   add_executable(${exe_name_small} ${f})
   add_executable(${exe_name_medium} ${f})
