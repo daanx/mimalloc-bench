@@ -15,3 +15,13 @@ foreach(f ${MY_SECURITY_TESTS})
   target_compile_options(${exe_name_medium} PRIVATE -Wno-free-nonheap-object -DALLOCATION_SIZE=4096)
   target_compile_options(${exe_name_large}  PRIVATE -Wno-free-nonheap-object -DALLOCATION_SIZE=256*1024)
 endforeach()
+
+file(GLOB MY_SECURITY_TESTS_CPP
+  "*.cc"
+)
+foreach(f ${MY_SECURITY_TESTS_CPP})
+  get_filename_component (exe_name ${f} NAME_WE)
+  message(STATUS "Compiling ${f} ${exe_name}")
+  add_executable(${exe_name} ${f})
+  target_compile_options(${exe_name} PRIVATE -std=c++17 -fsized-deallocation)
+endforeach()
