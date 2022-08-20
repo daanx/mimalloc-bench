@@ -11,5 +11,6 @@ int main() {
     free(q);
 
     NOT_CAUGHT();
+
     return 0;
 }

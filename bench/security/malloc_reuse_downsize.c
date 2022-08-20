@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
+
 /* This test checks that pointers aren't immediately re-used between
  * an allocation and a smaller one. */
 
@@ -13,8 +15,7 @@ int main(void) {
 
     if (p == q)
     {
-        puts("NOT_CAUGHT");
-        fflush(stdout);
+        NOT_CAUGHT();
     }
 
     return 0;

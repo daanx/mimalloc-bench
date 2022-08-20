@@ -12,5 +12,6 @@ int main() {
         free(malloc(ALLOCATION_SIZE));
 
     NOT_CAUGHT();
+
     return 0;
 }

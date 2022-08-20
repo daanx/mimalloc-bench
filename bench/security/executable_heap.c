@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
+
 const char* shellcode = "\x90\x90\x90\x90\xc3";  // nop, ..., ret on x86
 
 int main(void) {
@@ -10,7 +12,7 @@ int main(void) {
     void(*fptr)(void) = (void(*)(void))p;
     fptr();
 
-    puts("NOT_CAUGHT");
-    fflush(stdout);
+    NOT_CAUGHT();
+
     return 0;
 }

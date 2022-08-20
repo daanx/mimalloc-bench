@@ -13,5 +13,6 @@ int main() {
     free(p);
 
     NOT_CAUGHT();
+
     return 0;
 }
