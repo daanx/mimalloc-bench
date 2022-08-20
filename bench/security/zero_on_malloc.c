@@ -4,7 +4,7 @@
 
 #include "common.h"
 
-#define ITERATIONS 32
+#define ITERATIONS 4096
 
 int main(void) {
     // Allocate many chunks, and fill them.
