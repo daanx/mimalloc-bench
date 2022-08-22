@@ -26,9 +26,8 @@ jobs:
         # lf: crashes redis server
         # lt: return type 'struct mallinfo' is incomplete
         # mesh/nomesh: infinite loop?
-        # sg: src/gnuwrapper.cpp:51:32: error: expected ')' before '__malloc_initialize_hook'
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-gd no-sg no-fg no-lf no-lt
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-gd no-fg no-lf no-lt
       - name: Run everything.
         run: |
           cd out/bench
@@ -47,10 +46,9 @@ jobs:
         # gd: infinite loop in the redis benchmark
         # lt: breaks on sh8benchN
         # lf: crashes redis server
-        # sg: infinite loop in the redis benchmark
         # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
         # hoard: crashes on rocksdb
-        run: ./build-bench-env.sh all no-lean no-gd no-sg no-ff no-fg no-lt no-lf no-hd
+        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-lt no-lf no-hd
       - name: Run everything.
         run: |
           cd out/bench
@@ -72,11 +70,10 @@ jobs:
         # gd: infinite loop in the redis benchmark
         # mesh/nomesh: error: '__malloc_hook' was not declared in this scope;
         # mi: error: '__malloc_hook' was not declared in this scope;
-        # sg: src/gnuwrapper.cpp:55:23: error: '__malloc_hook' was not declared in this scope; did you mean 'my_malloc_hook'?
         # rp: mixing declarations and code is incompatible with standards before C99
         # lf: crashes redis server
         # fg: crashes redis server
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-sg no-rp no-lf no-fg
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg
       - name: Run everything.
         run: |
           cd out/bench
