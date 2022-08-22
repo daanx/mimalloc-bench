@@ -238,6 +238,7 @@ benchmarks as it faulted on those)
 - [Portability improvement](https://github.com/oneapi-src/oneTBB/pull/764) in Intel TBB malloc
 - [Portability](https://github.com/google/tcmalloc/issues/128) [improvements]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
 - [Improved double-free detection]( https://github.com/microsoft/snmalloc/pull/550 ) in snmalloc
+- [Fixed compilation on modern glibc]( https://github.com/ssrg-vt/SlimGuard/pull/13 ) in SlimGuard
 
 
 # References
