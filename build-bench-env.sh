@@ -47,6 +47,7 @@ readonly version_mesh=master # ~unmaintained since 2021
 readonly version_mi=v1.7.6
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
+readonly version_pm=master  # ~unmaintained
 readonly version_rp=1.4.4
 readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
@@ -78,6 +79,7 @@ setup_mesh=0
 setup_mi=0
 setup_mng=0
 setup_nomesh=0
+setup_pm=0
 setup_rp=0
 setup_sc=0
 setup_scudo=0
@@ -137,6 +139,7 @@ while : ; do
           setup_hm=$flag_arg        # lacking <thread.h>
           setup_mesh=$flag_arg          
           setup_rp=$flag_arg
+          setup_pm=$flag_arg
           setup_scudo=$flag_arg     # lacking <sys/auxv.h>
           setup_sm=$flag_arg        # ../src/supermalloc.h:10:31: error: expected function body after function declarator + error: use of undeclared identifier 'MADV_HUGEPAGE'
         else
@@ -192,6 +195,8 @@ while : ; do
         setup_nomesh=$flag_arg;;
     packages)
         setup_packages=$flag_arg;;
+    pm)
+        setup_pm=$flag_arg;;
     redis)
         setup_redis=$flag_arg;;
     rocksdb)
@@ -241,6 +246,7 @@ while : ; do
         echo "  mi                           setup mimalloc ($version_mi)"
         echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
+        echo "  pm                           setup portableumem"
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
         echo "  scudo                        setup scudo ($version_scudo)"
@@ -522,6 +528,14 @@ if test "$setup_tbb" = "1"; then
   checkout tbb $version_tbb https://github.com/oneapi-src/oneTBB
   cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench .
   make -j $procs
+  popd
+fi
+
+if test "$setup_pm" = "1"; then
+  checkout pm $version_pm https://github.com/omniti-labs/portableumem.git
+  ./autogen.sh
+  ./configure
+  make -j $procs libumem.la libumem_malloc.la
   popd
 fi
 
