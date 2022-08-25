@@ -5,8 +5,8 @@
 
 int main(void) {
     char *p = malloc(ALLOCATION_SIZE);
-    char* q = p + 1024 * 1024 * 1024;
-    free(q);
+    p[ALLOCATION_SIZE] ^= 'A'; // XOR is used to avoid the test having a 1/256 chance to fail
+    free(p);
 
     NOT_CAUGHT();
 

@@ -8,7 +8,8 @@ int main() {
     if (!p) {
         return 1;
     }
-    *p = 'A';
+    putchar(*p);
+    free(p);
 
     NOT_CAUGHT();
 

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
+
 int main(void) {
     char *p = malloc(8);
     char *q = p;
@@ -8,8 +10,7 @@ int main(void) {
 
     if (p == q)
     {
-        puts("NOT_CAUGHT");
-        fflush(stdout);
+        NOT_CAUGHT();
     }
 
     return 0;

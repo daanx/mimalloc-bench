@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(void) {
-    free(alloca(8));
+#include "common.h"
 
-    puts("NOT_CAUGHT");
-    fflush(stdout);
+int main(void) {
+    free(alloca(ALLOCATION_SIZE));
+
+    NOT_CAUGHT();
+
     return 0;
 }

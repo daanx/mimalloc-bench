@@ -3,10 +3,9 @@
 
 #include "common.h"
 
-int main(void) {
+int main() {
     char *p = malloc(ALLOCATION_SIZE);
-    char* q = p + 1024 * 1024 * 1024;
-    free(q);
+    free(p + 8);
 
     NOT_CAUGHT();
 

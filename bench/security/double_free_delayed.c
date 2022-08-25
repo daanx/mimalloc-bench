@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
+
 int main() {
-    void *p = malloc(8);
+    void *p = malloc(ALLOCATION_SIZE);
     free(p);
 
     for(int i=0; i<1024; i++)
-        free(malloc(8));
+        free(malloc(ALLOCATION_SIZE));
 
     free(p);
 
-    puts("NOT_CAUGHT");
-    fflush(stdout);
+    NOT_CAUGHT();
+
     return 0;
 }
