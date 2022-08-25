@@ -2,18 +2,22 @@ file(GLOB MY_SECURITY_TESTS
   "*.c"
 )
 
+macro (add_security_test test_name test_file allocation_size)
+  add_executable(${test_name} ${test_file})
+  target_compile_options(${test_name}  PRIVATE 
+    -Wno-free-nonheap-object 
+    -fno-inline
+    -fno-builtin-inline
+    -fno-inline-small-functions 
+    -DALLOCATION_SIZE=${allocation_size})
+endmacro ()
+
 foreach(f ${MY_SECURITY_TESTS})
   get_filename_component (exe_name ${f} NAME_WE)
-  set (exe_name_small  "${exe_name}_small")
-  set (exe_name_medium "${exe_name}_medium")
-  set (exe_name_large  "${exe_name}_large")
   message(STATUS "Compiling ${f} ${exe_name}")
-  add_executable(${exe_name_small} ${f})
-  add_executable(${exe_name_medium} ${f})
-  add_executable(${exe_name_large} ${f})
-  target_compile_options(${exe_name_small}  PRIVATE -Wno-free-nonheap-object -DALLOCATION_SIZE=8)
-  target_compile_options(${exe_name_medium} PRIVATE -Wno-free-nonheap-object -DALLOCATION_SIZE=4096)
-  target_compile_options(${exe_name_large}  PRIVATE -Wno-free-nonheap-object -DALLOCATION_SIZE=256*1024)
+  add_security_test("${exe_name}_small" ${f} 8)
+  add_security_test("${exe_name}_medium" ${f} 4096)
+  add_security_test("${exe_name}_large" ${f} 256*1024)
 endforeach()
 
 file(GLOB MY_SECURITY_TESTS_CPP
