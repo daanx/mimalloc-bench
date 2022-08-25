@@ -7,11 +7,11 @@
  * an allocation and a smaller one. */
 
 int main(void) {
-    void *p = malloc(256);
+    void *p = malloc(ALLOCATION_SIZE);
     void *q = p;
     free(p);
 
-    p = malloc(8);
+    p = malloc(ALLOCATION_SIZE / 2);
 
     if (p == q)
     {

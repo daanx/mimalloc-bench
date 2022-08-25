@@ -4,7 +4,7 @@
 #include "common.h"
 
 int main(void) {
-    free(alloca(8));
+    free(alloca(ALLOCATION_SIZE));
 
     NOT_CAUGHT();
 

@@ -4,7 +4,7 @@
 #include "common.h"
 
 int main(void) {
-    char p[8];
+    char p[ALLOCATION_SIZE];
     free(p);
 
     NOT_CAUGHT();
