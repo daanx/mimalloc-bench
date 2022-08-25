@@ -524,20 +524,21 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        do
           # Don't run the test if the file is not a executable file.
           # E.g. some of the build files CMake generates.
-          if [[ -x $binary && -f $binary ]]; then
-            tmpfile="$1-$2-tmp.txt"
-            (/usr/bin/env $3 ./$binary || echo CRASHED ) 2>/dev/null > "$tmpfile"
-            if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
-              if grep --text -q 'CRASHED' "$tmpfile"; then
-                echo "[t] $binary" >> "$outfile"
-              else
-                echo "[-] $binary" >> "$outfile"
-              fi
-            else
-              echo "[+] $binary" >> "$outfile"
-            fi
-  	        rm -f "./$tmpfile"
+          if [[ ! -x $binary || ! -f $binary ]]; then
+            continue
           fi
+          tmpfile="$1-$2-tmp.txt"
+          (/usr/bin/env $3 ./$binary || echo CRASHED ) 2>/dev/null > "$tmpfile"
+          if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
+            if grep --text -q 'CRASHED' "$tmpfile"; then
+              echo "[t] $binary" >> "$outfile"
+            else
+              echo "[-] $binary" >> "$outfile"
+            fi
+          else
+            echo "[+] $binary" >> "$outfile"
+          fi
+          rm -f "./$tmpfile"
        done
        ;;
     *)
