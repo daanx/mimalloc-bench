@@ -522,6 +522,11 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        echo $2 >> $outfile
        for binary in security/*
        do
+          # Don't run the test if the file is not a executable file.
+          # E.g. some of the build files CMake generates.
+          if [[ ! -x $binary || ! -f $binary ]]; then
+            continue
+          fi
           tmpfile="$1-$2-tmp.txt"
           (/usr/bin/env $3 ./$binary || echo CRASHED ) 2>/dev/null > "$tmpfile"
           if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
@@ -533,7 +538,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
           else
             echo "[+] $binary" >> "$outfile"
           fi
-	  rm -f "./$tmpfile"
+          rm -f "./$tmpfile"
        done
        ;;
     *)
