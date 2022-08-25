@@ -8,7 +8,7 @@
 int main(void) {
     const char c[ALLOCATION_SIZE + 1024 * 1024] = {0};
     char *p = malloc(ALLOCATION_SIZE);
-    memcpy(p, c, sizeof(c));
+    memcpy_noinline(p, c, sizeof(c));
 
     NOT_CAUGHT();
 
