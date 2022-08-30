@@ -528,22 +528,22 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
             continue
           fi
           tmpfile="$1-$2-tmp.txt"
-          ( timeout 1s bash -c "/usr/bin/env $3 ./$binary || echo CRASHED" || echo TIMEOUT ) 2>/dev/null > "$tmpfile"
+          ((timeout 1s bash -c "/usr/bin/env $3 ./$binary || echo CRASHED") || echo TIMEOUT)  2>/dev/null > "$tmpfile"
           if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
             if grep --text -q 'CRASHED' "$tmpfile"; then
-              echo "[d] $binary" >> "$outfile"
+              echo   "[late crash]   $binary" >> "$outfile"
             else
               if grep --text -q 'TIMEOUT' "$tmpfile"; then
-                echo "[dt] $binary" >> "$outfile"
+                echo "[late timeout] $binary" >> "$outfile"
               else
-                echo "[-] $binary" >> "$outfile"
+                echo "[-]            $binary" >> "$outfile"
               fi
             fi
           else
             if grep --text -q 'TIMEOUT' "$tmpfile"; then
-              echo "[t] $binary" >> "$outfile"
+              echo   "[timeout]      $binary" >> "$outfile"
             else
-              echo "[+] $binary" >> "$outfile"
+              echo   "[+]            $binary" >> "$outfile"
             fi
           fi
           rm -f "./$tmpfile"
