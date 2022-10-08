@@ -759,9 +759,7 @@ if test "$setup_bench" = "1"; then
     patch -p1 -o sh8bench-new.c SH8BENCH.C sh8bench.patch
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
   phase "get large PDF document"
 
   readonly pdfdoc="large.pdf"
@@ -775,9 +773,7 @@ if test "$setup_bench" = "1"; then
     wget --no-verbose -O "$pdfdoc" -U "useragent" $pdfurl
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
   phase "build benchmarks"
 
   mkdir -p out/bench
