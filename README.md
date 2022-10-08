@@ -155,6 +155,7 @@ some, and consists of:
    and the benchmark simulates this.
 - __larsonN-sized__: same as the __larsonN__ except it uses sized deallocation calls which
    have a fast path in some allocators. 
+- __lua__: compiling the [lua interpreter](https://github.com/lua/lua).
 - __z3__: perform some computations in [z3](https://github.com/Z3Prover/z3).
 
 The second set of benchmarks are stress tests and consist of:

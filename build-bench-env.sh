@@ -61,6 +61,7 @@ readonly version_tcg=859a590b7dfe70cd29728198ebb16a8f71d81252
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
 readonly version_rocksdb=7.3.1
+readonly version_lua=v5.4.4
 
 # allocators
 setup_dh=0
@@ -772,6 +773,10 @@ if test "$setup_bench" = "1"; then
     useragent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
     wget --no-verbose -O "$pdfdoc" -U "useragent" $pdfurl
   fi
+  popd
+
+  phase "get lua"
+  checkout lua $version_lua https://github.com/lua/lua
   popd
 
   phase "build benchmarks"

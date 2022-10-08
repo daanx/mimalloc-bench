@@ -15,7 +15,7 @@ alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofi
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
-readonly tests_all4="z3 spec spec-bench security"
+readonly tests_all4="z3 spec spec-bench security lua"
 
 readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
 readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
@@ -145,6 +145,7 @@ if test "$use_packages" = "1"; then
   fi
 fi
 
+readonly luadir="$localdevdir/lua"
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-$version_redis/src"
@@ -494,6 +495,10 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     mathlib)
       echo "preprocess..."
       find . -name '*.olean' -delete;;
+    lua)
+      pushd "$luadir"
+      make clean
+      popd;;
     spec-*)
       readonly spec_subdir="${1#*-}"
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
@@ -620,6 +625,10 @@ function run_test {  # <test>
       run_test_cmd "barnes" "./barnes";;
     gs)
       run_test_cmd "gs" "gs -dBATCH -dNODISPLAY $pdfdoc";;
+    lua)
+      pushd "$luadir"
+      run_test_cmd "lua" "make"
+      popd;;
     lean)
       pushd "$leandir/library"
       if test $procs -gt 8; then # more than 8 makes it slower
