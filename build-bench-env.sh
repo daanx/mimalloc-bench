@@ -61,6 +61,7 @@ readonly version_tcg=859a590b7dfe70cd29728198ebb16a8f71d81252
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
 readonly version_rocksdb=7.3.1
+readonly version_lua=v5.4.4
 
 # allocators
 setup_dh=0
@@ -759,9 +760,7 @@ if test "$setup_bench" = "1"; then
     patch -p1 -o sh8bench-new.c SH8BENCH.C sh8bench.patch
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
   phase "get large PDF document"
 
   readonly pdfdoc="large.pdf"
@@ -775,9 +774,11 @@ if test "$setup_bench" = "1"; then
     wget --no-verbose -O "$pdfdoc" -U "useragent" $pdfurl
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
+  phase "get lua"
+  checkout lua $version_lua https://github.com/lua/lua
+  popd
+
   phase "build benchmarks"
 
   mkdir -p out/bench
