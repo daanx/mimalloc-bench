@@ -12,10 +12,10 @@ alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs lua"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
-readonly tests_all4="z3 spec spec-bench security lua"
+readonly tests_all4="z3 spec spec-bench security"
 
 readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
 readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
