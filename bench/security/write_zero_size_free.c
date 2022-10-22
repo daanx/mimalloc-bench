@@ -9,6 +9,7 @@ int main() {
         return 1;
     }
     *p = 'A';
+    free(p);
 
     NOT_CAUGHT();
 

@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "common.h"
+
 int main() {
     char *p = malloc(0);
     if (!p) {
@@ -8,6 +10,7 @@ int main() {
     }
     putchar(*p);
 
-    puts("NOT_CAUGHT");
+    NOT_CAUGHT();
+
     return 0;
 }

@@ -38,7 +38,7 @@ readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
-readonly version_iso=1.2.3
+readonly version_iso=1.2.4
 readonly version_je=5.3.0
 readonly version_lf=master   # ~unmaintained since 2018
 readonly version_lp=main
@@ -52,15 +52,16 @@ readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
-readonly version_sn=0.6.0
+readonly version_sn=0.6.1
 readonly version_tbb=3a7f96d # v2021.5.0 + a fix for musl
 readonly version_tc=gperftools-2.10
-readonly version_tcg=0fdd7dce282523ed7f76849edf37d6a97eda007e
+readonly version_tcg=859a590b7dfe70cd29728198ebb16a8f71d81252
 
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
 readonly version_rocksdb=7.3.1
+readonly version_lua=v5.4.4
 
 # allocators
 setup_dh=0
@@ -227,7 +228,7 @@ while : ; do
         echo ""
         echo "  dh                           setup dieharder ($version_dh)"
         echo "  ff                           setup ffmalloc ($version_ff)"
-        echo "  fg                           setup ffreeguard ($version_fg)"
+        echo "  fg                           setup freeguard ($version_fg)"
         echo "  gd                           setup guarder ($version_gd)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
@@ -294,43 +295,43 @@ function write_version {  # name, git-tag, repo
   echo "$1: $2, $commit, $3" > "$devdir/version_$1.txt"
 }
 
-function partial_checkout {  # name, git-tag, directory, git repo, directory to download
+function partial_checkout {  # name, git-tag, git repo, directory to download
   phase "build $1: version $2"
   pushd $devdir
   if test "$rebuild" = "1"; then
-    rm -rf "$3"
+    rm -rf "$1"
   fi
-  if test -d "$3"; then
-    echo "$devdir/$3 already exists; no need to git clone"
-    cd "$3"
+  if test -d "$1"; then
+    echo "$devdir/$1 already exists; no need to git clone"
+    cd "$1"
   else
-    mkdir "$3"
-    cd "$3"
+    mkdir "$1"
+    cd "$1"
     git init
-    git remote add origin $4
+    git remote add origin $3
     git config extensions.partialClone origin
-    git sparse-checkout set $5
+    git sparse-checkout set $4
   fi
   git fetch --depth=1 --filter=blob:none origin $2
   git checkout $2
   git reset origin/$2 --hard
-  write_version $1 $2 $4
+  write_version $1 $2 $3
 }
 
-function checkout {  # name, git-tag, directory, git repo, options
+function checkout {  # name, git-tag, git repo, options
   phase "build $1: version $2"
   pushd $devdir
   if test "$rebuild" = "1"; then
-    rm -rf "$3"
+    rm -rf "$1"
   fi
-  if test -d "$3"; then
-    echo "$devdir/$3 already exists; no need to git clone"
+  if test -d "$1"; then
+    echo "$devdir/$1 already exists; no need to git clone"
   else
-    git clone $5 $4 $3
+    git clone $4 $3 $1
   fi
-  cd "$3"
+  cd "$1"
   git checkout $2
-  write_version $1 $2 $4
+  write_version $1 $2 $3
 }
 
 function aptinstall {
@@ -369,7 +370,7 @@ function aptinstallbazel {
   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
   $SUDO mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
   echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | $SUDO tee /etc/apt/sources.list.d/bazel.list
-  $SUDO apt update
+  $SUDO apt update -qq
   aptinstall bazel
 }
 
@@ -410,10 +411,12 @@ if test "$setup_packages" = "1"; then
       liblz4-dev libzstd-dev"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
+    echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
       samurai libtool git build-base linux-headers autoconf util-linux sed \
       ghostscript libatomic gflags-dev"
+    apkinstall "bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
       ghostscript bazelisk gflags snappy"
@@ -421,44 +424,44 @@ if test "$setup_packages" = "1"; then
 fi
 
 if test "$setup_hm" = "1"; then
-  checkout hm $version_hm hm https://github.com/GrapheneOS/hardened_malloc
+  checkout hm $version_hm https://github.com/GrapheneOS/hardened_malloc
   make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light -j $proc
   make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=default -j $proc
   popd
 fi
 
 if test "$setup_gd" = "1"; then
-  checkout gd $version_gd gd https://github.com/UTSASRG/Guarder
+  checkout gd $version_gd https://github.com/UTSASRG/Guarder
   make -j $procs
   popd
 fi
 
 if test "$setup_iso" = "1"; then
-  checkout iso $version_iso iso https://github.com/struct/isoalloc
+  checkout iso $version_iso https://github.com/struct/isoalloc
   make library -j $procs
   popd
 fi
 
 if test "$setup_lf" = "1"; then
-  checkout lf $version_lf lf https://github.com/Begun/lockfree-malloc
+  checkout lf $version_lf https://github.com/Begun/lockfree-malloc
   make -j $procs liblite-malloc-shared.so
   popd
 fi
 
 if test "$setup_ff" = "1"; then
-  checkout ff $version_ff ff https://github.com/bwickman97/ffmalloc
+  checkout ff $version_ff https://github.com/bwickman97/ffmalloc
   make -j $procs
   popd
 fi
 
 if test "$setup_mng" = "1"; then
-  checkout mng $version_mng mng https://github.com/richfelker/mallocng-draft
+  checkout mng $version_mng https://github.com/richfelker/mallocng-draft
   make -j $procs
   popd
 fi
 
 if test "$setup_scudo" = "1"; then
-  partial_checkout scudo $version_scudo scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
+  partial_checkout scudo $version_scudo https://github.com/llvm/llvm-project "compiler-rt/lib/scudo/standalone"
   cd "compiler-rt/lib/scudo/standalone"
   # TODO: make the next line prettier instead of hardcoding everything.
   clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions $CXXFLAGS -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
@@ -467,13 +470,13 @@ if test "$setup_scudo" = "1"; then
 fi
 
 if test "$setup_fg" = "1"; then
-  checkout "fg" $version_fg "fg" https://github.com/UTSASRG/FreeGuard
+  checkout "fg" $version_fg https://github.com/UTSASRG/FreeGuard
   make -j $procs SSE2RNG=1
   popd
 fi
 
 if test "$setup_lp" = "1"; then
-  partial_checkout lp $version_lp lp https://github.com/WebKit/WebKit "Source/bmalloc/libpas"
+  partial_checkout lp $version_lp https://github.com/WebKit/WebKit "Source/bmalloc/libpas"
   cd "Source/bmalloc/libpas"
   ORIG=""
   if test "$darwin" = "1"; then
@@ -492,21 +495,21 @@ if test "$setup_lp" = "1"; then
 fi
 
 if test "$setup_lt" = "1"; then
-  checkout lt $version_lt lt https://github.com/r-lyeh-archived/ltalloc
+  checkout lt $version_lt https://github.com/r-lyeh-archived/ltalloc
   make -j $procs -C gnu.make.lib
   popd
 fi
 
 if test "$setup_sg" = "1"; then
-  checkout sg $version_sg sg https://github.com/ssrg-vt/SlimGuard
+  checkout sg $version_sg https://github.com/ssrg-vt/SlimGuard
   make -j $procs
   popd
 fi
 
 if test "$setup_dh" = "1"; then
-  checkout dh $version_dh dh https://github.com/emeryberger/DieHard
+  checkout dh $version_dh https://github.com/emeryberger/DieHard
   # remove all the historical useless junk
-  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/
+  rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/ ./docs
   if test "$darwin" = "1"; then
     TARGET=libdieharder make -C src macos
   else
@@ -516,14 +519,14 @@ if test "$setup_dh" = "1"; then
 fi
 
 if test "$setup_tbb" = "1"; then
-  checkout tbb $version_tbb tbb https://github.com/oneapi-src/oneTBB
+  checkout tbb $version_tbb https://github.com/oneapi-src/oneTBB
   cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench .
   make -j $procs
   popd
 fi
 
 if test "$setup_tc" = "1"; then
-  checkout tc $version_tc tc https://github.com/gperftools/gperftools
+  checkout tc $version_tc https://github.com/gperftools/gperftools
   if test -f configure; then
     echo "already configured"
   else
@@ -537,7 +540,7 @@ if test "$setup_tc" = "1"; then
 fi
 
 if test "$setup_tcg" = "1"; then
-  checkout tcg $version_tcg tcg https://github.com/google/tcmalloc
+  checkout tcg $version_tcg https://github.com/google/tcmalloc
   ORIG=""
   if test "$darwin" = "1"; then
     ORIG="_orig"
@@ -554,7 +557,7 @@ if test "$setup_tcg" = "1"; then
 fi
 
 if test "$setup_hd" = "1"; then
-  checkout hd $version_hd Hoard https://github.com/emeryberger/Hoard
+  checkout hd $version_hd https://github.com/emeryberger/Hoard
   cd src
   if [ "`uname -m -s`" = "Darwin x86_64" ] ; then
     sed -i_orig 's/-arch arm64/ /g' GNUmakefile   # fix the makefile    
@@ -564,7 +567,7 @@ if test "$setup_hd" = "1"; then
 fi
 
 if test "$setup_je" = "1"; then
-  checkout je $version_je jemalloc https://github.com/jemalloc/jemalloc
+  checkout je $version_je https://github.com/jemalloc/jemalloc
   if test -f config.status; then
     echo "$devdir/jemalloc is already configured; no need to reconfigure"
   else
@@ -577,7 +580,7 @@ if test "$setup_je" = "1"; then
 fi
 
 if test "$setup_rp" = "1"; then
-  checkout rp $version_rp rpmalloc https://github.com/mjansson/rpmalloc
+  checkout rp $version_rp https://github.com/mjansson/rpmalloc
   if test -f build.ninja; then
     echo "$devdir/rpmalloc is already configured; no need to reconfigure"
   else
@@ -588,7 +591,7 @@ if test "$setup_rp" = "1"; then
 fi
 
 if test "$setup_sn" = "1"; then
-  checkout sn $version_sn snmalloc https://github.com/Microsoft/snmalloc
+  checkout sn $version_sn https://github.com/Microsoft/snmalloc
   if test -f release/build.ninja; then
     echo "$devdir/snmalloc is already configured; no need to reconfigure"
   else
@@ -603,7 +606,8 @@ if test "$setup_sn" = "1"; then
 fi
 
 if test "$setup_sm" = "1"; then
-  checkout sm $version_sm SuperMalloc https://github.com/kuszmaul/SuperMalloc
+  checkout sm $version_sm https://github.com/kuszmaul/SuperMalloc
+  rm -rf ./doc ./paper "./short-talk"
   sed -i "s/-Werror//" Makefile.include
   cd release
   make -j $procs
@@ -611,21 +615,21 @@ if test "$setup_sm" = "1"; then
 fi
 
 if test "$setup_mesh" = "1"; then
-  checkout mesh $version_mesh mesh https://github.com/plasma-umass/mesh
+  checkout mesh $version_mesh https://github.com/plasma-umass/mesh
   cmake .
-  make  # cannot run in parallel 
+  make  # https://github.com/plasma-umass/Mesh/issues/96
   popd
 fi
 
 if test "$setup_nomesh" = "1"; then
-  checkout nomesh $version_nomesh nomesh https://github.com/plasma-umass/mesh
+  checkout nomesh $version_nomesh https://github.com/plasma-umass/mesh
   cmake . -DDISABLE_MESHING=ON
-  make  # cannot run in parallel 
+  make  # https://github.com/plasma-umass/Mesh/issues/96
   popd
 fi
 
 if test "$setup_sc" = "1"; then
-  checkout sc $version_sc scalloc https://github.com/cksystemsgroup/scalloc
+  checkout sc $version_sc https://github.com/cksystemsgroup/scalloc
   if test -f Makefile; then
     echo "$devdir/scalloc is already configured; no need to reconfigure"
   else
@@ -641,7 +645,7 @@ if test "$setup_sc" = "1"; then
 fi
 
 if test "$setup_mi" = "1"; then
-  checkout mi $version_mi mimalloc https://github.com/microsoft/mimalloc
+  checkout mi $version_mi https://github.com/microsoft/mimalloc
 
   echo ""
   echo "- build mimalloc release"
@@ -666,7 +670,7 @@ if test "$setup_mi" = "1"; then
 
   mkdir -p out/secure
   cd out/secure
-  cmake ../..
+  cmake ../.. -DMI_SECURE=ON
   make -j $procs
   cd ../..
   popd
@@ -699,15 +703,7 @@ fi
 
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
-
-  pushd $devdir
-  if test -d lean; then
-    echo "$devdir/lean already exists; no need to git clone"
-  else
-    git clone https://github.com/leanprover/lean
-  fi
-  cd lean
-  git checkout "$version_lean"
+  checkout lean $version_lean https://github.com/leanprover/lean
   mkdir -p out/release
   cd out/release
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
@@ -763,9 +759,7 @@ if test "$setup_bench" = "1"; then
     patch -p1 -o sh8bench-new.c SH8BENCH.C sh8bench.patch
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
   phase "get large PDF document"
 
   readonly pdfdoc="large.pdf"
@@ -779,9 +773,11 @@ if test "$setup_bench" = "1"; then
     wget --no-verbose -O "$pdfdoc" -U "useragent" $pdfurl
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
+  phase "get lua"
+  checkout lua $version_lua https://github.com/lua/lua
+  popd
+
   phase "build benchmarks"
 
   mkdir -p out/bench
@@ -795,7 +791,7 @@ fi
 curdir=`pwd`
 
 phase "installed allocators"
-cat $devdir/version_*.txt 2>/dev/null | tee $devdir/versions.txt | column -t
+cat $devdir/version_*.txt 2>/dev/null | tee $devdir/versions.txt | column -t || true
 
 phase "done in $curdir"
 echo "run the cfrac benchmarks as:"

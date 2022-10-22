@@ -4,13 +4,13 @@
 
 #include "common.h"
 
-const char* shellcode = "\x90\x90\x90\x90\xc3";  // nop, ..., ret on x86
-
 int main(void) {
     char *p = malloc(ALLOCATION_SIZE);
-    memcpy(p, shellcode, sizeof(shellcode));
-    void(*fptr)(void) = (void(*)(void))p;
-    fptr();
+    free(p);
+    memset(p, 'A', ALLOCATION_SIZE);
+
+    for (size_t i=0; i< 1024 * 256; i++)
+        free(malloc(ALLOCATION_SIZE));
 
     NOT_CAUGHT();
 

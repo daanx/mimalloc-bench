@@ -4,7 +4,9 @@
 #include "common.h"
 
 int main(void) {
-    free((void *)1);
+    char *p = malloc(ALLOCATION_SIZE);
+    char* q = p + 1024 * 1024 * 1024;
+    free(q);
 
     NOT_CAUGHT();
 

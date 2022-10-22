@@ -155,6 +155,7 @@ some, and consists of:
    and the benchmark simulates this.
 - __larsonN-sized__: same as the __larsonN__ except it uses sized deallocation calls which
    have a fast path in some allocators. 
+- __lua__: compiling the [lua interpreter](https://github.com/lua/lua).
 - __z3__: perform some computations in [z3](https://github.com/Z3Prover/z3).
 
 The second set of benchmarks are stress tests and consist of:
@@ -206,6 +207,9 @@ The second set of benchmarks are stress tests and consist of:
   migrating between them. This asymmetric producer/consumer pattern is usually
   difficult to handle by allocators with thread-local caches.
 
+Finally, there is a
+[security benchmark](https://github.com/daanx/mimalloc-bench/tree/master/bench/security)
+aiming at checking basic security properties of allocators.
 
 ## Example
 
@@ -235,6 +239,7 @@ benchmarks as it faulted on those)
 - [Portability improvement](https://github.com/oneapi-src/oneTBB/pull/764) in Intel TBB malloc
 - [Portability](https://github.com/google/tcmalloc/issues/128) [improvements]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
 - [Improved double-free detection]( https://github.com/microsoft/snmalloc/pull/550 ) in snmalloc
+- [Fixed compilation on modern glibc]( https://github.com/ssrg-vt/SlimGuard/pull/13 ) in SlimGuard
 
 
 # References

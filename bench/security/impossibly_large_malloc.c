@@ -4,9 +4,10 @@
 #include "common.h"
 
 int main(void) {
-    free((void *)1);
-
-    NOT_CAUGHT();
-
+    char *p = malloc(-2);
+    if (p != NULL) {
+      NOT_CAUGHT();
+    }
+    free(p);
     return 0;
 }

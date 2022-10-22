@@ -4,7 +4,8 @@
 #include "common.h"
 
 int main(void) {
-    char p[ALLOCATION_SIZE];
+    char *p = malloc(ALLOCATION_SIZE);
+    p[-32] ^= 'A'; // XOR is used to avoid the test having a 1/256 chance to fail
     free(p);
 
     NOT_CAUGHT();

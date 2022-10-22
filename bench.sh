@@ -12,7 +12,7 @@ alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs lua"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench security"
@@ -92,7 +92,7 @@ function alloc_lib_add {  # <allocator> <variable> <librarypath>
   alloc_libs="$1=$2 $alloc_libs"
 }
 
-readonly lib_rp="`find ${localdevdir}/rpmalloc/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
+readonly lib_rp="`find ${localdevdir}/rp/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
 readonly lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
 readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
@@ -101,11 +101,11 @@ alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
 alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
-alloc_lib_add "hd"     "$localdevdir/Hoard/src/libhoard$extso"
+alloc_lib_add "hd"     "$localdevdir/hd/src/libhoard$extso"
 alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
 alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso"
 alloc_lib_add "iso"    "$localdevdir/iso/build/libisoalloc$extso"
-alloc_lib_add "je"     "$localdevdir/jemalloc/lib/libjemalloc$extso"
+alloc_lib_add "je"     "$localdevdir/je/lib/libjemalloc$extso"
 alloc_lib_add "lf"     "$localdevdir/lf/liblite-malloc-shared$extso"
 alloc_lib_add "lp"     "$localdevdir/lp/Source/bmalloc/libpas/build-cmake-default/Release/libpas_lib$extso"
 alloc_lib_add "lt"     "$localdevdir/lt/gnu.make.lib/libltalloc$extso"
@@ -113,22 +113,22 @@ alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
 alloc_lib_add "mng"    "$localdevdir/mng/libmallocng$extso"
 alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
 alloc_lib_add "rp"     "$lib_rp"
-alloc_lib_add "sc"     "$localdevdir/scalloc/out/Release/lib.target/libscalloc$extso"
+alloc_lib_add "sc"     "$localdevdir/sc/out/Release/lib.target/libscalloc$extso"
 alloc_lib_add "scudo"  "$localdevdir/scudo/compiler-rt/lib/scudo/standalone/libscudo$extso"
 alloc_lib_add "sg"     "$localdevdir/sg/libSlimGuard.so"
-alloc_lib_add "sm"     "$localdevdir/SuperMalloc/release/lib/libsupermalloc$extso"
-alloc_lib_add "sn"     "$localdevdir/snmalloc/release/libsnmallocshim$extso"
-alloc_lib_add "sn-sec" "$localdevdir/snmalloc/release/libsnmallocshim-checks$extso"
+alloc_lib_add "sm"     "$localdevdir/sm/release/lib/libsupermalloc$extso"
+alloc_lib_add "sn"     "$localdevdir/sn/release/libsnmallocshim$extso"
+alloc_lib_add "sn-sec" "$localdevdir/sn/release/libsnmallocshim-checks$extso"
 alloc_lib_add "tbb"    "$lib_tbb"
 alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 
-alloc_lib_add "mi"     "$localdevdir/mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "mi-sec" "$localdevdir/mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "mi-dbg" "$localdevdir/mimalloc/out/debug/libmimalloc-debug$extso"
-alloc_lib_add "xmi"    "$localdevdir/../../mimalloc/out/release/libmimalloc$extso"
-alloc_lib_add "xmi-sec"   "$localdevdir/../../mimalloc/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "xmi-dbg"   "$localdevdir/../../mimalloc/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "mi"     "$localdevdir/mi/out/release/libmimalloc$extso"
+alloc_lib_add "mi-sec" "$localdevdir/mi/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "mi-dbg" "$localdevdir/mi/out/debug/libmimalloc-debug$extso"
+alloc_lib_add "xmi"    "$localdevdir/../../mi/out/release/libmimalloc$extso"
+alloc_lib_add "xmi-sec"   "$localdevdir/../../mi/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "xmi-dbg"   "$localdevdir/../../mi/out/debug/libmimalloc-debug$extso"
 
 if test "$use_packages" = "1"; then
   if test -f "/usr/lib/libtcmalloc$extso"; then
@@ -145,6 +145,7 @@ if test "$use_packages" = "1"; then
   fi
 fi
 
+readonly luadir="$localdevdir/lua"
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-$version_redis/src"
@@ -494,6 +495,10 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     mathlib)
       echo "preprocess..."
       find . -name '*.olean' -delete;;
+    lua)
+      pushd "$luadir"
+      make clean
+      popd;;
     spec-*)
       readonly spec_subdir="${1#*-}"
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
@@ -520,14 +525,33 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        ;;
     security)
        echo $2 >> $outfile
-       for file in security/*.c
+       for binary in security/*
        do
-          binary=${file%.*}
-          if /usr/bin/env $3 ./$binary 2>/dev/null | grep --text -q 'NOT_CAUGHT'; then
-                  echo "[-] $binary" >> "$outfile"
-          else
-                  echo "[+] $binary" >> "$outfile"
+          # Don't run the test if the file is not a executable file.
+          # E.g. some of the build files CMake generates.
+          if [[ ! -x $binary || ! -f $binary ]]; then
+            continue
           fi
+          tmpfile="$1-$2-tmp.txt"
+          ((timeout 1s bash -c "/usr/bin/env $3 ./$binary || echo CRASHED") || echo TIMEOUT)  2>/dev/null > "$tmpfile"
+          if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
+            if grep --text -q 'CRASHED' "$tmpfile"; then
+              echo   "[late crash]   $binary" >> "$outfile"
+            else
+              if grep --text -q 'TIMEOUT' "$tmpfile"; then
+                echo "[late timeout] $binary" >> "$outfile"
+              else
+                echo "[-]            $binary" >> "$outfile"
+              fi
+            fi
+          else
+            if grep --text -q 'TIMEOUT' "$tmpfile"; then
+              echo   "[timeout]      $binary" >> "$outfile"
+            else
+              echo   "[+]            $binary" >> "$outfile"
+            fi
+          fi
+          rm -f "./$tmpfile"
        done
        ;;
     *)
@@ -601,6 +625,10 @@ function run_test {  # <test>
       run_test_cmd "barnes" "./barnes";;
     gs)
       run_test_cmd "gs" "gs -dBATCH -dNODISPLAY $pdfdoc";;
+    lua)
+      pushd "$luadir"
+      run_test_cmd "lua" "make"
+      popd;;
     lean)
       pushd "$leandir/library"
       if test $procs -gt 8; then # more than 8 makes it slower

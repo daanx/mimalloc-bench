@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
+
 int main() {
-    char *p = malloc(256 * 1024);
+    char *p = malloc(ALLOCATION_SIZE);
     free(p + 1);
 
-    puts("NOT_CAUGHT");
+    NOT_CAUGHT();
+
     return 0;
 }

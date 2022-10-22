@@ -3,8 +3,9 @@
 
 #include "common.h"
 
-int main(void) {
-    free((void *)1);
+int main() {
+    char *p = malloc(ALLOCATION_SIZE);
+    free(p + 8);
 
     NOT_CAUGHT();
 

@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
+
 int main() {
-    void *p = malloc(8);
+    void *p = malloc(ALLOCATION_SIZE);
     free(p);
     free(p);
 
-    puts("NOT_CAUGHT");
+    NOT_CAUGHT();
+
     return 0;
 }

@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
+
 int main(void) {
-    char *p = malloc(8);
-    memset(p, 'A', 8);
+    char *p = malloc(ALLOCATION_SIZE);
+    memset(p, 'A', ALLOCATION_SIZE);
     free(p);
 
-    for (int i=0; i<8; i++) {
+    for (int i=0; i< ALLOCATION_SIZE; i++) {
         if (p[i] != 0) {
-            puts("NOT_CAUGHT");
+            NOT_CAUGHT();
             return 0;
         }
     }
