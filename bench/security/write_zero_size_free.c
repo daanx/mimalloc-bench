@@ -4,12 +4,12 @@
 #include "common.h"
 
 int main() {
-    char *p = malloc(0);
+    char *p = malloc_noinline(0);
     if (!p) {
         return 1;
     }
     *p = 'A';
-    free(p);
+    free_noinline(p);
 
     NOT_CAUGHT();
 
