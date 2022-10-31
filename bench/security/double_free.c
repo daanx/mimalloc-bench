@@ -4,9 +4,9 @@
 #include "common.h"
 
 int main() {
-    void *p = malloc(ALLOCATION_SIZE);
-    free(p);
-    free(p);
+    void *p = malloc_noinline(ALLOCATION_SIZE);
+    free_noinline(p);
+    free_noinline(p);
 
     NOT_CAUGHT();
 

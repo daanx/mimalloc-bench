@@ -4,7 +4,7 @@
 #include "common.h"
 
 int main(void) {
-    char *p = malloc(8);
+    char *p = malloc_noinline(8);
     char *q = p;
     realloc(p, 1024);
 

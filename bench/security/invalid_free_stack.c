@@ -5,7 +5,7 @@
 
 int main(void) {
     char p[ALLOCATION_SIZE];
-    free(p);
+    free_noinline(p);
 
     NOT_CAUGHT();
 

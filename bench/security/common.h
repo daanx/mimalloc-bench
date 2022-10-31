@@ -8,14 +8,26 @@
 #define NOT_CAUGHT() do { puts("NOT_CAUGHT"); fflush(stdout); } while ((0));
 
 #if defined(_MSC_VER) 
-__declspec(noinline)
+#define NOINLINE __declspec(noinline)
 #elif defined(__INTEL_COMPILER)
-#pragma noinline
+#define NOINLINE _Pragma("noinline")
 #else
-__attribute((noinline))
+#define NOINLINE __attribute((noinline))
 #endif
+
+NOINLINE
 void* memcpy_noinline(void* dest, const void* src, size_t n) {
     return memcpy(dest, src, n);
+}
+
+NOINLINE
+void* malloc_noinline(size_t size) {
+    return malloc(size);
+}
+
+NOINLINE
+void free_noinline(void* ptr) {
+    return free(ptr);
 }
 
 #endif //_MIMALLOC_BENCH_SECURITY_COMMON_H
