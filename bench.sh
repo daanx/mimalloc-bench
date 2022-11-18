@@ -487,7 +487,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     sleep "$sleep"
   fi
   echo
-  echo "run $test_repeat: $1 $2: $3 $4"
+  echo "run $5: $1 $2: $3 $4"
   # clear temporary output
   if [ -f "$benchres.line" ]; then
     rm "$benchres.line"
@@ -605,12 +605,12 @@ function run_test_cmd {  # <test name> <command>
   # for alloc in $alloc_all; do   # use order as specified in $alloc_all
     if contains "$alloc_run" "$alloc"; then
       alloc_lib_set "$alloc"  # sets alloc_lib to point to the allocator .so file
-      for i in {1..$test_repeats}; do
+      for ((i=$test_repeats; i>0; i--)); do
         case "$alloc" in
-          sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2";;
-          dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
-          tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2";;
-          *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2";;
+          sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2" $i;;
+          dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2" $i;;
+          tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2" $i;;
+          *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2" $i;;
         esac
       done
     fi
@@ -724,7 +724,7 @@ function run_test {  # <test>
 rm "$benchres"
 rm -f ./security-*-out.txt
 
-for ((repeat=1; repeat<=$repeats; repeat++)); do
+for ((repeat=$repeats; repeat>0; repeat--)); do
   for tst in $tests_run; do
     run_test "$tst"
   done
