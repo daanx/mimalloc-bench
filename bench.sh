@@ -126,9 +126,18 @@ alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 alloc_lib_add "mi"     "$localdevdir/mi/out/release/libmimalloc$extso"
 alloc_lib_add "mi-sec" "$localdevdir/mi/out/secure/libmimalloc-secure$extso"
 alloc_lib_add "mi-dbg" "$localdevdir/mi/out/debug/libmimalloc-debug$extso"
-alloc_lib_add "xmi"    "$localdevdir/../../mi/out/release/libmimalloc$extso"
-alloc_lib_add "xmi-sec"   "$localdevdir/../../mi/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "xmi-dbg"   "$localdevdir/../../mi/out/debug/libmimalloc-debug$extso"
+
+xmidir="$localdevdir/../../mi"
+if ! [ -d "$xmidir" ]; then
+  xmidir_ext="${xmidir}malloc"
+  if [ -d "$xmidir_ext" ]; then 
+    xmidir="$xmidir_ext";
+  fi
+fi
+
+alloc_lib_add "xmi"    "$xmidir/out/release/libmimalloc$extso"
+alloc_lib_add "xmi-sec"   "$xmidir/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "xmi-dbg"   "$xmidir/out/debug/libmimalloc-debug$extso"
 
 if test "$use_packages" = "1"; then
   if test -f "/usr/lib/libtcmalloc$extso"; then
