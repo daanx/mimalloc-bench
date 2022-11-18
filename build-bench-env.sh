@@ -44,7 +44,7 @@ readonly version_lf=master   # ~unmaintained since 2018
 readonly version_lp=main
 readonly version_lt=master   # ~unmaintained since 2019
 readonly version_mesh=master # ~unmaintained since 2021
-readonly version_mi=v1.7.6
+readonly version_mi=v1.7.7
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
 readonly version_rp=1.4.4
@@ -55,7 +55,7 @@ readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.1
 readonly version_tbb=v2021.7.0
 readonly version_tc=gperftools-2.10
-readonly version_tcg=859a590b7dfe70cd29728198ebb16a8f71d81252
+readonly version_tcg=41fc1266a08d9662a7e3dd76aebd0a3587f4cc36 # 2022-11-17
 
 # benchmark versions
 readonly version_redis=6.2.7
