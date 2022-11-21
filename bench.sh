@@ -745,8 +745,11 @@ if test -f "$benchres"; then
   cat $benchres
   echo ""
 fi
+
 for file in security-*-out.txt
 do
-  cat "$file"
-  echo ""
+  if [ -f "$file" ]; then
+    cat "$file"
+    echo ""
+  fi
 done
