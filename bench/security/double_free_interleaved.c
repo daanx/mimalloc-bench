@@ -4,11 +4,11 @@
 #include "common.h"
 
 int main() {
-    void *p = malloc(ALLOCATION_SIZE);
-    void *q = malloc(ALLOCATION_SIZE);
-    free(p);
-    free(q);
-    free(p);
+    void *p = malloc_noinline(ALLOCATION_SIZE);
+    void *q = malloc_noinline(ALLOCATION_SIZE);
+    free_noinline(p);
+    free_noinline(q);
+    free_noinline(p);
 
     NOT_CAUGHT();
 

@@ -7,7 +7,7 @@
 const char* shellcode = "\x90\x90\x90\x90\xc3";  // nop, ..., ret on x86
 
 int main(void) {
-    char *p = malloc(ALLOCATION_SIZE);
+    char *p = malloc_noinline(ALLOCATION_SIZE);
     memcpy(p, shellcode, sizeof(shellcode));
     void(*fptr)(void) = (void(*)(void))p;
     fptr();

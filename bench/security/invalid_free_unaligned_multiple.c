@@ -4,8 +4,8 @@
 #include "common.h"
 
 int main() {
-    char *p = malloc(ALLOCATION_SIZE);
-    free(p + 8);
+    char *p = malloc_noinline(ALLOCATION_SIZE);
+    free_noinline(p + 8);
 
     NOT_CAUGHT();
 

@@ -7,11 +7,11 @@
  * an allocation and a smaller one. */
 
 int main(void) {
-    void *p = malloc(ALLOCATION_SIZE);
+    void *p = malloc_noinline(ALLOCATION_SIZE);
     void *q = p;
-    free(p);
+    free_noinline(p);
 
-    p = malloc(ALLOCATION_SIZE / 2);
+    p = malloc_noinline(ALLOCATION_SIZE / 2);
 
     if (p == q)
     {

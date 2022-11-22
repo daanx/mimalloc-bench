@@ -38,13 +38,13 @@ readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
-readonly version_iso=1.2.3
+readonly version_iso=master
 readonly version_je=5.3.0
 readonly version_lf=master   # ~unmaintained since 2018
 readonly version_lp=main
 readonly version_lt=master   # ~unmaintained since 2019
 readonly version_mesh=master # ~unmaintained since 2021
-readonly version_mi=v1.7.6
+readonly version_mi=v1.7.7
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
 readonly version_rp=1.4.4
@@ -52,15 +52,16 @@ readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
-readonly version_sn=0.6.0
-readonly version_tbb=3a7f96d # v2021.5.0 + a fix for musl
+readonly version_sn=0.6.1
+readonly version_tbb=v2021.7.0
 readonly version_tc=gperftools-2.10
-readonly version_tcg=859a590b7dfe70cd29728198ebb16a8f71d81252
+readonly version_tcg=41fc1266a08d9662a7e3dd76aebd0a3587f4cc36 # 2022-11-17
 
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
 readonly version_rocksdb=7.3.1
+readonly version_lua=v5.4.4
 
 # allocators
 setup_dh=0
@@ -90,7 +91,6 @@ setup_tcg=0
 
 # bigger benchmarks
 setup_bench=0
-setup_ch=0
 setup_lean=0
 setup_redis=0
 setup_rocksdb=0
@@ -151,13 +151,10 @@ while : ; do
         setup_redis=$flag_arg
         setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
-        #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
     bench)
         setup_bench=$flag_arg;;
-    ch)
-        setup_ch=$flag_arg;;
     ff)
         setup_ff=$flag_arg;;
     fg)
@@ -408,7 +405,7 @@ if test "$setup_packages" = "1"; then
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
-      liblz4-dev libzstd-dev"
+      liblz4-dev libzstd-dev libreadline-dev"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
@@ -730,13 +727,6 @@ if test "$setup_redis" = "1"; then
   popd
 fi
 
-if test "$setup_ch" = "1"; then
-  phase "build ClickHouse v19.8.3.8-stable"
-  checkout ClickHouse mimalloc https://github.com/yandex/ClickHouse "--recursive"
-  ./release
-  popd
-fi
-
 if test "$setup_bench" = "1"; then
   phase "patch shbench"
   pushd "bench/shbench"
@@ -759,9 +749,7 @@ if test "$setup_bench" = "1"; then
     patch -p1 -o sh8bench-new.c SH8BENCH.C sh8bench.patch
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
   phase "get large PDF document"
 
   readonly pdfdoc="large.pdf"
@@ -775,9 +763,11 @@ if test "$setup_bench" = "1"; then
     wget --no-verbose -O "$pdfdoc" -U "useragent" $pdfurl
   fi
   popd
-fi
 
-if test "$setup_bench" = "1"; then
+  phase "get lua"
+  checkout lua $version_lua https://github.com/lua/lua
+  popd
+
   phase "build benchmarks"
 
   mkdir -p out/bench

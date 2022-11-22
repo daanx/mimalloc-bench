@@ -4,7 +4,7 @@
 #include "common.h"
 
 int main(void) {
-    free((void *)1);
+    free_noinline((void *)1);
 
     NOT_CAUGHT();
 

@@ -12,7 +12,7 @@ alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
-readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs"
+readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs lua"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench security"
@@ -126,9 +126,18 @@ alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 alloc_lib_add "mi"     "$localdevdir/mi/out/release/libmimalloc$extso"
 alloc_lib_add "mi-sec" "$localdevdir/mi/out/secure/libmimalloc-secure$extso"
 alloc_lib_add "mi-dbg" "$localdevdir/mi/out/debug/libmimalloc-debug$extso"
-alloc_lib_add "xmi"    "$localdevdir/../../mi/out/release/libmimalloc$extso"
-alloc_lib_add "xmi-sec"   "$localdevdir/../../mi/out/secure/libmimalloc-secure$extso"
-alloc_lib_add "xmi-dbg"   "$localdevdir/../../mi/out/debug/libmimalloc-debug$extso"
+
+xmidir="$localdevdir/../../mi"
+if ! [ -d "$xmidir" ]; then
+  xmidir_ext="${xmidir}malloc"
+  if [ -d "$xmidir_ext" ]; then 
+    xmidir="$xmidir_ext";
+  fi
+fi
+
+alloc_lib_add "xmi"    "$xmidir/out/release/libmimalloc$extso"
+alloc_lib_add "xmi-sec"   "$xmidir/out/secure/libmimalloc-secure$extso"
+alloc_lib_add "xmi-dbg"   "$xmidir/out/debug/libmimalloc-debug$extso"
 
 if test "$use_packages" = "1"; then
   if test -f "/usr/lib/libtcmalloc$extso"; then
@@ -145,6 +154,7 @@ if test "$use_packages" = "1"; then
   fi
 fi
 
+readonly luadir="$localdevdir/lua"
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-$version_redis/src"
@@ -477,7 +487,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     sleep "$sleep"
   fi
   echo
-  echo "run $test_repeat: $1 $2: $3 $4"
+  echo "run $5: $1 $2: $3 $4"
   # clear temporary output
   if [ -f "$benchres.line" ]; then
     rm "$benchres.line"
@@ -494,6 +504,10 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     mathlib)
       echo "preprocess..."
       find . -name '*.olean' -delete;;
+    lua)
+      pushd "$luadir"
+      make clean
+      popd;;
     spec-*)
       readonly spec_subdir="${1#*-}"
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
@@ -528,15 +542,23 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
             continue
           fi
           tmpfile="$1-$2-tmp.txt"
-          (/usr/bin/env $3 ./$binary || echo CRASHED ) 2>/dev/null > "$tmpfile"
+          ((timeout 1s bash -c "/usr/bin/env $3 ./$binary || echo CRASHED") || echo TIMEOUT)  2>/dev/null > "$tmpfile"
           if grep --text -q 'NOT_CAUGHT' "$tmpfile"; then
             if grep --text -q 'CRASHED' "$tmpfile"; then
-              echo "[t] $binary" >> "$outfile"
+              echo   "[late crash]   $binary" >> "$outfile"
             else
-              echo "[-] $binary" >> "$outfile"
+              if grep --text -q 'TIMEOUT' "$tmpfile"; then
+                echo "[late timeout] $binary" >> "$outfile"
+              else
+                echo "[-]            $binary" >> "$outfile"
+              fi
             fi
           else
-            echo "[+] $binary" >> "$outfile"
+            if grep --text -q 'TIMEOUT' "$tmpfile"; then
+              echo   "[timeout]      $binary" >> "$outfile"
+            else
+              echo   "[+]            $binary" >> "$outfile"
+            fi
           fi
           rm -f "./$tmpfile"
        done
@@ -583,12 +605,12 @@ function run_test_cmd {  # <test name> <command>
   # for alloc in $alloc_all; do   # use order as specified in $alloc_all
     if contains "$alloc_run" "$alloc"; then
       alloc_lib_set "$alloc"  # sets alloc_lib to point to the allocator .so file
-      for i in {1..$test_repeats}; do
+      for ((i=$test_repeats; i>0; i--)); do
         case "$alloc" in
-          sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2";;
-          dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2";;
-          tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2";;
-          *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2";;
+          sys) run_test_env_cmd $1 "sys" "SYSMALLOC=1" "$2" $i;;
+          dmi) run_test_env_cmd $1 "dmi" "MIMALLOC_VERBOSE=1 MIMALLOC_STATS=1 ${ldpreload}=$alloc_lib" "$2" $i;;
+          tbb) run_test_env_cmd $1 "tbb" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$lib_tbb_dir ${ldpreload}=$alloc_lib" "$2" $i;;
+          *)   run_test_env_cmd $1 "$alloc" "${ldpreload}=$alloc_lib" "$2" $i;;
         esac
       done
     fi
@@ -612,6 +634,10 @@ function run_test {  # <test>
       run_test_cmd "barnes" "./barnes";;
     gs)
       run_test_cmd "gs" "gs -dBATCH -dNODISPLAY $pdfdoc";;
+    lua)
+      pushd "$luadir"
+      run_test_cmd "lua" "make"
+      popd;;
     lean)
       pushd "$leandir/library"
       if test $procs -gt 8; then # more than 8 makes it slower
@@ -698,7 +724,7 @@ function run_test {  # <test>
 rm "$benchres"
 rm -f ./security-*-out.txt
 
-for ((repeat=1; repeat<=$repeats; repeat++)); do
+for ((repeat=$repeats; repeat>0; repeat--)); do
   for tst in $tests_run; do
     run_test "$tst"
   done
@@ -719,8 +745,11 @@ if test -f "$benchres"; then
   cat $benchres
   echo ""
 fi
+
 for file in security-*-out.txt
 do
-  cat "$file"
-  echo ""
+  if [ -f "$file" ]; then
+    cat "$file"
+    echo ""
+  fi
 done
