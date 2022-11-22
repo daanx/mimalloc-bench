@@ -91,7 +91,6 @@ setup_tcg=0
 
 # bigger benchmarks
 setup_bench=0
-setup_ch=0
 setup_lean=0
 setup_redis=0
 setup_rocksdb=0
@@ -152,13 +151,10 @@ while : ; do
         setup_redis=$flag_arg
         setup_rocksdb=$flag_arg
         setup_bench=$flag_arg
-        #setup_ch=$flag_arg
         setup_packages=$flag_arg
         ;;
     bench)
         setup_bench=$flag_arg;;
-    ch)
-        setup_ch=$flag_arg;;
     ff)
         setup_ff=$flag_arg;;
     fg)
@@ -728,13 +724,6 @@ if test "$setup_redis" = "1"; then
 
   cd "redis-$version_redis/src"
   USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no make -j $procs
-  popd
-fi
-
-if test "$setup_ch" = "1"; then
-  phase "build ClickHouse v19.8.3.8-stable"
-  checkout ClickHouse mimalloc https://github.com/yandex/ClickHouse "--recursive"
-  ./release
   popd
 fi
 
