@@ -583,7 +583,7 @@ if test "$setup_rp" = "1"; then
   else
     python3 configure.py
   fi
-  ninja
+  CC=gcc ninja
   popd
 fi
 
