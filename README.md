@@ -230,7 +230,7 @@ allocates more the faster the program runs. Unfortunately,
 there are no entries for _SuperMalloc_ in the _leanN_ and _xmalloc-testN_
 benchmarks as it faulted on those)
 
-# Resulting improvements
+# Resulting improvements and found issues
 
 - [Minor performances improvement](https://github.com/struct/isoalloc/commit/049c12e4c2ad5c21a768f7f3873d84bf1106646a) in isoalloc
 - A [crash]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
@@ -240,6 +240,7 @@ benchmarks as it faulted on those)
 - [Portability](https://github.com/google/tcmalloc/issues/128) [improvements]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
 - [Improved double-free detection]( https://github.com/microsoft/snmalloc/pull/550 ) in snmalloc
 - [Fixed compilation on modern glibc]( https://github.com/ssrg-vt/SlimGuard/pull/13 ) in SlimGuard
+- [Portability issues](https://github.com/mjansson/rpmalloc/issues/293) in rpmalloc
 
 
 # References
