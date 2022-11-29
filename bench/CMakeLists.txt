@@ -38,9 +38,11 @@ set(barnes_sources
 PREPEND(barnes_sources barnes/ ${barnes_sources})
 
 # turn off warnings..
+message(STATUS "${CMAKE_C_COMPILER_ID}")
 if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
-  list(APPEND CMAKE_C_FLAGS " -w ")
-  list(APPEND CMAKE_CXX_FLAGS " -w ")
+  set(FLAGS " -w -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion")
+  list(APPEND CMAKE_C_FLAGS ${FLAGS})
+  list(APPEND CMAKE_CXX_FLAGS ${FLAGS})
 endif()
 
 add_executable(cfrac ${cfrac_sources})
