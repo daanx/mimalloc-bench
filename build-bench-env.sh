@@ -60,7 +60,7 @@ readonly version_tcg=41fc1266a08d9662a7e3dd76aebd0a3587f4cc36 # 2022-11-17
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=v3.4.2
-readonly version_rocksdb=7.3.1
+readonly version_rocksdb=7.7.3
 readonly version_lua=v5.4.4
 
 # allocators
@@ -683,7 +683,7 @@ if test "$setup_rocksdb" = "1"; then
   if test -d "redis-$version_rocksdb"; then
     echo "$devdir/rocksdb-$version_rocksdb already exists; no need to download it"
   else
-    wget --no-verbose "https://github.com/facebook/rocksdb/archive/refs/tags/v7.3.1.tar.gz" -O rocksdb-$version_rocksdb.tar.gz
+    wget --no-verbose "https://github.com/facebook/rocksdb/archive/refs/tags/v${version_rocksdb}.tar.gz" -O rocksdb-$version_rocksdb.tar.gz
     tar xzf "rocksdb-$version_rocksdb.tar.gz"
     rm "./rocksdb-$version_rocksdb.tar.gz"
   fi
