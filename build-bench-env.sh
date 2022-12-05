@@ -689,12 +689,8 @@ if test "$setup_rocksdb" = "1"; then
   fi
 
   cd "rocksdb-$version_rocksdb"
-  if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
-    DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 make db_bench -j $procs
-  else
-    DISABLE_JEMALLOC=1 make db_bench -j $procs
-  fi
-    [ "$CI" ] && find . -name '*.o' -delete
+  DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 make db_bench -j $procs
+  [ "$CI" ] && find . -name '*.o' -delete
   popd
 fi
 
