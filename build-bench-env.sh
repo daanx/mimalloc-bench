@@ -53,7 +53,7 @@ readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.1
-readonly version_tbb=v202.7.0
+readonly version_tbb=v2021.7.0
 readonly version_tc=gperftools-2.10
 readonly version_tcg=41fc1266a08d9662a7e3dd76aebd0a3587f4cc36 # 2022-11-17
 
