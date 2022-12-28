@@ -241,7 +241,7 @@ benchmarks as it faulted on those)
 - [Improved double-free detection]( https://github.com/microsoft/snmalloc/pull/550 ) in snmalloc
 - [Fixed compilation on modern glibc]( https://github.com/ssrg-vt/SlimGuard/pull/13 ) in SlimGuard
 - [Portability issues](https://github.com/mjansson/rpmalloc/issues/293) in rpmalloc
-
+- Provided [data]( https://gitlab.gnome.org/GNOME/glib/-/issues/1079#note_1627978 ) for the glib allocator.
 
 # References
 
