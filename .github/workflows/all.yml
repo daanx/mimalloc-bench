@@ -27,7 +27,7 @@ jobs:
         # lt: return type 'struct mallinfo' is incomplete
         # mesh/nomesh: infinite loop?
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
-        # tcg: [...] specifies less restrictive attribute than its target [...]
+        # tcg: error: 'size_t malloc_usable_size(void*)' specifies less restrictive attribute than its target ... 'nothrow' [-Werror=missing-attributes]
         run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-gd no-fg no-lf no-lt no-tcg
       - name: Run everything.
         run: |
