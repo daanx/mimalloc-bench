@@ -265,6 +265,18 @@ function tests_run_add_remove { # <test> <add?>
   fi
 }
 
+function process_external { # file
+  REGEXP="^([^ ]+) +(.*)$"
+
+  while read -r ; do
+    echo $REPLY
+    if [[ $REPLY =~ $REGEXP ]]; then
+      alloc_lib_add ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}
+      alloc_run_add ${BASH_REMATCH[1]}
+    fi
+  done < $1
+}
+
 if test "$darwin" = "1"; then
   # remove tests that don't run on darwin
   tests_exclude="$tests_exclude $tests_exclude_macos"
@@ -331,6 +343,8 @@ while : ; do
         spec=*)
             test_run_add "spec"
             run_spec_bench="$flag_arg";;
+        --external=*)
+            process_external "$flag_arg";;
         -j=*|--procs=*)
             procs="$flag_arg";;
         -r=*)
@@ -351,6 +365,7 @@ while : ; do
             echo "  -r=<n>                       number of repeats of the full suite (=$repeats)"
             echo "  -n=<n>                       number of repeats of each individual test (=$test_repeats)"
             echo "  -s=<n>, --sleep=<n>          seconds of sleep between each test (=$sleep)"
+            echo "  --external=<file>            read external allocators from <file>, one per line, in the format <name> <path>"
             echo ""
             echo "  allt                         run all tests"
             echo "  alla                         run all allocators"
