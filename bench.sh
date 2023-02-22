@@ -265,14 +265,16 @@ function tests_run_add_remove { # <test> <add?>
   fi
 }
 
-function process_external { # file
-  REGEXP="^([^ ]+) +(.*)$"
+function read_external_allocators_from_file { # file
+  REGEXP="^([^ ]+) +(.+)$"
 
   while read -r ; do
-    echo $REPLY
     if [[ $REPLY =~ $REGEXP ]]; then
+      echo Adding external allocator: $REPLY
       alloc_lib_add ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}
       alloc_run_add ${BASH_REMATCH[1]}
+    else
+      echo "Invalid line in external allocators file: $REPLY"
     fi
   done < $1
 }
@@ -344,7 +346,7 @@ while : ; do
             test_run_add "spec"
             run_spec_bench="$flag_arg";;
         --external=*)
-            process_external "$flag_arg";;
+            read_external_allocators_from_file "$flag_arg";;
         -j=*|--procs=*)
             procs="$flag_arg";;
         -r=*)
