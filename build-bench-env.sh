@@ -47,6 +47,7 @@ readonly version_mesh=master # ~unmaintained since 2021
 readonly version_mi=v1.7.7
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
+readonly version_pa=main
 readonly version_rp=f4732ee  # https://github.com/mjansson/rpmalloc/issues/293#issuecomment-1336502654
 readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
@@ -79,6 +80,7 @@ setup_mesh=0
 setup_mi=0
 setup_mng=0
 setup_nomesh=0
+setup_pa=0
 setup_rp=0
 setup_sc=0
 setup_scudo=0
@@ -123,6 +125,7 @@ while : ; do
         setup_je=$flag_arg
         setup_lp=$flag_arg
         setup_mi=$flag_arg
+        setup_pa=$flag_arg
         setup_sn=$flag_arg
         setup_sg=$flag_arg
         setup_tbb=$flag_arg
@@ -187,6 +190,8 @@ while : ; do
         setup_mi=$flag_arg;;
     nomesh)
         setup_nomesh=$flag_arg;;
+    pa)
+        setup_pa=$flag_arg;;
     packages)
         setup_packages=$flag_arg;;
     redis)
@@ -238,6 +243,7 @@ while : ; do
         echo "  mi                           setup mimalloc ($version_mi)"
         echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
+        echo "  pa                           setup PartitionAlloc ($version_pa)"
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
         echo "  scudo                        setup scudo ($version_scudo)"
@@ -494,6 +500,23 @@ fi
 if test "$setup_lt" = "1"; then
   checkout lt $version_lt https://github.com/r-lyeh-archived/ltalloc
   make -j $procs -C gnu.make.lib
+  popd
+fi
+
+if test "$setup_pa" = "1"; then
+  checkout pa $version_pa https://github.com/1c3t3a/partition_alloc_builder.git
+
+  # Setup depot_tools for building
+  git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+  export PATH="$PATH:${pwd}/depot_tools"
+
+  # Fetch sources - this relies on a standalone build of PA
+  gclient config https://github.com/1c3t3a/partition_alloc_builder.git
+  gclient sync
+  cd partition_alloc_builder
+
+  gn gen out/Default
+  autoninja -C out/Default
   popd
 fi
 
