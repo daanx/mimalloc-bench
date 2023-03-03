@@ -507,8 +507,8 @@ if test "$setup_pa" = "1"; then
   checkout pa $version_pa https://github.com/1c3t3a/partition_alloc_builder.git
 
   # Setup depot_tools for building
-  git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-  export PATH="$PATH:${pwd}/depot_tools"
+  git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git --depth=1
+  export PATH="$PATH:$PWD/depot_tools"
 
   # Fetch sources - this relies on a standalone build of PA
   gclient config https://github.com/1c3t3a/partition_alloc_builder.git
