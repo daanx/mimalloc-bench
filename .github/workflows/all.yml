@@ -26,9 +26,10 @@ jobs:
         # lf: crashes redis server
         # lt: return type 'struct mallinfo' is incomplete
         # mesh/nomesh: infinite loop?
+        # pa: can't setup depot_tools and goma
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # tcg: [...] specifies less restrictive attribute than its target [...]
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-gd no-fg no-lf no-lt no-tcg
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-pa no-gd no-fg no-lf no-lt no-tcg
       - name: Run everything.
         run: |
           cd out/bench
