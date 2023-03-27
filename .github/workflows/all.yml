@@ -51,7 +51,8 @@ jobs:
         # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
         # hoard: crashes on rocksdb
         # tcg: https://github.com/google/tcmalloc/issues/155
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-lt no-lf no-hd no-tcg
+        # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
+        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-lt no-lf no-hd no-tcg no-pa
       - name: Run everything.
         run: |
           cd out/bench
@@ -76,7 +77,8 @@ jobs:
         # rp: mixing declarations and code is incompatible with standards before C99
         # lf: crashes redis server
         # fg: crashes redis server
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg
+        # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg no-pa
       - name: Run everything.
         run: |
           cd out/bench
