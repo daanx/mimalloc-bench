@@ -96,7 +96,8 @@ jobs:
         # ff:ffmalloc.c:1140:14: error: implicit declaration of function 'sched_getcpu' is invalid in C99 [-Werror,-Wimplicit-function-declaration] 
         # fg: unknown type name 'pthread_spinlock_t'; did you mean 'pthread_rwlock_t'?
         # gd: so many errors
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg
+        # pa: ninja: error: '../../buildtools/third_party/libc++/trunk/src/utility.cpp', needed by 'obj/buildtools/third_party/libc++/libc++/utility.o', missing and no known rule to make it
+        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-pa
       - name: Run everything.
         run: |
           cd out/bench
