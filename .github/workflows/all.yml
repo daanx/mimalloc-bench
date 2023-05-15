@@ -29,7 +29,8 @@ jobs:
         # pa: can't setup depot_tools and goma
         # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
         # tcg: [...] specifies less restrictive attribute than its target [...]
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-pa no-gd no-fg no-lf no-lt no-tcg
+        # lp: /__w/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/pas_thread_local_cache.c:218:22: error: call to undeclared function 'pthread_getname_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-pa no-gd no-fg no-lf no-lt no-tcg no-lp
       - name: Run everything.
         run: |
           cd out/bench
