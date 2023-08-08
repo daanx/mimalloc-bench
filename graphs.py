@@ -12,17 +12,16 @@ if len(sys.argv) != 2:
     print('Usage: %s results.txt' % sys.argv[0])
     sys.exit(1)
 
-r = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+)')
+parse_line = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+)')
 allocs = collections.defaultdict(lambda: collections.defaultdict(dict))
 
 with open(sys.argv[1]) as f:
     for l in f.readlines():
-        match = r.search(l)
+        match = parse_line.search(l)
         if not match:
             continue
-        test_name = match.group(1)
-        alloc_name = match.group(2)
-        time_split = match.group(3).split(':')
+        test_name, alloc_name, time_string = match.groups()
+        time_split = time_string.split(':')
         time_taken = 0
         if len(time_split) == 2:
             time_taken = int(time_split[0]) * 60 + float(time_split[1])

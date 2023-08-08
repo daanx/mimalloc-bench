@@ -35,20 +35,18 @@ if len(sys.argv) != 2:
     print('The normalised time/memory uses a log scale.')
     sys.exit(1)
 
-r = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+) +([0-9]+)')
+parse_line = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+) +([0-9]+)')
 data = []
 test_names = set()
 
 # read in the data
 with open(sys.argv[1]) as f:
     for l in f.readlines():
-        match = r.search(l)
+        match = parse_line.search(l)
         if not match:
             continue
-        test_name = match.group(1)
-        alloc_name = match.group(2)
-        time_split = match.group(3).split(':')
-        memory = match.group(4)
+        test_name, alloc_name, time_string, memory = match.groups()
+        time_split = time_string.split(':')
         time_taken = 0
         test_names.add(test_name)
         if len(time_split) == 2:
