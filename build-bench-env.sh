@@ -45,6 +45,7 @@ readonly version_lp=main
 readonly version_lt=master   # ~unmaintained since 2019
 readonly version_mesh=master # ~unmaintained since 2021
 readonly version_mi=v1.8.2
+readonly version_mi2=v2.1.2
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
 readonly version_pa=main
@@ -78,6 +79,7 @@ setup_lp=0
 setup_lt=0
 setup_mesh=0
 setup_mi=0
+setup_mi2=0
 setup_mng=0
 setup_nomesh=0
 setup_pa=0
@@ -125,6 +127,7 @@ while : ; do
         setup_je=$flag_arg
         setup_lp=$flag_arg
         setup_mi=$flag_arg
+        setup_mi2=$flag_arg
         setup_pa=$flag_arg
         setup_sn=$flag_arg
         setup_sg=$flag_arg
@@ -188,6 +191,8 @@ while : ; do
         setup_mesh=$flag_arg;;
     mi)
         setup_mi=$flag_arg;;
+    mi2)
+        setup_mi2=$flag_arg;;
     nomesh)
         setup_nomesh=$flag_arg;;
     pa)
@@ -241,6 +246,7 @@ while : ; do
         echo "  lt                           setup ltmalloc ($version_lt)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
+        echo "  mi2                          setup mimalloc ($version_mi2)"
         echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  pa                           setup PartitionAlloc ($version_pa)"
@@ -687,6 +693,38 @@ if test "$setup_mi" = "1"; then
 
   echo ""
   echo "- build mimalloc secure"
+
+  mkdir -p out/secure
+  cd out/secure
+  cmake ../.. -DMI_SECURE=ON
+  make -j $procs
+  cd ../..
+  popd
+fi
+
+if test "$setup_mi2" = "1"; then
+  checkout mi2 $version_mi2 https://github.com/microsoft/mimalloc
+
+  echo ""
+  echo "- build mimalloc2 release"
+
+  mkdir -p out/release
+  cd out/release
+  cmake ../..
+  make -j $procs
+  cd ../..
+
+  echo ""
+  echo "- build mimalloc2 debug with full checking"
+
+  mkdir -p out/debug
+  cd out/debug
+  cmake ../.. -DMI_CHECK_FULL=ON
+  make -j $procs
+  cd ../..
+
+  echo ""
+  echo "- build mimalloc2 secure"
 
   mkdir -p out/secure
   cd out/secure
