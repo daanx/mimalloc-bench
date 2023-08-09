@@ -676,29 +676,20 @@ if test "$setup_mi" = "1"; then
   echo ""
   echo "- build mimalloc release"
 
-  mkdir -p out/release
-  cd out/release
-  cmake ../..
-  make -j $procs
-  cd ../..
+  cmake -B out/release
+  cmake --build out/release --parallel $procs
 
   echo ""
   echo "- build mimalloc debug with full checking"
 
-  mkdir -p out/debug
-  cd out/debug
-  cmake ../.. -DMI_CHECK_FULL=ON
-  make -j $procs
-  cd ../..
+  cmake -B out/debug -DMI_CHECK_FULL=ON
+  cmake --build out/debug --parallel $procs
 
   echo ""
   echo "- build mimalloc secure"
 
-  mkdir -p out/secure
-  cd out/secure
-  cmake ../.. -DMI_SECURE=ON
-  make -j $procs
-  cd ../..
+  cmake -B out/secure -DMI_SECURE=ON
+  cmake --build out/secure --parallel $procs
   popd
 fi
 
@@ -708,29 +699,20 @@ if test "$setup_mi2" = "1"; then
   echo ""
   echo "- build mimalloc2 release"
 
-  mkdir -p out/release
-  cd out/release
-  cmake ../..
-  make -j $procs
-  cd ../..
+  cmake -B out/release
+  cmake --build out/release --parallel $procs
 
   echo ""
   echo "- build mimalloc2 debug with full checking"
 
-  mkdir -p out/debug
-  cd out/debug
-  cmake ../.. -DMI_CHECK_FULL=ON
-  make -j $procs
-  cd ../..
+  cmake -B out/debug -DMI_CHECK_FULL=ON
+  cmake --build out/debug --parallel $procs
 
   echo ""
   echo "- build mimalloc2 secure"
 
-  mkdir -p out/secure
-  cd out/secure
-  cmake ../.. -DMI_SECURE=ON
-  make -j $procs
-  cd ../..
+  cmake -B out/secure -DMI_SECURE=ON
+  cmake --build out/secure --parallel $procs
   popd
 fi
 
@@ -827,11 +809,8 @@ if test "$setup_bench" = "1"; then
 
   phase "build benchmarks"
 
-  mkdir -p out/bench
-  cd out/bench
-  cmake ../../bench
-  make -j $procs
-  cd ../..
+  cmake -B out/bench -S bench
+  cmake --build out/bench --parallel $procs
 fi
 
 
