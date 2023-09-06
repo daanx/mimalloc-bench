@@ -202,7 +202,7 @@ while : ; do
     rocksdb)
         setup_rocksdb=$flag_arg;;
     linux)
-		setup_linux=$flag_arg;;
+        setup_linux=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
     sc)

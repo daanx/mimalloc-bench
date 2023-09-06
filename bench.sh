@@ -539,9 +539,11 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     barnes)
       infile="$benchdir/barnes/input";;
     linux)
+      builddir="/tmp/linux_build"
       pushd "$linux_dir"
-      make distclean
-      make allnoconfig
+      mkdir -p $builddir
+      make O=$builddir distclean
+      make O=$builddir allnoconfig
       popd;;
   esac
   case "$1" in
@@ -677,9 +679,10 @@ function run_test {  # <test>
       run_test_cmd "mathlib" "$leandir/bin/leanpkg build"
       popd;;
     linux)
-	  pushd "$linux_dir"
-	  run_test_cmd "linux" "make -j $procs"
-	  popd;;
+      builddir="/tmp/linux_build"
+      pushd "$linux_dir"
+      run_test_cmd "linux" "make O=$builddir -j $procs"
+      popd;;
     redis)
       # https://redis.io/docs/reference/optimization/benchmarks/
       redis_tail="1"
