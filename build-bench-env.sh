@@ -726,6 +726,12 @@ if test "$setup_lean" = "1"; then
   echo "make -j$procs"
   make -j $procs
   rm -rf ./tests/  # we don't need tests
+  if test ! -d "$devdir/mathlib"; then
+    mkdir "$devdir/mathlib"
+  fi
+  if test ! -f "$devdir/mathlib/leanpkg.toml"; then
+    cp "$devdir/lean/leanpkg/leanpkg.toml" "$devdir/mathlib"
+  fi
   popd
 fi
 
