@@ -492,6 +492,9 @@ if test "$setup_lp" = "1"; then
     ORIG="_orig"
   fi
   sed -i $ORIG '/Werror/d' CMakeLists.txt
+  # Fix compilation with recent compilers
+  # (at least clang16 that enforces -Wimplicit-function-declaration)
+  sed -i $ORIG 's/extra_cmake_options=""/extra_cmake_options="-D_GNU_SOURCE=1"/' build.sh
   # Remove once/if https://github.com/WebKit/WebKit/pull/1219 is merged
   sed -i $ORIG 's/cmake --build $build_dir --parallel/cmake --build $build_dir --target pas_lib --parallel/' build.sh
   if test "$darwin" = "1"; then
