@@ -61,7 +61,7 @@ readonly version_tcg=bb24fb0a8be3a6ef52888d247097d05976b8918e # 2023-04-22
 
 # benchmark versions
 readonly version_redis=6.2.7
-readonly version_lean=v3.4.2
+readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.4
 
@@ -739,7 +739,7 @@ fi
 
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
-  checkout lean $version_lean https://github.com/leanprover/lean
+  checkout lean $version_lean https://github.com/leanprover-community/lean
   mkdir -p out/release
   cd out/release
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
