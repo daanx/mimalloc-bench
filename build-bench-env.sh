@@ -56,7 +56,7 @@ readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.2
 readonly version_tbb=v2021.9.0
-readonly version_tc=gperftools-2.14
+readonly version_tc=gperftools-2.15
 readonly version_tcg=bb24fb0a8be3a6ef52888d247097d05976b8918e # 2023-04-22
 
 # benchmark versions
