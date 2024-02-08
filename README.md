@@ -93,6 +93,8 @@ for the versions:
   multi-thread scalability-focused.
 - **lp**: The [_libpas_](https://github.com/WebKit/WebKit/tree/main/Source/bmalloc/libpas)
   allocator, used by [WebKit](https://webkit.org).
+- **lt**: The [_ltalloc_](https://github.com/r-lyeh-archived/ltalloc) allocator,
+  a multi-threaded memory allocator based on free lists best suited for many small allocations.
 - **mesh**: The [_mesh_](https://github.com/plasma-umass/mesh) allocator, a
   memory allocator that automatically reduces the memory footprint of C/C++
   applications. Also tested as **nomesh** with the meshing feature disabled.
