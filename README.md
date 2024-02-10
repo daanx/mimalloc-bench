@@ -237,19 +237,23 @@ allocates more the faster the program runs. Unfortunately,
 there are no entries for _SuperMalloc_ in the _leanN_ and _xmalloc-testN_
 benchmarks as it faulted on those)
 
-# Resulting improvements and found issues
+# Results and notable usages
 
+## Improvements
 - [Minor performances improvement](https://github.com/struct/isoalloc/commit/049c12e4c2ad5c21a768f7f3873d84bf1106646a) in isoalloc
-- A [crash]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
-- Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 - [Parallel compilation](https://github.com/emeryberger/DieHard/issues/15) support in DieHarder
 - [Portability improvement](https://github.com/oneapi-src/oneTBB/pull/764) in Intel TBB malloc
 - [Various](https://github.com/google/tcmalloc/issues/155) [portability](https://github.com/google/tcmalloc/issues/128) [improvements]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
 - [Improved double-free detection]( https://github.com/microsoft/snmalloc/pull/550 ) in snmalloc
 - [Fixed compilation on modern glibc]( https://github.com/ssrg-vt/SlimGuard/pull/13 ) in SlimGuard
+- A [crash]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
+- Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 - [Portability issues](https://github.com/mjansson/rpmalloc/issues/293) in rpmalloc
+
+## Notable usages
 - Provided [data]( https://gitlab.gnome.org/GNOME/glib/-/issues/1079#note_1627978 ) for the glib allocator.
 - Provided [data]( https://github.com/microsoft/snmalloc/pull/587#issuecomment-1442077886 ) for snmalloc hardening.
+- Used as main benchmark suite by [S2malloc: Statistically Secure Allocator for Use-After-Free Protection And More](https://arxiv.org/abs/2402.01894) by Ruizhe Wang, Meng Xu and N. Asokan
 
 # References
 
