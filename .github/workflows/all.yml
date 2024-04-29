@@ -103,7 +103,8 @@ jobs:
         # fg: unknown type name 'pthread_spinlock_t'; did you mean 'pthread_rwlock_t'?
         # gd: so many errors
         # pa: ninja: error: '../../buildtools/third_party/libc++/trunk/src/utility.cpp', needed by 'obj/buildtools/third_party/libc++/libc++/utility.o', missing and no known rule to make it
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-pa
+        # lp: /home/runner/work/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/hotbit_heap_inlines.h:64:51: error: too few arguments to function call, expected 3, have 2
+        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-pa no-lp
       - name: Run everything.
         run: |
           cd out/bench
