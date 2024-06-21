@@ -61,9 +61,12 @@ readonly version_tcg=bb24fb0a8be3a6ef52888d247097d05976b8918e # 2023-04-22
 
 # benchmark versions
 readonly version_redis=6.2.7
+readonly sha256sum_redis="b7a79cc3b46d3c6eb52fa37dde34a4a60824079ebdfb3abfbbfa035947c55319"
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.4
+readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
+readonly sha256sum_sh8bench="12a8e75248c9dcbfee28245c12bc937a16ef56ec9cbfab88d0e348271667726f"
 
 # allocators
 setup_dh=0
@@ -765,8 +768,12 @@ if test "$setup_redis" = "1"; then
     echo "$devdir/redis-$version_redis already exists; no need to download it"
   else
     wget --no-verbose "http://download.redis.io/releases/redis-$version_redis.tar.gz"
-    tar xzf "redis-$version_redis.tar.gz"
-    rm "./redis-$version_redis.tar.gz"
+    if test "$(sha256sum redis-$version_redis.tar.gz | cut -d ' ' -f 1)" = "$sha256sum_redis"; then
+      tar xzf "redis-$version_redis.tar.gz"
+      rm "./redis-$version_redis.tar.gz"
+    else
+      echo "redis: sha256sum mismatch"
+    fi
   fi
 
   cd "redis-$version_redis/src"
@@ -781,19 +788,27 @@ if test "$setup_bench" = "1"; then
     echo "do nothing: bench/shbench/sh6bench-new.c already exists"
   else
     wget --no-verbose http://www.microquill.com/smartheap/shbench/bench.zip
-    unzip -o bench.zip
-    dos2unix sh6bench.patch
-    dos2unix sh6bench.c
-    patch -p1 -o sh6bench-new.c sh6bench.c sh6bench.patch
+    if test "$(sha256sum bench.zip | cut -d ' ' -f 1)" = "$sha256sum_sh6bench"; then
+      unzip -o bench.zip
+      dos2unix sh6bench.patch
+      dos2unix sh6bench.c
+      patch -p1 -o sh6bench-new.c sh6bench.c sh6bench.patch
+    else
+      echo "sh6bench: sha256sum mismatch"
+    fi
   fi
   if test -f sh8bench-new.c; then
     echo "do nothing: bench/shbench/sh8bench-new.c already exists"
   else
     wget --no-verbose http://www.microquill.com/smartheap/SH8BENCH.zip
-    unzip -o SH8BENCH.zip
-    dos2unix sh8bench.patch
-    dos2unix SH8BENCH.C
-    patch -p1 -o sh8bench-new.c SH8BENCH.C sh8bench.patch
+    if test "$(sha256sum SH8BENCH.zip | cut -d ' ' -f 1)" = "$sha256sum_sh8bench"; then
+      unzip -o SH8BENCH.zip
+      dos2unix sh8bench.patch
+      dos2unix SH8BENCH.C
+      patch -p1 -o sh8bench-new.c SH8BENCH.C sh8bench.patch
+    else
+      echo "sh8bench: sha256sum mismatch"
+    fi
   fi
   popd
 
