@@ -354,11 +354,11 @@ function checkout {  # name, git-tag, git repo, options
 }
 
 function check_checksum {  # name, sha256sum
-  if (echo $2 $1 | $SHA256SUM_CMD --check --status); then
+  if (echo $2  $1 | $SHA256SUM_CMD --check --status); then
     echo "$1 has correct checksum"
   else
     echo "$1 has wrong checksum"
-    echo "$2 was expected"
+    echo "$2  was expected"
     $SHA256SUM_CMD $1
   fi
 }
