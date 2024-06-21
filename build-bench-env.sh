@@ -27,6 +27,11 @@ if [ "$EUID" -eq 0 ]; then
   SUDO=""
 fi
 
+SHA256SUM_CMD="sha256sum"
+if test "$darwin" = "1"; then
+  SHA256SUM_CMD="shasum -a 256"
+fi
+
 curdir=`pwd`
 rebuild=0
 all=0
@@ -349,12 +354,12 @@ function checkout {  # name, git-tag, git repo, options
 }
 
 function check_checksum {  # name, sha256sum
-  if (echo $2 $1 | sha256sum --check --status); then
+  if (echo $2 $1 | $SHA256SUM_CMD --check --status); then
     echo "$1 has correct checksum"
   else
     echo "$1 has wrong checksum"
     echo "$2 was expected"
-    sha256sum $1
+    $SHA256SUM_CMD $1
   fi
 }
 
