@@ -65,7 +65,7 @@ readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for r
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.4
 
-# HTTP-download files checksums
+# HTTP-downloaded files checksums
 readonly sha256sum_redis="b7a79cc3b46d3c6eb52fa37dde34a4a60824079ebdfb3abfbbfa035947c55319"
 readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
 readonly sha256sum_sh8bench="12a8e75248c9dcbfee28245c12bc937a16ef56ec9cbfab88d0e348271667726f"
