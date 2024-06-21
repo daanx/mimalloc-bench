@@ -40,7 +40,7 @@ PREPEND(barnes_sources barnes/ ${barnes_sources})
 # turn off warnings..
 message(STATUS "${CMAKE_C_COMPILER_ID}")
 if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
-  set(FLAGS " -w -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion")
+  set(FLAGS " -w -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion -Wno-return-mismatch -Wno-incompatible-pointer-types")
   string(APPEND CMAKE_C_FLAGS ${FLAGS})
   string(APPEND CMAKE_CXX_FLAGS ${FLAGS})
 endif()
