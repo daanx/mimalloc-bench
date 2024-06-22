@@ -71,7 +71,6 @@ readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.4
 
 # HTTP-downloaded files checksums
-readonly sha256sum_redis="b7a79cc3b46d3c6eb52fa37dde34a4a60824079ebdfb3abfbbfa035947c55319"
 readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
 readonly sha256sum_sh8bench="12a8e75248c9dcbfee28245c12bc937a16ef56ec9cbfab88d0e348271667726f"
 
@@ -358,7 +357,7 @@ function check_checksum {  # name, sha256sum
     echo "$1 has correct checksum"
   else
     echo "$1 has wrong checksum"
-    echo "$2  was expected"
+    echo "$2 was expected"
     $SHA256SUM_CMD $1
   fi
 }
@@ -784,8 +783,7 @@ if test "$setup_redis" = "1"; then
   if test -d "redis-$version_redis"; then
     echo "$devdir/redis-$version_redis already exists; no need to download it"
   else
-    wget --no-verbose "http://download.redis.io/releases/redis-$version_redis.tar.gz"
-    check_checksum "redis-$version_redis.tar.gz" "$sha256sum_redis"
+    wget --no-verbose "https://download.redis.io/releases/redis-$version_redis.tar.gz"
     tar xzf "redis-$version_redis.tar.gz"
     rm "./redis-$version_redis.tar.gz"
   fi
