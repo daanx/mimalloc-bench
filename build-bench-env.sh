@@ -27,6 +27,11 @@ if [ "$EUID" -eq 0 ]; then
   SUDO=""
 fi
 
+SHA256SUM_CMD="sha256sum"
+if test "$darwin" = "1"; then
+  SHA256SUM_CMD="shasum -a 256"
+fi
+
 curdir=`pwd`
 rebuild=0
 all=0
@@ -64,6 +69,10 @@ readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.4
+
+# HTTP-downloaded files checksums
+readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
+readonly sha256sum_sh8bench="12a8e75248c9dcbfee28245c12bc937a16ef56ec9cbfab88d0e348271667726f"
 
 # allocators
 setup_dh=0
@@ -341,6 +350,16 @@ function checkout {  # name, git-tag, git repo, options
   cd "$1"
   git checkout $2
   write_version $1 $2 $3
+}
+
+function check_checksum {  # name, sha256sum
+  if (echo "$2  $1" | $SHA256SUM_CMD --check --status); then
+    echo "$1 has correct checksum"
+  else
+    echo "$1 has wrong checksum"
+    echo "$2 was expected"
+    $SHA256SUM_CMD $1
+  fi
 }
 
 function aptinstall {
@@ -764,7 +783,7 @@ if test "$setup_redis" = "1"; then
   if test -d "redis-$version_redis"; then
     echo "$devdir/redis-$version_redis already exists; no need to download it"
   else
-    wget --no-verbose "http://download.redis.io/releases/redis-$version_redis.tar.gz"
+    wget --no-verbose "https://download.redis.io/releases/redis-$version_redis.tar.gz"
     tar xzf "redis-$version_redis.tar.gz"
     rm "./redis-$version_redis.tar.gz"
   fi
@@ -781,6 +800,7 @@ if test "$setup_bench" = "1"; then
     echo "do nothing: bench/shbench/sh6bench-new.c already exists"
   else
     wget --no-verbose http://www.microquill.com/smartheap/shbench/bench.zip
+    check_checksum "bench.zip" "$sha256sum_sh6bench"
     unzip -o bench.zip
     dos2unix sh6bench.patch
     dos2unix sh6bench.c
@@ -790,6 +810,7 @@ if test "$setup_bench" = "1"; then
     echo "do nothing: bench/shbench/sh8bench-new.c already exists"
   else
     wget --no-verbose http://www.microquill.com/smartheap/SH8BENCH.zip
+    check_checksum "SH8BENCH.zip" "$sha256sum_sh8bench"
     unzip -o SH8BENCH.zip
     dos2unix sh8bench.patch
     dos2unix SH8BENCH.C
