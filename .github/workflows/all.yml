@@ -52,11 +52,10 @@ jobs:
         # lf: crashes redis server
         # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
         # hoard: crashes on rocksdb
-        # tcg: https://github.com/google/tcmalloc/issues/155
         # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
         # sn: /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/chrono:2320:48: error: call to consteval function 'std::chrono::hh_mm_ss::_S_fractional_width' is not a constant expression
         # lp: /home/runner/work/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/hotbit_heap_inlines.h:64:51: error: too few arguments to function call, expected 3, have 2
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-lt no-lf no-hd no-tcg no-pa no-sn no-lp
+        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-lt no-lf no-hd no-pa no-sn no-lp
       - name: Run everything.
         run: |
           cd out/bench
@@ -83,8 +82,7 @@ jobs:
         # fg: crashes redis server
         # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
         # lp: /__w/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/pas_thread_local_cache.c:218:22: error: call to undeclared function 'pthread_getname_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-        # tcg: https://github.com/google/tcmalloc/issues/179
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg no-pa no-lp no-tcg
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg no-pa no-lp no-sh8
       - name: Run everything.
         run: |
           cd out/bench
