@@ -222,13 +222,14 @@ static DWORD WINAPI thread_entry(LPVOID param) {
 static void run_os_threads(size_t nthreads) {
   DWORD* tids = (DWORD*)CUSTOM_MALLOC(nthreads * sizeof(DWORD));
   HANDLE* thandles = (HANDLE*)CUSTOM_MALLOC(nthreads * sizeof(HANDLE));
-  for (uintptr_t i = 0; i < nthreads; i++) {
+  for (uintptr_t i = 1; i < nthreads; i++) {
     thandles[i] = CreateThread(0, 4096, &thread_entry, (void*)(i), 0, &tids[i]);
   }
-  for (size_t i = 0; i < nthreads; i++) {
+  thread_entry((void*)0); // main runs as well
+  for (size_t i = 1; i < nthreads; i++) {
     WaitForSingleObject(thandles[i], INFINITE);
   }
-  for (size_t i = 0; i < nthreads; i++) {
+  for (size_t i = 1; i < nthreads; i++) {
     CloseHandle(thandles[i]);
   }
   CUSTOM_FREE(tids);
@@ -256,10 +257,11 @@ static void run_os_threads(size_t nthreads) {
   pthread_t* threads = (pthread_t*)CUSTOM_MALLOC(nthreads * sizeof(pthread_t));
   memset(threads, 0, sizeof(pthread_t) * nthreads);
   //pthread_setconcurrency(nthreads);
-  for (uintptr_t i = 0; i < nthreads; i++) {
+  for (uintptr_t i = 1; i < nthreads; i++) {
     pthread_create(&threads[i], NULL, &thread_entry, (void*)i);
   }
-  for (size_t i = 0; i < nthreads; i++) {
+  thread_entry((void*)0); // main runs as well
+  for (size_t i = 1; i < nthreads; i++) {
     pthread_join(threads[i], NULL);
   }
   CUSTOM_FREE(threads);

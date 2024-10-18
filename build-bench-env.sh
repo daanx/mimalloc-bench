@@ -27,6 +27,11 @@ if [ "$EUID" -eq 0 ]; then
   SUDO=""
 fi
 
+SHA256SUM_CMD="sha256sum"
+if test "$darwin" = "1"; then
+  SHA256SUM_CMD="shasum -a 256"
+fi
+
 curdir=`pwd`
 rebuild=0
 all=0
@@ -45,25 +50,30 @@ readonly version_lp=main
 readonly version_lt=master   # ~unmaintained since 2019
 readonly version_mesh=master # ~unmaintained since 2021
 readonly version_mi=v1.8.2
+readonly version_mi2=v2.1.2
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
 readonly version_pa=main
-readonly version_rp=39f5cfaa35f73b445d6ec66629ab3963eeb5fa7a  # fix some gcc warnings
+readonly version_rp=1.4.5
 readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.6.2
 readonly version_tbb=v2021.9.0
-readonly version_tc=gperftools-2.10
-readonly version_tcg=bb24fb0a8be3a6ef52888d247097d05976b8918e # 2023-04-22
+readonly version_tc=gperftools-2.16
+readonly version_tcg=8febb4b4da2ab3b04862a8676fb5b506ef90aa42 # 2024-07-30
 
 # benchmark versions
 readonly version_redis=6.2.7
-readonly version_lean=v3.4.2
+readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.4
 readonly version_linux=6.5.1
+
+# HTTP-downloaded files checksums
+readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
+readonly sha256sum_sh8bench="12a8e75248c9dcbfee28245c12bc937a16ef56ec9cbfab88d0e348271667726f"
 
 # allocators
 setup_dh=0
@@ -79,6 +89,7 @@ setup_lp=0
 setup_lt=0
 setup_mesh=0
 setup_mi=0
+setup_mi2=0
 setup_mng=0
 setup_nomesh=0
 setup_pa=0
@@ -127,6 +138,7 @@ while : ; do
         setup_je=$flag_arg
         setup_lp=$flag_arg
         setup_mi=$flag_arg
+        setup_mi2=$flag_arg
         setup_pa=$flag_arg
         setup_sn=$flag_arg
         setup_sg=$flag_arg
@@ -191,6 +203,8 @@ while : ; do
         setup_mesh=$flag_arg;;
     mi)
         setup_mi=$flag_arg;;
+    mi2)
+        setup_mi2=$flag_arg;;
     nomesh)
         setup_nomesh=$flag_arg;;
     pa)
@@ -246,6 +260,7 @@ while : ; do
         echo "  lt                           setup ltmalloc ($version_lt)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
+        echo "  mi2                          setup mimalloc ($version_mi2)"
         echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  pa                           setup PartitionAlloc ($version_pa)"
@@ -343,6 +358,16 @@ function checkout {  # name, git-tag, git repo, options
   write_version $1 $2 $3
 }
 
+function check_checksum {  # name, sha256sum
+  if (echo "$2  $1" | $SHA256SUM_CMD --check --status); then
+    echo "$1 has correct checksum"
+  else
+    echo "$1 has wrong checksum"
+    echo "$2 was expected"
+    $SHA256SUM_CMD $1
+  fi
+}
+
 function aptinstall {
   echo ""
   echo "> $SUDO apt install $1"
@@ -417,7 +442,7 @@ if test "$setup_packages" = "1"; then
     aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
-      liblz4-dev libzstd-dev libreadline-dev"
+      liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
@@ -492,6 +517,9 @@ if test "$setup_lp" = "1"; then
     ORIG="_orig"
   fi
   sed -i $ORIG '/Werror/d' CMakeLists.txt
+  # Fix compilation with recent compilers
+  # (at least clang16 that enforces -Wimplicit-function-declaration)
+  sed -i $ORIG 's/extra_cmake_options=""/extra_cmake_options="-D_GNU_SOURCE=1"/' build.sh
   # Remove once/if https://github.com/WebKit/WebKit/pull/1219 is merged
   sed -i $ORIG 's/cmake --build $build_dir --parallel/cmake --build $build_dir --target pas_lib --parallel/' build.sh
   if test "$darwin" = "1"; then
@@ -612,6 +640,9 @@ if test "$setup_rp" = "1"; then
   else
     python3 configure.py
   fi
+  # fix build using clang-16
+  # see https://github.com/mjansson/rpmalloc/issues/316
+  sed -i 's/-Werror//' build.ninja
   ninja
   popd
 fi
@@ -676,29 +707,43 @@ if test "$setup_mi" = "1"; then
   echo ""
   echo "- build mimalloc release"
 
-  mkdir -p out/release
-  cd out/release
-  cmake ../..
-  make -j $procs
-  cd ../..
+  cmake -B out/release
+  cmake --build out/release --parallel $procs
 
   echo ""
   echo "- build mimalloc debug with full checking"
 
-  mkdir -p out/debug
-  cd out/debug
-  cmake ../.. -DMI_CHECK_FULL=ON
-  make -j $procs
-  cd ../..
+  cmake -B out/debug -DMI_CHECK_FULL=ON
+  cmake --build out/debug --parallel $procs
 
   echo ""
   echo "- build mimalloc secure"
 
-  mkdir -p out/secure
-  cd out/secure
-  cmake ../.. -DMI_SECURE=ON
-  make -j $procs
-  cd ../..
+  cmake -B out/secure -DMI_SECURE=ON
+  cmake --build out/secure --parallel $procs
+  popd
+fi
+
+if test "$setup_mi2" = "1"; then
+  checkout mi2 $version_mi2 https://github.com/microsoft/mimalloc
+
+  echo ""
+  echo "- build mimalloc2 release"
+
+  cmake -B out/release
+  cmake --build out/release --parallel $procs
+
+  echo ""
+  echo "- build mimalloc2 debug with full checking"
+
+  cmake -B out/debug -DMI_CHECK_FULL=ON
+  cmake --build out/debug --parallel $procs
+
+  echo ""
+  echo "- build mimalloc2 secure"
+
+  cmake -B out/secure -DMI_SECURE=ON
+  cmake --build out/secure --parallel $procs
   popd
 fi
 
@@ -725,13 +770,15 @@ fi
 
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
-  checkout lean $version_lean https://github.com/leanprover/lean
+  checkout lean $version_lean https://github.com/leanprover-community/lean
   mkdir -p out/release
   cd out/release
   env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
   echo "make -j$procs"
   make -j $procs
   rm -rf ./tests/  # we don't need tests
+  mkdir -p "$devdir/mathlib"
+  cp -u "$devdir/lean/leanpkg/leanpkg.toml" "$devdir/mathlib"
   popd
 fi
 
@@ -742,7 +789,7 @@ if test "$setup_redis" = "1"; then
   if test -d "redis-$version_redis"; then
     echo "$devdir/redis-$version_redis already exists; no need to download it"
   else
-    wget --no-verbose "http://download.redis.io/releases/redis-$version_redis.tar.gz"
+    wget --no-verbose "https://download.redis.io/releases/redis-$version_redis.tar.gz"
     tar xzf "redis-$version_redis.tar.gz"
     rm "./redis-$version_redis.tar.gz"
   fi
@@ -759,6 +806,7 @@ if test "$setup_bench" = "1"; then
     echo "do nothing: bench/shbench/sh6bench-new.c already exists"
   else
     wget --no-verbose http://www.microquill.com/smartheap/shbench/bench.zip
+    check_checksum "bench.zip" "$sha256sum_sh6bench"
     unzip -o bench.zip
     dos2unix sh6bench.patch
     dos2unix sh6bench.c
@@ -768,6 +816,7 @@ if test "$setup_bench" = "1"; then
     echo "do nothing: bench/shbench/sh8bench-new.c already exists"
   else
     wget --no-verbose http://www.microquill.com/smartheap/SH8BENCH.zip
+    check_checksum "SH8BENCH.zip" "$sha256sum_sh8bench"
     unzip -o SH8BENCH.zip
     dos2unix sh8bench.patch
     dos2unix SH8BENCH.C
@@ -795,11 +844,8 @@ if test "$setup_bench" = "1"; then
 
   phase "build benchmarks"
 
-  mkdir -p out/bench
-  cd out/bench
-  cmake ../../bench
-  make -j $procs
-  cd ../..
+  cmake -B out/bench -S bench
+  cmake --build out/bench --parallel $procs
 fi
 
 if test "$setup_linux" = "1"; then

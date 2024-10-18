@@ -73,6 +73,8 @@ for the versions:
   OS X.
 - **ff**: [ffmalloc](https://github.com/bwickman97/ffmalloc), from the Usenix
   Security 21 [paper](https://www.usenix.org/conference/usenixsecurity21/presentation/wickman)
+- **fg**: The [_FreeGuard_](https://github.com/UTSASRG/FreeGuard) allocator, from
+  the CCS 17 [paper](https://dl.acm.org/doi/10.1145/3133956.3133957)
 - **gd**: The [_Guarder_](https://github.com/UTSASRG/Guarder) allocator
   is a tunable secure allocator by the UTSA.
 - **hd**: The [_Hoard_](https://github.com/emeryberger/Hoard) allocator by
@@ -87,15 +89,19 @@ for the versions:
   allocator by [Jason Evans](https://github.com/jasone),
   now developed at Facebook
   and widely used in practice, for example in FreeBSD and Firefox.
+- **lf**: The [_lockfree-malloc_](https://github.com/Begun/lockfree-malloc) allocator,
+  multi-thread scalability-focused.
 - **lp**: The [_libpas_](https://github.com/WebKit/WebKit/tree/main/Source/bmalloc/libpas)
   allocator, used by [WebKit](https://webkit.org).
-- **mng**: [musl](https://musl.libc.org)'s memory allocator.
+- **lt**: The [_ltalloc_](https://github.com/r-lyeh-archived/ltalloc) allocator,
+  a multi-threaded memory allocator based on free lists best suited for many small allocations.
 - **mesh**: The [_mesh_](https://github.com/plasma-umass/mesh) allocator, a
   memory allocator that automatically reduces the memory footprint of C/C++
   applications. Also tested as **nomesh** with the meshing feature disabled.
 - **mi**: The [_mimalloc_](https://github.com/microsoft/mimalloc) allocator.
   We can also test the debug version as **dmi** (this can be used to check for
   any bugs in the benchmarks), and the secure version as **smi**.
+- **mng**: [musl](https://musl.libc.org)'s memory allocator.
 - **pa**: The [_PartitionAlloc_](https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator.git/+/refs/heads/main/PartitionAlloc.md) allocator used in Chromium.
 - **rp**: The [_rpmalloc_](https://github.com/mjansson/rpmalloc) allocator uses
   16-byte aligned allocations and is developed by [Mattias
@@ -231,19 +237,24 @@ allocates more the faster the program runs. Unfortunately,
 there are no entries for _SuperMalloc_ in the _leanN_ and _xmalloc-testN_
 benchmarks as it faulted on those)
 
-# Resulting improvements and found issues
+# Results and notable usages
 
+## Improvements
 - [Minor performances improvement](https://github.com/struct/isoalloc/commit/049c12e4c2ad5c21a768f7f3873d84bf1106646a) in isoalloc
-- A [crash]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
-- Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 - [Parallel compilation](https://github.com/emeryberger/DieHard/issues/15) support in DieHarder
 - [Portability improvement](https://github.com/oneapi-src/oneTBB/pull/764) in Intel TBB malloc
-- [Various](https://github.com/google/tcmalloc/issues/155) [portability](https://github.com/google/tcmalloc/issues/128) [improvements]( https://github.com/google/tcmalloc/issues/125 ) in Google's tcmalloc
+- [Various](https://github.com/google/tcmalloc/issues/155) [portability](https://github.com/google/tcmalloc/issues/128)
+  [improvements]( https://github.com/google/tcmalloc/issues/125 ) [in](https://github.com/google/tcmalloc/issues/179) Google's tcmalloc
 - [Improved double-free detection]( https://github.com/microsoft/snmalloc/pull/550 ) in snmalloc
 - [Fixed compilation on modern glibc]( https://github.com/ssrg-vt/SlimGuard/pull/13 ) in SlimGuard
+- A [crash]( https://github.com/struct/isoalloc/issues/56 ) in isoalloc
+- Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 - [Portability issues](https://github.com/mjansson/rpmalloc/issues/293) in rpmalloc
+
+## Notable usages
 - Provided [data]( https://gitlab.gnome.org/GNOME/glib/-/issues/1079#note_1627978 ) for the glib allocator.
 - Provided [data]( https://github.com/microsoft/snmalloc/pull/587#issuecomment-1442077886 ) for snmalloc hardening.
+- Used as main benchmark suite by [S2malloc: Statistically Secure Allocator for Use-After-Free Protection And More](https://arxiv.org/abs/2402.01894) by Ruizhe Wang, Meng Xu and N. Asokan
 
 # References
 
