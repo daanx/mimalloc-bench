@@ -68,7 +68,7 @@ readonly version_tcg=8febb4b4da2ab3b04862a8676fb5b506ef90aa42 # 2024-07-30
 readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
-readonly version_lua=v5.4.4
+readonly version_lua=v5.4.7
 readonly version_linux=6.5.1
 
 # HTTP-downloaded files checksums
