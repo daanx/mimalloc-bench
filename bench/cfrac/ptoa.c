@@ -59,7 +59,7 @@ char *ptoa(u)
    if (*dPtr == '\0') --dPtr;		   /* but don't waste zero! */
    if (i) *--dPtr = '-';
    if (dPtr > d) {	     /* ASSUME copied from lower to higher! */
-      (void) memcpy(d, dPtr, consize - (dPtr - d));
+      (void) memmove(d, dPtr, consize - (dPtr - d));
    }
 
    pdestroy(pbase);
