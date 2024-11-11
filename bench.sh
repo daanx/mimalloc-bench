@@ -1,12 +1,12 @@
 #!/bin/bash
-# Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
+# Copyright 2018-2024, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
 
 
 # --------------------------------------------------------------------
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mng pa scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
@@ -123,6 +123,7 @@ alloc_lib_add "sn-sec" "$localdevdir/sn/release/libsnmallocshim-checks$extso"
 alloc_lib_add "tbb"    "$lib_tbb"
 alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
+alloc_lib_add "yal"    "$localdevdir/yal/yalloc$extso"
 
 alloc_lib_add "mi"     "$localdevdir/mi/out/release/libmimalloc$extso"
 alloc_lib_add "mi-sec" "$localdevdir/mi/out/secure/libmimalloc-secure$extso"
@@ -414,6 +415,7 @@ while : ; do
             echo "  tbb                          use Intel TBB malloc"
             echo "  tc                           use tcmalloc (from gperftools)"
             echo "  tcg                          use tcmalloc (from Google)"
+            echo "  yalloc                       use yalloc"
             echo ""
             echo "tests included in 'allt':"
             echo "  $tests_all1"

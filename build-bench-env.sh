@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2018-2022, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
+# Copyright 2018-2024, Microsoft Research, Daan Leijen, Julien Voisin, Matthew Parkinson
 
 set -eo pipefail
 
@@ -63,6 +63,7 @@ readonly version_sn=0.6.2
 readonly version_tbb=v2021.9.0
 readonly version_tc=gperftools-2.16
 readonly version_tcg=8febb4b4da2ab3b04862a8676fb5b506ef90aa42 # 2024-07-30
+readonly version_yal=main
 
 # benchmark versions
 readonly version_redis=6.2.7
@@ -101,6 +102,7 @@ setup_sn=0
 setup_tbb=0
 setup_tc=0
 setup_tcg=0
+setup_yal=0
 
 # bigger benchmarks
 setup_bench=0
@@ -142,6 +144,7 @@ while : ; do
         setup_sg=$flag_arg
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
+        setup_yal=$flag_arg
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg       # lacking 'malloc.h'
           setup_dh=$flag_arg
@@ -230,6 +233,9 @@ while : ; do
         setup_tc=$flag_arg;;
     tcg)
         setup_tcg=$flag_arg;;
+    yal)
+        setup_yal=$flag_arg;;
+
     -r|--rebuild)
         rebuild=1;;
     -j=*|--procs=*)
@@ -268,6 +274,7 @@ while : ; do
         echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
         echo "  tc                           setup tcmalloc ($version_tc)"
         echo "  tcg                          setup Google's tcmalloc ($version_tcg)"
+        echo "  yal                          setup yalloc ($version_yal)"
         echo ""
         echo "  bench                        build all local benchmarks"
         echo "  lean                         setup lean 3 benchmark"
@@ -741,6 +748,10 @@ if test "$setup_mi2" = "1"; then
   popd
 fi
 
+if test "$setup_yal" = "1"; then
+  checkout yal $version_yal https://github.com/jorisgeer/yalloc
+  ./build.sh -V
+fi
 
 phase "install benchmarks"
 
