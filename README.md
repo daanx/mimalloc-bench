@@ -128,6 +128,7 @@ for the versions:
 - **tcg**: The [_tcmalloc_](https://github.com/google/tcmalloc)
   allocator, maintained and [used](https://cloud.google.com/blog/topics/systems/trading-off-malloc-costs-and-fleet-efficiency)
   by Google.
+- **yal**: The [_yalloc_](https://github.com/jorisgeer/yalloc) yet another allocator aims at balancing safety and compactness.
 - **sys**: The system allocator. Here we usually use the _glibc_ allocator
   (which is originally based on _Ptmalloc2_).
 
