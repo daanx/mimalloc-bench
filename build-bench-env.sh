@@ -435,7 +435,7 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby ninja-build libtool autoconf git patch time sed \
-      ghostscript libatomic which gflags-devel xz readline-devel snappy"
+      ghostscript libatomic which gflags-devel xz readline-devel snappy-devel"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
