@@ -435,7 +435,7 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby ninja-build libtool autoconf git patch time sed \
-      ghostscript libatomic which gflags-devel xz readline-devel"
+      ghostscript libatomic which gflags-devel xz readline-devel snappy"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
@@ -450,7 +450,7 @@ if test "$setup_packages" = "1"; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
       samurai libtool git build-base linux-headers autoconf util-linux sed \
-      ghostscript libatomic gflags-dev readline-dev"
+      ghostscript libatomic gflags-dev readline-dev snappy-dev"
     apkinstall "bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
