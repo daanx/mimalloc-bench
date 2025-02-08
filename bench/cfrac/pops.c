@@ -91,10 +91,11 @@ precision palloc(size)
    register posit size;
 {
    register precision w;
-   register cacheType *kludge = pcache + size;	/* for shitty compilers */
+   register cacheType *kludge;  /* for shitty compilers */
 
 #if !(defined(NOMEMOPT) || defined(BWGC))
-   if (size < CACHESIZE && (w = kludge->next) != pUndef) {
+   if (size < CACHESIZE && (kludge = pcache + size) &&
+       (w = kludge->next) != pUndef) {
       kludge->next = ((cacheType *) w)->next;
       --kludge->count;
    } else {
@@ -135,9 +136,9 @@ int pfree(u)
 
    size = u->alloc;
 
-   kludge = pcache + size;
 #if !(defined(NOMEMOPT) || defined(BWGC))
-   if (size < CACHESIZE && kludge->count < CACHELIMIT) {
+   if (size < CACHESIZE && (kludge = pcache + size) &&
+       kludge->count < CACHELIMIT) {
       ((cacheType *) u)->next = kludge->next;
       kludge->next = u;
       kludge->count++;
