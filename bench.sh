@@ -107,7 +107,7 @@ alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso
 alloc_lib_add "iso"    "$localdevdir/iso/build/libisoalloc$extso"
 alloc_lib_add "je"     "$localdevdir/je/lib/libjemalloc$extso"
 alloc_lib_add "lf"     "$localdevdir/lf/liblite-malloc-shared$extso"
-alloc_lib_add "ll"     "$localdevdir/ll/llmalloc.so.1.0.0"
+alloc_lib_add "ll"     "$localdevdir/ll/linux_ld_preload_so/llmalloc.so.1.0.0"
 alloc_lib_add "lp"     "$localdevdir/lp/Source/bmalloc/libpas/build-cmake-default/Release/libpas_lib$extso"
 alloc_lib_add "lt"     "$localdevdir/lt/gnu.make.lib/libltalloc$extso"
 alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
