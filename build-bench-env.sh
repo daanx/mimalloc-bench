@@ -39,7 +39,8 @@ all=0
 # allocator versions
 readonly version_dh=master   # ~unmaintained
 readonly version_ff=master   # ~unmaintained since 2021
-readonly version_fg=master   # ~unmaintained since 2018
+readonly version_fg=master   # ~unmaintained since 2018 
+readonly version_gr=main
 readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=5afe855  # 3.13 #a43ac40 #d880f72  #9d137ef37
 readonly version_hm=11
@@ -80,6 +81,7 @@ setup_dh=0
 setup_ff=0
 setup_fg=0
 setup_gd=0
+setup_gr=0
 setup_hd=0
 setup_hm=0
 setup_iso=0
@@ -132,7 +134,8 @@ while : ; do
         setup_dh=$flag_arg
         setup_ff=$flag_arg
         setup_fg=$flag_arg
-        setup_gd=$flag_arg
+        setup_gd=$flag_arg 
+        setup_gr=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
         setup_je=$flag_arg
@@ -181,6 +184,8 @@ while : ; do
         setup_dh=$flag_arg;;
     gd)
         setup_gd=$flag_arg;;
+    gr) 
+        setup_gr=$flag_arg;;
     hd)
         setup_hd=$flag_arg;;
     hm)
@@ -252,6 +257,7 @@ while : ; do
         echo "  ff                           setup ffmalloc ($version_ff)"
         echo "  fg                           setup freeguard ($version_fg)"
         echo "  gd                           setup guarder ($version_gd)"
+        echo "  gr                           setup grizzly ($version_gr)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
         echo "  iso                          setup isoalloc ($version_iso)"
@@ -468,6 +474,12 @@ fi
 if test "$setup_gd" = "1"; then
   checkout gd $version_gd https://github.com/UTSASRG/Guarder
   make -j $procs
+  popd
+fi 
+
+if test "$setup_gr" = "1"; then 
+  checkout gr $version_gr https://github.com/JoshuaMBa/grizzly 
+  make -j $procs 
   popd
 fi
 

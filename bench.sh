@@ -6,7 +6,7 @@
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal"
+readonly alloc_all="sys dh ff fg gd gr hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mng pa scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
@@ -101,6 +101,7 @@ alloc_lib_add "dh"     "$localdevdir/dh/src/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
 alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
+alloc_lib_add "gr"     "$localdevdir/gr/libgrizzly$extso"
 alloc_lib_add "hd"     "$localdevdir/hd/src/libhoard$extso"
 alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
 alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso"
@@ -389,6 +390,7 @@ while : ; do
             echo "  ff                           use ffmalloc"
             echo "  fg                           use freeguard"
             echo "  gd                           use guarder"
+            echo "  gr                           use grizzly"
             echo "  hd                           use hoard"
             echo "  hm                           use hardened_malloc"
             echo "  hml                          use hardened_malloc light"
