@@ -415,7 +415,7 @@ function dnfinstallbazel {
   echo ""
   dnfinstall dnf-plugins-core
   $SUDO dnf copr -y enable vbatts/bazel
-  dnfinstall bazel4
+  dnfinstall bazel5
 }
 
 if test "$all" = "1"; then
