@@ -47,6 +47,7 @@ readonly version_iso=1.2.5
 readonly version_je=5.3.0
 readonly version_lf=master   # ~unmaintained since 2018
 readonly version_lp=main
+readonly version_ll=main
 readonly version_lt=master   # ~unmaintained since 2019
 readonly version_mesh=master # ~unmaintained since 2021
 readonly version_mi=v1.8.2
@@ -86,6 +87,7 @@ setup_iso=0
 setup_je=0
 setup_lf=0
 setup_lp=0
+setup_ll=0
 setup_lt=0
 setup_mesh=0
 setup_mi=0
@@ -137,6 +139,7 @@ while : ; do
         setup_iso=$flag_arg
         setup_je=$flag_arg
         setup_lp=$flag_arg
+        setup_ll=$flag_arg
         setup_mi=$flag_arg
         setup_mi2=$flag_arg
         setup_pa=$flag_arg
@@ -191,6 +194,8 @@ while : ; do
         setup_je=$flag_arg;;
     lf)
         setup_lf=$flag_arg;;
+    ll)
+        setup_ll=$flag_arg;;
     lp)
         setup_lp=$flag_arg;;
     lt)
@@ -257,6 +262,7 @@ while : ; do
         echo "  iso                          setup isoalloc ($version_iso)"
         echo "  je                           setup jemalloc ($version_je)"
         echo "  lf                           setup lockfree-malloc ($version_lf)"
+        echo "  ll                           setup llmalloc ($version_ll)"
         echo "  lp                           setup libpas ($version_lp)"
         echo "  lt                           setup ltmalloc ($version_lt)"
         echo "  mesh                         setup mesh allocator ($version_mesh)"
@@ -508,6 +514,13 @@ if test "$setup_fg" = "1"; then
   checkout "fg" $version_fg https://github.com/UTSASRG/FreeGuard
   make -j $procs SSE2RNG=1
   popd
+fi
+
+if test "$setup_ll" = "1"; then
+  checkout "ll" $version_ll https://github.com/akhin/llmalloc.git
+  cd linux_ld_preload_so
+  chmod +x build.sh
+  ./build.sh
 fi
 
 if test "$setup_lp" = "1"; then
