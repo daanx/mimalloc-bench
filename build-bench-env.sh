@@ -37,7 +37,7 @@ rebuild=0
 all=0
 
 # allocator versions
-readonly version_dh=master   # ~unmaintained
+readonly version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2   # last unmaintained version, see https://github.com/daanx/mimalloc-bench/issues/222 for the up-to-date one
 readonly version_ff=master   # ~unmaintained since 2021
 readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
