@@ -83,7 +83,8 @@ jobs:
         # fg: crashes redis server
         # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
         # lp: /__w/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/pas_thread_local_cache.c:218:22: error: call to undeclared function 'pthread_getname_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg no-pa no-lp no-sh8
+        # tcg: https://github.com/bazelbuild/bazel/issues/19295 bazel5 is required but unavailable
+        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg no-pa no-lp no-sh8 no-tcg
       - name: Run everything.
         run: |
           cd out/bench
