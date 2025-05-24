@@ -37,7 +37,7 @@ rebuild=0
 all=0
 
 # allocator versions
-readonly version_dh=640949fe0128d9c7013677c8c332698d5c2cefc2   # last unmaintained version, see https://github.com/daanx/mimalloc-bench/issues/222 for the up-to-date one
+readonly version_dh=master
 readonly version_ff=master   # ~unmaintained since 2021
 readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
@@ -565,11 +565,12 @@ if test "$setup_dh" = "1"; then
   checkout dh $version_dh https://github.com/emeryberger/DieHard
   # remove all the historical useless junk
   rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/ ./docs
-  if test "$darwin" = "1"; then
-    TARGET=libdieharder make -C src macos
-  else
-    TARGET=libdieharder make -C src linux-gcc-64
-  fi
+  cd src
+  mkdir -p build
+  cd build
+  cmake ..
+  make
+  cd ../..
   popd
 fi
 
