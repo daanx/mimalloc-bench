@@ -566,10 +566,8 @@ if test "$setup_dh" = "1"; then
   # remove all the historical useless junk
   rm -rf ./benchmarks/ ./src/archipelago/ ./src/build/ ./src/exterminator/ ./src/local/ ./src/original-diehard/ ./src/replicated/ ./docs
   cd src
-  mkdir -p build
-  cd build
-  cmake ..
-  make
+  cmake -S . -B build
+  cmake --build build -j `nproc`
   cd ../..
   popd
 fi
