@@ -252,10 +252,11 @@ benchmarks as it faulted on those)
 - Caught a [compilation issue](https://github.com/mjansson/rpmalloc/issues/263) in rpmalloc
 - [Portability issues](https://github.com/mjansson/rpmalloc/issues/293) in rpmalloc
 
-## Notable usages
+## Notable usages and papers
 - Provided [data]( https://gitlab.gnome.org/GNOME/glib/-/issues/1079#note_1627978 ) for the glib allocator.
 - Provided [data]( https://github.com/microsoft/snmalloc/pull/587#issuecomment-1442077886 ) for snmalloc hardening.
 - Used as main benchmark suite by [S2malloc: Statistically Secure Allocator for Use-After-Free Protection And More](https://arxiv.org/abs/2402.01894) by Ruizhe Wang, Meng Xu and N. Asokan
+- Used as benchmark suite by [StarMalloc: Verifying a Modern, Hardened Memory Allocator](https://dl.acm.org/doi/10.1145/3689773) by Antonin Reitz, Aymeric Fromherz, and Jonathan Protzenko
 
 # References
 
