@@ -456,6 +456,8 @@ if test "$setup_packages" = "1"; then
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
       ghostscript bazelisk gflags snappy"
+  elif grep -q 'Arch Linux' /etc/os-release; then
+    sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy
   fi
 fi
 
