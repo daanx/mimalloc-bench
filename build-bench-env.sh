@@ -543,7 +543,11 @@ if test "$setup_pa" = "1"; then
   checkout pa $version_pa https://github.com/1c3t3a/partition_alloc_builder.git
 
   # Setup depot_tools for building
-  git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git --depth=1
+  if test -d depot_tools; then
+    echo "depot_tools alrady exist, no cloning"
+  else
+    git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git --depth=1
+  fi
   export PATH="$PATH:$PWD/depot_tools"
 
   # Fetch sources - this relies on a standalone build of PA
