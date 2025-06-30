@@ -6,4 +6,5 @@ bench/shbench/sh6bench.c
 bench/shbench/sh6bench-new.c
 bench/shbench/SH8BENCH.C
 bench/shbench/sh8bench-new.c
+bench/shbench/*.zip*
 *.zip
