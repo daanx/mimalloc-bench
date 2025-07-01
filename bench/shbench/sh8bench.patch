@@ -2,6 +2,10 @@
 < unsigned long ulIterations   =  100000;
 ---
 > unsigned long ulIterations   =  700000;
+180c180
+< void main(int argc, char *argv[])
+---
+> int main(int argc, char *argv[])
 194c194,203
 < 	
 ---
