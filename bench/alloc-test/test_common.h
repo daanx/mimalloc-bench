@@ -48,7 +48,7 @@
 #define NOINLINE      __declspec(noinline)
 #define FORCE_INLINE	__forceinline
 #elif __GNUC__
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__aarch64__)
 #include <time.h>
 //#if defined(CLOCK_REALTIME) || defined(CLOCK_MONOTONIC)
 static inline uint64_t get_timestamp(void) {
