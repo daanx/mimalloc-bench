@@ -667,7 +667,7 @@ function run_test {  # <test>
       run_test_cmd "gs" "gs -dBATCH -dNODISPLAY $pdfdoc";;
     lua)
       pushd "$luadir"
-      run_test_cmd "lua" "make"
+      run_test_cmd "lua" "make -j $procs"
       popd;;
     lean)
       pushd "$leandir/library"
