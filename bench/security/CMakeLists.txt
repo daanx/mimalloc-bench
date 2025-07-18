@@ -9,6 +9,7 @@ macro (add_security_test test_name test_file allocation_size)
     -fno-inline
     -fno-builtin-inline
     -fno-inline-small-functions 
+    -fno-ipa-pure-const
     -DALLOCATION_SIZE=${allocation_size})
 endmacro ()
 
