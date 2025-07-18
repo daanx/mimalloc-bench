@@ -11,3 +11,18 @@ index d7c8a124336..2e47726f8d1 100644
  #include <iosfwd>
  #include <memory>
  #include <string>
+
+# backported from https://github.com/facebook/rocksdb/commit/e812a3d3b32ac159f2df99bcae4ca55173e790d5
+diff --git a/include/rocksdb/trace_record.h b/include/rocksdb/trace_record.h
+index 8f9c3ee2f0f..d0f1532aa3a 100644
+--- a/include/rocksdb/trace_record.h
++++ b/include/rocksdb/trace_record.h
+@@ -8,7 +8,7 @@
+ #include <memory>
+ #include <string>
+ #include <vector>
+-
++#include <cstdint>
+ #include "rocksdb/rocksdb_namespace.h"
+ #include "rocksdb/slice.h"
+ #include "rocksdb/status.h"
