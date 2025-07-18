@@ -1,0 +1,28 @@
+# backported from https://github.com/facebook/rocksdb/commit/a4f2d46ab6065eb43ee781b0d57c29787780d935
+diff --git a/db/blob/blob_file_meta.h b/db/blob/blob_file_meta.h
+index d7c8a124336..2e47726f8d1 100644
+--- a/db/blob/blob_file_meta.h
++++ b/db/blob/blob_file_meta.h
+@@ -6,6 +6,7 @@
+ #pragma once
+ 
+ #include <cassert>
++#include <cstdint>
+ #include <iosfwd>
+ #include <memory>
+ #include <string>
+
+# backported from https://github.com/facebook/rocksdb/commit/e812a3d3b32ac159f2df99bcae4ca55173e790d5
+diff --git a/include/rocksdb/trace_record.h b/include/rocksdb/trace_record.h
+index 8f9c3ee2f0f..d0f1532aa3a 100644
+--- a/include/rocksdb/trace_record.h
++++ b/include/rocksdb/trace_record.h
+@@ -8,7 +8,7 @@
+ #include <memory>
+ #include <string>
+ #include <vector>
+-
++#include <cstdint>
+ #include "rocksdb/rocksdb_namespace.h"
+ #include "rocksdb/slice.h"
+ #include "rocksdb/status.h"
