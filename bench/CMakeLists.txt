@@ -55,6 +55,7 @@ target_compile_options(espresso PRIVATE $<$<C_COMPILER_ID:GNU>:-std=gnu89>)
 target_link_libraries(espresso m)
 
 add_executable(barnes ${barnes_sources})
+target_compile_options(barnes PRIVATE $<$<C_COMPILER_ID:GNU>:-std=gnu89>)
 target_link_libraries(barnes m)
 
 add_executable(larson larson/larson.cpp)
