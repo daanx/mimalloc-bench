@@ -763,6 +763,9 @@ if test "$setup_rocksdb" = "1"; then
   fi
 
   cd "rocksdb-$version_rocksdb"
+  set +e
+  patch -p1 -N -r- < ../../patches/rocksdb_build.patch > /dev/null
+  set -e
   DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 make db_bench -j $procs
   [ "$CI" ] && find . -name '*.o' -delete
   popd
