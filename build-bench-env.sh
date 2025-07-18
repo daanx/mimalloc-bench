@@ -62,7 +62,7 @@ readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.7.1
 readonly version_tbb=v2021.9.0
 readonly version_tc=gperftools-2.16.90
-readonly version_tcg=8febb4b4da2ab3b04862a8676fb5b506ef90aa42 # 2024-07-30
+readonly version_tcg=98fd24303c7b5ef5e30da625f11fb623a5e038b6 # 2025-07-18
 readonly version_yal=main
 
 # benchmark versions
@@ -602,17 +602,6 @@ fi
 
 if test "$setup_tcg" = "1"; then
   checkout tcg $version_tcg https://github.com/google/tcmalloc
-  ORIG=""
-  if test "$darwin" = "1"; then
-    ORIG="_orig"
-  fi
-  sed -i $ORIG '/linkstatic/d' tcmalloc/BUILD
-  sed -i $ORIG '/linkstatic/d' tcmalloc/internal/BUILD
-  sed -i $ORIG '/linkstatic/d' tcmalloc/testing/BUILD
-  sed -i $ORIG '/linkstatic/d' tcmalloc/variants.bzl
-  gawk -i inplace '(f && g) {$0="linkshared = True, )"; f=0; g=0} /This library provides tcmalloc always/{f=1} /alwayslink/{g=1} 1' tcmalloc/BUILD
-  gawk -i inplace 'f{$0="cc_binary("; f=0} /This library provides tcmalloc always/{f=1} 1' tcmalloc/BUILD # Change the line after "This library…" to cc_binary (instead of cc_library)
-  gawk -i inplace '/alwayslink/ && !f{f=1; next} 1' tcmalloc/BUILD # delete only the first instance of "alwayslink"
   bazel build -c opt tcmalloc
   popd
 fi
