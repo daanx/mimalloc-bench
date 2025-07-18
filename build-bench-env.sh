@@ -754,7 +754,7 @@ if test "$setup_rocksdb" = "1"; then
   phase "build rocksdb $version_rocksdb"
 
   pushd "$devdir"
-  if test -d "redis-$version_rocksdb"; then
+  if test -d "rocksdb-$version_rocksdb"; then
     echo "$devdir/rocksdb-$version_rocksdb already exists; no need to download it"
   else
     wget --no-verbose "https://github.com/facebook/rocksdb/archive/refs/tags/v$version_rocksdb.tar.gz" -O rocksdb-$version_rocksdb.tar.gz
