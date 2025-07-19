@@ -14,7 +14,7 @@ alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofi
 
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs lua"
 readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
-readonly tests_all3="larson lean-mathlib malloc-large mleak rbstress cthrash"
+readonly tests_all3="larson lean-mathlib linux malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench security"
 
 readonly tests_all="$tests_all1 $tests_all2 $tests_all3 $tests_all4"
@@ -30,6 +30,7 @@ readonly tests_exclude_macos="sh6bench sh8bench redis"
 
 readonly version_redis=6.2.7
 readonly version_rocksdb=8.1.1
+readonly version_linux=6.5.1
 
 # --------------------------------------------------------------------
 # Environment
@@ -165,6 +166,7 @@ readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-$version_redis/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
 readonly rocksdb_dir="$localdevdir/rocksdb-$version_rocksdb"
+readonly linux_dir="$localdevdir/linux-$version_linux"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
@@ -547,6 +549,13 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       outfile="$1-$2-out.txt";;
     barnes)
       infile="$benchdir/barnes/input";;
+    linux)
+      builddir="/tmp/linux_build"
+      pushd "$linux_dir"
+      mkdir -p $builddir
+      make O=$builddir distclean
+      make O=$builddir allnoconfig
+      popd;;
   esac
   case "$1" in
     redis*)
@@ -680,6 +689,11 @@ function run_test {  # <test>
     lean-mathlib)
       pushd "$leanmldir"
       run_test_cmd "mathlib" "$leandir/bin/leanpkg build"
+      popd;;
+    linux)
+      builddir="/tmp/linux_build"
+      pushd "$linux_dir"
+      run_test_cmd "linux" "make O=$builddir -j $procs"
       popd;;
     redis)
       # https://redis.io/docs/reference/optimization/benchmarks/
