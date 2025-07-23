@@ -553,8 +553,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       builddir="/tmp/linux_build"
       pushd "$linux_dir"
       mkdir -p $builddir
-      make O=$builddir distclean
-      make O=$builddir allnoconfig
+      make O=$builddir distclean allnoconfig -j $procs
       popd;;
   esac
   case "$1" in
