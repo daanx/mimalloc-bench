@@ -70,6 +70,7 @@ readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.7
+readonly version_linux=6.5.1
 
 # HTTP-downloaded files checksums
 readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
@@ -109,6 +110,7 @@ setup_bench=0
 setup_lean=0
 setup_redis=0
 setup_rocksdb=0
+setup_linux=0
 
 # various
 setup_packages=0
@@ -168,6 +170,7 @@ while : ; do
         setup_lean=$flag_arg
         setup_redis=$flag_arg
         setup_rocksdb=$flag_arg
+        setup_linux=$flag_arg
         setup_bench=$flag_arg
         setup_packages=$flag_arg
         ;;
@@ -215,6 +218,8 @@ while : ; do
         setup_redis=$flag_arg;;
     rocksdb)
         setup_rocksdb=$flag_arg;;
+    linux)
+        setup_linux=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
     sc)
@@ -281,6 +286,7 @@ while : ; do
         echo "  packages                     setup required packages"
         echo "  redis                        setup redis benchmark"
         echo "  rocksdb                      setup rocksdb benchmark"
+        echo "  linux                        setup linux benchmark"
         echo ""
         echo "Prefix an option with 'no-' to disable an option"
         exit 0;;
@@ -851,6 +857,18 @@ if test "$setup_bench" = "1"; then
   cmake --build out/bench --parallel $procs
 fi
 
+if test "$setup_linux" = "1"; then
+  phase "fetch linux"
+  pushd "$devdir"
+  if test -d "linux-$version_linux"; then
+    echo "$devdir/linux-$version_linux already exists; no need to download it"
+  else
+    wget --no-verbose "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$version_linux.tar.xz"
+    tar xf "linux-$version_linux.tar.xz"
+    rm "./linux-$version_linux.tar.xz"
+  fi
+  popd
+fi
 
 curdir=`pwd`
 
