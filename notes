@@ -1,0 +1,15 @@
+HOMEBREW_NO_EMOJI?
+put archives in extra storage (and somehow map that for CI)
+	versionize archives for that
+		get verions into the Makefile
+		re-echo extern/versions.txt
+
+port linux and sjm
+fg: SSE2RNG is not used in the Makefile
+
+
+Decisions made:
+	dh: move build directory (src/build -> build)
+	gd: modified extern/Makefile to not use sse
+	lua: moved to big benchmarks because it is built in extern/
+	benchmarks: if something is updated, CMakeLists.txt needs to be touched (because bench/ is not part of the make logic at all)
