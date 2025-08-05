@@ -1,8 +1,9 @@
 HOMEBREW_NO_EMOJI?
 put archives in extra storage (and somehow map that for CI)
 	versionize archives for that
-		get verions into the Makefile
+		get versions into the Makefile
 		re-echo extern/versions.txt
+remove all non-standard pattern targets from the groups, do their stuff explicitly
 
 port linux and sjm
 fg: SSE2RNG is not used in the Makefile
