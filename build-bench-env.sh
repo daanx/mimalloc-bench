@@ -379,7 +379,7 @@ function aptinstall {
   echo ""
   echo "> $SUDO apt install $1"
   echo ""
-  $SUDO apt install --no-install-recommends $1
+  $SUDO apt install -y --no-install-recommends $1
 }
 
 function dnfinstall {
@@ -447,7 +447,7 @@ if test "$setup_packages" = "1"; then
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
-    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
+    aptinstall "build-essential git gpg g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
       liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux"
