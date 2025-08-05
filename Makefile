@@ -20,14 +20,14 @@ ifeq ($(shell uname), 'Darwin')
 endif
 
 BENCHMARKS_BIG=lean lua redis rocksdb
-ALLOCS = dh ff fg gd hd hm iso je lp lf lt mesh mi mi2 mng nomesh pa rp sc scudo sg sm sn tbb tc tcg yal
+ALLOCS_TRIVIAL = ff fg gd hd iso je lp lf lt mesh mi mi2 mng nomesh pa rp sc sg sm sn tbb tc tcg yal
 
-PDFDOC=bench/large.pdf
+PDFDOC=extern/large.pdf
 
-.PHONY: all benchmarks benchmarks_all benchmarks_big
+.PHONY: all allocs benchmarks benchmarks_all benchmarks_big
 
-all: $(ALLOCS) benchmarks_all
-
+all: allocs benchmarks_all
+allocs: $(ALLOCS_TRIVIAL) dh hm scudo
 benchmarks_all: benchmarks $(BENCHMARKS_BIG)
 
 benchmarks: bench/CMakeLists.txt bench/shbench/.patched $(PDFDOC)
@@ -35,7 +35,6 @@ benchmarks: bench/CMakeLists.txt bench/shbench/.patched $(PDFDOC)
 	cmake --build out/bench -j $(PROCS)
 
 PDF_URL=https://raw.githubusercontent.com/geekaaron/Resources/master/resources/Writing_a_Simple_Operating_System--from_Scratch.pdf
-#USERAGENT=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0
 $(PDFDOC):
 	wget --no-verbose -O $(PDFDOC) $(PDF_URL)
 
@@ -84,7 +83,7 @@ lt_ENV=-C gnu.make.lib
 ########################################################################
 
 # Todo: check for the big benchmarks
-$(ALLOCS) $(BENCHMARKS_BIG): %: extern/%/.built
+$(ALLOCS_TRIVIAL) $(BENCHMARKS_BIG): %: extern/%/.built
 
 extern/%/.built: extern/%/.unpacked
 	make -C $(@D) $($*_ENV) -j$(PROCS)
