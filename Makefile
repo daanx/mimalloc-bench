@@ -188,6 +188,15 @@ extern/sn/.built: extern/sn/build.ninja
 extern/sn/build.ninja: extern/sn/.unpacked
 	env CXX=clang++ cmake -S $(@D) -B $(@D)/release -G Ninja -DCMAKE_BUILD_TYPE=Release
 
+#tbb: cmake to configure
+extern/tbb/.built: extern/tbb/.configured
+	make -C $(@D) -j$(PROCS)
+	touch @
+
+extern/tbb/.configured: extern/tbb/.unpacked
+	cd $(@D) && cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
+	touch @
+
 #tcg: bazel
 extern/tcg/.built: extern/tcg/.unpacked
 	cd $(@D) && bazel build -c opt tcmalloc
