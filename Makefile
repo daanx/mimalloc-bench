@@ -130,6 +130,14 @@ extern/hm/.built: extern/hm/.configured
 	make -C $(@D) $(hml_ENV) -j$(PROCS)
 	touch $@
 
+#je: needs configure
+extern/je/.built: extern/je/config.status
+	make -C $(@D) -j$(PROCS)
+	touch @
+
+extern/je/config.status: extern/je/.unpacked
+	cd $(@D) && ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
+
 # mi,mi2: cmake, and 3 different variants
 extern/mi/.built extern/mi2/.built: extern/%/.built: extern/%/.unpacked
 	cmake -S $(@D) -B $(@D)/out/release
