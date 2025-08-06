@@ -15,8 +15,11 @@ mesh: master, d45d6de, https://github.com/plasma-umass/mesh
 mi2: v2.1.2, 43ce4bd7, https://github.com/microsoft/mimalloc
 mi: v1.8.2, b66e3214, https://github.com/microsoft/mimalloc
 mng: master, 2ed5881, https://github.com/richfelker/mallocng-draft
-pa: main, e6c10be, https://github.com/1c3t3a/partition_alloc_builder.git
+pa: main, e6c10be, https://github.com/1c3t3a/partition_alloc_builder
+redis: 6.2.7, e6f6709, https://github.com/redis/redis
+rocksdb: 8.1.1, 6a43615, https://github.com/facebook/rocksdb
 rp: 1.4.5, e4393ff, https://github.com/mjansson/rpmalloc
+sc: master, 9ef491c, https://github.com/cksystemsgroup/scalloc
 scudo: main, 30d3bb59, https://github.com/llvm/llvm-project
 sg: master, 6d7d065, https://github.com/ssrg-vt/SlimGuard
 sm: master, 709663f, https://github.com/kuszmaul/SuperMalloc
