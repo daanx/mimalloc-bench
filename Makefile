@@ -17,18 +17,19 @@ ifeq ($(shell uname), 'Darwin')
 	PROCS=$(shell sysctl -n hw.physicalcpu)
 	EXTSO="dylib"
 	SHA256SUM="shasum -a 256"
+	export HOMEBREW_NO_EMOJI=1
 endif
 
-BENCHMARKS_BIG=lean lua redis rocksdb
-ALLOCS_TRIVIAL = ff fg gd hd iso je lp lf lt mesh mi mi2 mng nomesh pa rp sc sg sm sn tbb tc tcg yal
-
+BENCHMARKS_EXTERN=lean lua redis rocksdb
+ALLOCS_TRIVIAL = ff iso je lf mng sg tbb tc
+ALLOCS_NONTRIVIAL = dh fg gd hd hm lp lt mesh mi mi2 nomesh rp sc scudo sm sn tcg yal
 PDFDOC=extern/large.pdf
 
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big
 
 all: allocs benchmarks_all
-allocs: $(ALLOCS_TRIVIAL) dh hm scudo
-benchmarks_all: benchmarks $(BENCHMARKS_BIG)
+allocs: $(ALLOCS_TRIVIAL) $(ALLOCS_NONTRIVIAL)
+benchmarks_all: benchmarks $(BENCHMARKS_EXTERN)
 
 benchmarks: bench/CMakeLists.txt bench/shbench/.patched $(PDFDOC)
 	cmake -B out/bench -S bench
@@ -76,14 +77,17 @@ gd_ENV=ARC4RNG=1
 iso_ENV=library
 lf_ENV=liblite-malloc-shared.so
 lt_ENV=-C gnu.make.lib
-
+hd_ENV=-C src
+redis_ENV=USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no -C src
+rocksdb_ENV=DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 db_bench
 ########################################################################
 # ALLOCS: generic targets for the standard scheme: download, unpack,   #
 # configure (nop for the standard), compile (using make).              #
 ########################################################################
 
 # Todo: check for the big benchmarks
-$(ALLOCS_TRIVIAL) $(BENCHMARKS_BIG): %: extern/%/.built
+$(ALLOCS_TRIVIAL) $(BENCHMARKS_EXTERN): %: extern/%/.built
+$(ALLOCS_NONTRIVIAL): %: extern/%/.built
 
 extern/%/.built: extern/%/.unpacked
 	make -C $(@D) $($*_ENV) -j$(PROCS)
@@ -91,7 +95,7 @@ extern/%/.built: extern/%/.unpacked
 
 extern/%/.unpacked: archives/%.tar.gz
 	mkdir -p $(@D)
-	tar -x --strip-components=1 -f $< -C $(@D)
+	tar -x --strip-components=1 --overwrite -f $< -C $(@D)
 	touch $@
 
 .PRECIOUS: archives/%.tar.gz
@@ -102,8 +106,7 @@ archives/%.tar.gz:
 ########################################################################
 # ALLOCS: special cases
 ########################################################################
-
-# dh: uses cmake
+#dh: uses cmake
 extern/dh/.configured: extern/dh/.unpacked
 	cd $(@D) && rm -rf ./benchmarks/ ./src/exterminator/ ./src/local/ ./src/replicated/ ./docs
 	cmake -S $(@D)/src -B $(@D)/build
@@ -113,7 +116,13 @@ extern/dh/.built: extern/dh/.configured
 	cmake --build $(@D)/build -j $(PROCS)
 	touch $@
 
-# hml (hm light): built from the same source, differently configured
+#hd: fix in Makefile. If later ported into a patch, hd can be reintegrated with ALLOCS_TRIVIAL
+extern/hd/.built: extern/hd/.unpacked
+	sed -i_orig 's/-arch arm64/ /g' $(@D)/src/GNUmakefile
+	make -C $(@D) $(hd_ENV) -j$(PROCS)
+	touch $@
+
+#hm/hml (hm light): built from the same source, differently configured
 hm_ENV=CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=default
 hml_ENV=CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light
 extern/hm/.built: extern/hm/.configured
@@ -121,11 +130,70 @@ extern/hm/.built: extern/hm/.configured
 	make -C $(@D) $(hml_ENV) -j$(PROCS)
 	touch $@
 
-# TODO: scudo needs only part of the source archive, maybe port partial_checkout to make and overwrite extern/scudo/.unpacked
-extern/scudo/.built: extern/scudo/.configured
-	cd $(@D)/compiler-rt/lib/scudo/standalone && clang++ -flto -fuse-ld=lld -fPIC -std=c++17 -fno-exceptions $CXXFLAGS -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
-# TODO: lp the same
+# mi,mi2: cmake, and 3 different variants
+extern/mi/.built extern/mi2/.built: extern/%/.built: extern/%/.unpacked
+	cmake -S $(@D) -B $(@D)/out/release
+	cmake --build $(@D)/out/release -j$(PROCS)
+	cmake -S $(@D) -B $(@D)/out/debug -DMI_CHECK_FULL=ON
+	cmake --build $(@D)/out/debug -j$(PROCS)
+	cmake -S $(@D) -B $(@D)/out/secure -DMI_SECURE=ON
+	cmake --build $(@D)/out/secure -j$(PROCS)
+	touch $@
 
+#rp: uses ninja, one fix in build.ninja
+extern/rp/build.ninja: extern/rp/.unpacked
+	cd $(@D) && python3 configure.py
+	sed -i 's/-Werror//' $(@D)/build.ninja
+
+extern/rp/.built: extern/rp/build.ninja
+	cd $(@D) && ninja
+	touch $@
+
+#sc: gyp -> make
+sc_ENV=BUILDTYPE=Release
+extern/sc/.built: extern/sc/Makefile
+	make -C $(@D) $(sc_ENV) -j$(PROCS)
+	touch $@
+
+extern/sc/Makefile: extern/sc/build/gyp/gyp
+	cd $(@D) && build/gyp/gyp --depth=. scalloc.gyp
+
+extern/sc/build/gyp/gyp: extern/sc/.unpacked
+	cd extern/sc && tools/make_deps.sh
+
+#scudo: native clang, in a sub-directory
+extern/scudo/.built: extern/scudo/.unpacked
+	cd $(@D)/compiler-rt/lib/scudo/standalone && clang++ -flto -fuse-ld=lld -fPIC -std=c++17 -fno-exceptions $(CXXFLAGS) -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
+	touch $@
+
+#sm: make, but a fix before
+extern/sm/.built: extern/sm/.unpacked
+	rm -rf ./$(@D)/doc ./$(@D)/paper ./$(@D)/short-talk ./$(@D)/talk
+	sed -i "s/-Werror//" $(@D)/Makefile.include
+	make -C $(@D)/release -j$(PROCS) ../release/lib/libsupermalloc.so
+
+#sn: cmake+ninja, builds in sn/release
+extern/sn/.built: extern/sn/build.ninja
+	cd $(@D)/release && ninja libsnmallocshim.$(EXTSO) libsnmallocshim-checks.$(EXTSO)
+	touch $@
+
+extern/sn/build.ninja: extern/sn/.unpacked
+	env CXX=clang++ cmake -S $(@D) -B $(@D)/release -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+#tcg: bazel
+extern/tcg/.built: extern/tcg/.unpacked
+	cd $(@D) && bazel build -c opt tcmalloc
+	touch $@
+
+#yal: custom shell script
+extern/yal/.built: extern/yal/.unpacked
+	cd $(@D) && ./build.sh -V
+	touch $@
+
+########################################################################
+# benchmarks residing in ./extern                                      #
+########################################################################
+# lean: cmake, additional mathlib setup
 extern/lean/.built: extern/lean/.unpacked
 	mkdir -p $(@D)/out/release
 	env CC=gcc CXX="g++" cmake -S $(@D)/src -B $(@D)/out/release -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
@@ -137,3 +205,4 @@ extern/lean/.built: extern/lean/.unpacked
 
 # lua only needs to be fetched, not more.
 extern/lua/.built: extern/lua/.unpacked
+	touch $@
