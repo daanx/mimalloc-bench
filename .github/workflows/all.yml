@@ -51,6 +51,8 @@ jobs:
           push: false
           target: benchmark
           build-args: |
+            platform=ubuntu
+            platform_version=24.04
             allocator=${{ matrix.allocator }}
             benchs=allt
             repeats=1
