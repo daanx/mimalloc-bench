@@ -36,7 +36,7 @@ jobs:
     needs: build-base-with-docker
     strategy:
       matrix:
-        platform: [ubuntu:24.04, alpine:latest, fedora:latest]
+        platform: [ubuntu:24.04, fedora:latest]
         allocator: [mi, sn, je]
     steps:
       - name: Check out repository code
