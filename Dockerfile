@@ -5,7 +5,7 @@ FROM ${platform}:${platform_version} as bench-env
 
 # Pull mimalloc-bench
 RUN mkdir -p /mimalloc-bench
-COPY . /mimalloc-bench
+COPY --exclude .github . /mimalloc-bench
 
 WORKDIR /mimalloc-bench
 # Install dependencies
@@ -14,11 +14,11 @@ RUN ./build-bench-env.sh packages
 # Build benchmarks
 RUN ./build-bench-env.sh bench
 
-RUN ./build-bench-env.sh redis
+# RUN ./build-bench-env.sh redis
 
-RUN ./build-bench-env.sh rocksdb
+# RUN ./build-bench-env.sh rocksdb
 
-RUN ./build-bench-env.sh lean
+# RUN ./build-bench-env.sh lean
 
 
 FROM bench-env as benchmark
@@ -26,7 +26,7 @@ FROM bench-env as benchmark
 WORKDIR /mimalloc-bench
 
 ARG allocator=mi
-ARG benchs=allt
+ARG benchs=cfrac
 ARG repeats=1
 
 RUN ./build-bench-env.sh $allocator
