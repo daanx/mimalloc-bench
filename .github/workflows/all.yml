@@ -7,6 +7,9 @@ on:
 jobs:
   build-base-with-docker:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu:24.04, alpine:latest, fedora:latest]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -24,16 +27,17 @@ jobs:
           tags: bench
           target: bench-env
           build-args: |
-            platform=ubuntu:24.04
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            platform=${{ matrix.platform }}
+          cache-from: type=gha,index=buildkit_${{ matrix.platform }}
+          cache-to: type=gha,mode=max, index=buildkit_${{ matrix.platform }}
 
   build-and-benchmark-allocator:
     runs-on: ubuntu-latest
     needs: build-base-with-docker
     strategy:
       matrix:
-        allocator: [mi, sn]
+        platform: [ubuntu:24.04, alpine:latest, fedora:latest]
+        allocator: [mi, sn, je]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -50,11 +54,11 @@ jobs:
           push: false
           target: benchmark
           build-args: |
-            platform=ubuntu:24.04
+            platform=${{ matrix.platform }}
             allocator=${{ matrix.allocator }}
             benchs=allt
             repeats=1
-          cache-from: type=gha
+          cache-from: type=gha, index=buildkit_${{ matrix.platform }}
 
   # build-all-alpine:
   #   runs-on: ubuntu-latest
