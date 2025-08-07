@@ -8,7 +8,7 @@ jobs:
   build-and-run:
     strategy:
       matrix:
-        platform: [ubuntu:24.04, fedora:latest]
+        platform: [ubuntu, fedora, alpine]
       fail-fast: false
     uses: ./.github/workflows/platform.yml
     name: ${{ matrix.platform }}

@@ -1,4 +1,14 @@
-ARG platform=ubuntu:24.04
+ARG platform=ubuntu
+
+FROM ubuntu:24.04 AS ubuntu
+
+
+FROM fedora:latest AS fedora
+
+
+FROM alpine:latest AS alpine
+RUN apk add --no-cache bash
+
 
 FROM ${platform} AS bench-env
 
