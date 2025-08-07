@@ -38,14 +38,15 @@ jobs:
     strategy:
       matrix:
         allocator: [mi, sn, je, dh, hd]
-        platform: ${{ inputs.platform }}
+        true: [true, false]
         exclude:
+          - true: false
           # dh: glibc-specific
           - allocator: dh
-            platform: alpine
+            platform: ${{ inputs.platform == 'alpine' }}
           # hd: glibc-specific
           - allocator: hd
-            platform: alpine
+            platform: ${{ inputs.platform == 'alpine' }}
 
       fail-fast: false
     name: ${{ matrix.allocator }} - build and benchmark
