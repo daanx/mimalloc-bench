@@ -28,8 +28,8 @@ jobs:
           target: bench-env
           build-args: |
             platform=${{ matrix.platform }}
-          cache-from: type=gha,index=buildkit_${{ matrix.platform }}
-          cache-to: type=gha,mode=max, index=buildkit_${{ matrix.platform }}
+          cache-from: type=gha,scope=buildkit_${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=buildkit_${{ matrix.platform }}
 
   build-and-benchmark-allocator:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
             allocator=${{ matrix.allocator }}
             benchs=allt
             repeats=1
-          cache-from: type=gha, index=buildkit_${{ matrix.platform }}
+          cache-from: type=gha,scope=buildkit_${{ matrix.platform }}
 
   # build-all-alpine:
   #   runs-on: ubuntu-latest
