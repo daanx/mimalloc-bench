@@ -1,23 +1,27 @@
 TODO
 	put archives in extra storage (and somehow map that for CI)
 		versionize archives for that
-	port linux and sjm
+	port linux
 	hd: Makefile fix (build-bench-env.sh, line 612: port to patch?)
-	scudo needs only part of the source archive, maybe port partial_checkout to make and overwrite extern/scudo/.unpacked
-	lp needs only part of WebKit (like scudo): port partial_checkout?
+	scudo needs only part of the source archive, maybe port partial_checkout to make?
 	pa: re-add
+	gd: detect architecture and set SSE2RNG if on x86, see gd/Makefile
+	gd: arc4random named a function getentropy which chalshes with a libc functions
+	lean: test bench.sh with smaller make-target: lean
 	adapt CI-scripts to use Makefile
 
 Decisions made:
 	VERSIONS: demand versions instead of reporting them in the end
-	dh: move build directory (src/build -> build)
-	gd: modified extern/Makefile to not use sse
+	switched from git cloning to grabbing a snapshot of the reqeuested version from github
+	dh: move build directory (dh/src/build -> dh/build)
 	lua: moved to extern benchmarks because it is built in extern/
 	benchmarks: if something is updated, CMakeLists.txt needs to be touched (because bench/ is not part of the make logic at all)
 	sm: instead of default target, switched to building supermalloc only
 
 Problems:
-	fg: built purely for x86, can't test
+	fg: built purely for x86, can't test - need to re-add when tested
 	lt: same.
-	sc: same.
-	sm: same. NO_RTM=1 during compilation helps, but does not solve
+	sc: same. re-add
+	sm: same. NO_RTM=1 during compilation helps, but does not solve; re-add
+	lp needs only part of WebKit (like scudo): port partial_checkout? Also, github does not serve archives on that repo. Re-add when solved.
+	mesh, nomesh: bazel currently only supports x86_64; re-add when tested on x86
