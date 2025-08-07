@@ -22,7 +22,7 @@ endif
 
 BENCHMARKS_EXTERN=lean lua redis rocksdb
 ALLOCS_TRIVIAL = ff iso je lf mng sg tbb tc
-ALLOCS_NONTRIVIAL = dh fg gd hd hm lp lt mesh mi mi2 nomesh rp sc scudo sm sn tcg yal
+ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp scudo sn tcg yal
 PDFDOC=extern/large.pdf
 
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big
@@ -31,7 +31,7 @@ all: allocs benchmarks_all
 allocs: $(ALLOCS_TRIVIAL) $(ALLOCS_NONTRIVIAL)
 benchmarks_all: benchmarks $(BENCHMARKS_EXTERN)
 
-benchmarks: bench/CMakeLists.txt bench/shbench/.patched $(PDFDOC)
+benchmarks: bench/CMakeLists.txt bench/shbench/sh6bench-new.c bench/shbench/sh8bench-new.c $(PDFDOC)
 	cmake -B out/bench -S bench
 	cmake --build out/bench -j $(PROCS)
 
@@ -39,11 +39,13 @@ PDF_URL=https://raw.githubusercontent.com/geekaaron/Resources/master/resources/W
 $(PDFDOC):
 	wget --no-verbose -O $(PDFDOC) $(PDF_URL)
 
-bench/shbench/.patched: bench/shbench/sh6bench.patch bench/shbench/sh6bench.c bench/shbench/sh8bench.patch bench/shbench/SH8BENCH.C
-	dos2unix $(@D)/*.patch
-	patch -p1 -o $(@D)/sh6bench-new.c $(@D)/sh6bench.c $(@D)/sh6bench.patch
-	patch -p1 -o $(@D)/sh8bench-new.c $(@D)/SH8BENCH.C $(@D)/sh8bench.patch
-	touch $@
+bench/shbench/sh6bench-new.c: bench/shbench/sh6bench.patch bench/shbench/sh6bench.c
+	dos2unix $<
+	patch -p1 -o $@ $(filter-out $<, $^) $<
+
+bench/shbench/sh8bench-new.c: bench/shbench/sh8bench.patch bench/shbench/SH8BENCH.C
+	dos2unix $<
+	patch -p1 -o $@ $(filter-out $<, $^) $<
 
 bench/shbench/sh6bench.c: bench/shbench/bench.zip
 	cd $(@D) && unzip -o $(<F)
@@ -118,14 +120,15 @@ extern/dh/.built: extern/dh/.configured
 
 #hd: fix in Makefile. If later ported into a patch, hd can be reintegrated with ALLOCS_TRIVIAL
 extern/hd/.built: extern/hd/.unpacked
-	sed -i_orig 's/-arch arm64/ /g' $(@D)/src/GNUmakefile
+	sed -i_orig 's/-arch arm64e//g' $(@D)/src/GNUmakefile
+	sed -i_orig 's/-arch arm64//g' $(@D)/src/GNUmakefile
 	make -C $(@D) $(hd_ENV) -j$(PROCS)
 	touch $@
 
 #hm/hml (hm light): built from the same source, differently configured
 hm_ENV=CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=default
 hml_ENV=CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light
-extern/hm/.built: extern/hm/.configured
+extern/hm/.built: extern/hm/.unpacked
 	make -C $(@D) $(hm_ENV) -j$(PROCS)
 	make -C $(@D) $(hml_ENV) -j$(PROCS)
 	touch $@
@@ -133,7 +136,7 @@ extern/hm/.built: extern/hm/.configured
 #je: needs configure
 extern/je/.built: extern/je/config.status
 	make -C $(@D) -j$(PROCS)
-	touch @
+	touch $@
 
 extern/je/config.status: extern/je/.unpacked
 	cd $(@D) && ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
@@ -191,11 +194,23 @@ extern/sn/build.ninja: extern/sn/.unpacked
 #tbb: cmake to configure
 extern/tbb/.built: extern/tbb/.configured
 	make -C $(@D) -j$(PROCS)
-	touch @
+	touch $@
 
 extern/tbb/.configured: extern/tbb/.unpacked
 	cd $(@D) && cmake -DCMAKE_BUILD_TYPE=Release -DTBB_BUILD=OFF -DTBB_TEST=OFF -DTBB_OUTPUT_DIR_BASE=bench -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
-	touch @
+	touch $@
+
+#tc: autogen+configure
+extern/tc/.built: extern/tc/Makefile
+	make -C $(@D) -j $(PROCS)
+	touch $@
+
+extern/tc/Makefile: extern/tc/configure
+	cd $(@D) && CXXFLAGS="$(CXXFLAGS) -w -DNDEBUG -O2" ./configure --enable-minimal --disable-debugalloc
+
+extern/tc/configure: extern/tc/.unpacked
+	cd $(@D) && ./autogen.sh
+
 
 #tcg: bazel
 extern/tcg/.built: extern/tcg/.unpacked
