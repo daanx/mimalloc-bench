@@ -38,7 +38,18 @@ jobs:
     needs: build-base-with-docker
     strategy:
       matrix:
-        allocator: [mi, sn, je]
+        allocator: [mi, sn, je, dh, hd]
+        isAlpine: ${{ inputs.platform == 'alpine' }}
+        isFedora: ${{ inputs.platform == 'fedora' }}
+        isUbuntu: ${{ inputs.platform == 'ubuntu' }}
+        exclude:
+          # dh: glibc-specific
+          - allocator: dh
+            isAlpine: true
+          # hd: glibc-specific
+          - allocator: hd
+            isAlpine: true
+
       fail-fast: false
     name: ${{ matrix.allocator }} - build and benchmark
     steps:
