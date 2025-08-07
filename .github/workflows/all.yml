@@ -5,107 +5,158 @@ on:
   schedule:
     - cron: '0 0 * * 1'
 jobs:
-  build-all-alpine:
-    runs-on: ubuntu-latest
-    container:
-      image: alpine:latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Install bash
-        run: apk add bash git
-      - name: Silence some git warnings
-        run: |
-          git config --global advice.detachedHead false
-          git config --global init.defaultBranch main
-      - name: Install and build all benchmarks and allocators
-        # dh: glibc-specific
-        # fg: Uses execinfo.h, which is a GNU extension
-        # gd: ?
-        # hd: glibc-specific
-        # lf: crashes redis server
-        # lt: return type 'struct mallinfo' is incomplete
-        # mesh/nomesh: infinite loop?
-        # pa: can't setup depot_tools and goma
-        # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
-        # tcg: [...] specifies less restrictive attribute than its target [...]
-        # lp: /__w/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/pas_thread_local_cache.c:218:22: error: call to undeclared function 'pthread_getname_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-        # rp: rpmalloc/rpmalloc.c:980:9: error: unsafe pointer arithmetic [-Werror,-Wunsafe-buffer-usage]
-        run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-pa no-gd no-fg no-lf no-lt no-tcg no-lp no-rp
-      - name: Run everything.
-        run: |
-          cd out/bench
-          ../../bench.sh alla allt
-  build-all-ubuntu:
+  build-base-with-docker:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - name: Silence some git warnings
-        run: |
-          git config --global advice.detachedHead false
-          git config --global init.defaultBranch main
-      - name: Install and build all benchmarks and allocators
-        # fg: crashes on redis
-        # gd: infinite loop in the redis benchmark
-        # lt: breaks on sh8benchN
-        # lf: crashes redis server
-        # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
-        # hoard: crashes on rocksdb
-        # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
-        # sn: /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/chrono:2320:48: error: call to consteval function 'std::chrono::hh_mm_ss::_S_fractional_width' is not a constant expression
-        # lp: /home/runner/work/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/hotbit_heap_inlines.h:64:51: error: too few arguments to function call, expected 3, have 2
-        # tcg: ERROR: Error computing the main repository mapping: protobuf@29.0 depends on rules_fuzzing@0.5.2 with compatibility level 0, but <root> depends on rules_fuzzing@0.5.1 with compatibility level 1 which is different
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-lt no-lf no-hd no-pa no-sn no-lp no-tcg
-      - name: Run everything.
-        run: |
-          cd out/bench
-          ../../bench.sh alla allt
-  build-all-fedora:
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and run benchmarks in Docker
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: bench
+          target: bench-env
+          build-args: |
+            platform=ubuntu
+            platform_version=24.04
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-and-benchmark-allocator:
     runs-on: ubuntu-latest
-    container:
-      image: fedora:latest
+    needs: build-base-with-docker
+    strategy:
+      matrix:
+        allocator: [mi, sn]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - name: Install git
-        run: sudo dnf -y --quiet --nodocs install git
-      - name: Silence some git warnings
-        run: |
-          git config --global advice.detachedHead false
-          git config --global init.defaultBranch main
-      - name: Install and build all benchmarks and allocators
-        # gd: infinite loop in the redis benchmark
-        # mesh/nomesh: error: '__malloc_hook' was not declared in this scope;
-        # mi: error: '__malloc_hook' was not declared in this scope;
-        # rp: mixing declarations and code is incompatible with standards before C99
-        # lf: crashes redis server
-        # fg: crashes redis server
-        # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
-        # lp: /__w/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/pas_thread_local_cache.c:218:22: error: call to undeclared function 'pthread_getname_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-        # tcg: https://github.com/bazelbuild/bazel/issues/19295 bazel5 is required but unavailable
-        run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg no-pa no-lp no-sh8 no-tcg
-      - name: Run everything.
-        run: |
-          cd out/bench
-          ../../bench.sh alla allt
-  build-all-osx:
-    runs-on: macos-11
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Silence some git warnings
-        run: |
-          git config --global advice.detachedHead false
-          git config --global init.defaultBranch main
-      - name: Install and build all benchmarks and allocators
-        # ff:ffmalloc.c:1140:14: error: implicit declaration of function 'sched_getcpu' is invalid in C99 [-Werror,-Wimplicit-function-declaration] 
-        # fg: unknown type name 'pthread_spinlock_t'; did you mean 'pthread_rwlock_t'?
-        # gd: so many errors
-        # pa: ninja: error: '../../buildtools/third_party/libc++/trunk/src/utility.cpp', needed by 'obj/buildtools/third_party/libc++/libc++/utility.o', missing and no known rule to make it
-        # lp: /home/runner/work/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/hotbit_heap_inlines.h:64:51: error: too few arguments to function call, expected 3, have 2
-        run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-pa no-lp
-      - name: Run everything.
-        run: |
-          cd out/bench
-          ../../bench.sh alla allt
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and run benchmarks in Docker
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          target: benchmark
+          build-args: |
+            allocator=${{ matrix.allocator }}
+            benchs=allt
+            repeats=1
+          cache-from: type=gha
+
+  # build-all-alpine:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: alpine:latest
+  #   steps:
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v3
+  #     - name: Install bash
+  #       run: apk add bash git
+  #     - name: Silence some git warnings
+  #       run: |
+  #         git config --global advice.detachedHead false
+  #         git config --global init.defaultBranch main
+  #     - name: Install and build all benchmarks and allocators
+  #       # dh: glibc-specific
+  #       # fg: Uses execinfo.h, which is a GNU extension
+  #       # gd: ?
+  #       # hd: glibc-specific
+  #       # lf: crashes redis server
+  #       # lt: return type 'struct mallinfo' is incomplete
+  #       # mesh/nomesh: infinite loop?
+  #       # pa: can't setup depot_tools and goma
+  #       # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
+  #       # tcg: [...] specifies less restrictive attribute than its target [...]
+  #       # lp: /__w/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/pas_thread_local_cache.c:218:22: error: call to undeclared function 'pthread_getname_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+  #       # rp: rpmalloc/rpmalloc.c:980:9: error: unsafe pointer arithmetic [-Werror,-Wunsafe-buffer-usage]
+  #       run: ./build-bench-env.sh all no-dh no-hd no-sm no-mesh no-nomesh no-pa no-gd no-fg no-lf no-lt no-tcg no-lp no-rp
+  #     - name: Run everything.
+  #       run: |
+  #         cd out/bench
+  #         ../../bench.sh alla allt
+  # build-all-ubuntu:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v3
+  #     - name: Silence some git warnings
+  #       run: |
+  #         git config --global advice.detachedHead false
+  #         git config --global init.defaultBranch main
+  #     - name: Install and build all benchmarks and allocators
+  #       # fg: crashes on redis
+  #       # gd: infinite loop in the redis benchmark
+  #       # lt: breaks on sh8benchN
+  #       # lf: crashes redis server
+  #       # ff: crashes on modern ubuntu: https://github.com/bwickman97/ffmalloc/issues/5
+  #       # hoard: crashes on rocksdb
+  #       # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
+  #       # sn: /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/chrono:2320:48: error: call to consteval function 'std::chrono::hh_mm_ss::_S_fractional_width' is not a constant expression
+  #       # lp: /home/runner/work/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/hotbit_heap_inlines.h:64:51: error: too few arguments to function call, expected 3, have 2
+  #       # tcg: ERROR: Error computing the main repository mapping: protobuf@29.0 depends on rules_fuzzing@0.5.2 with compatibility level 0, but <root> depends on rules_fuzzing@0.5.1 with compatibility level 1 which is different
+  #       run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-lt no-lf no-hd no-pa no-sn no-lp no-tcg
+  #     - name: Run everything.
+  #       run: |
+  #         cd out/bench
+  #         ../../bench.sh alla allt
+  # build-all-fedora:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: fedora:latest
+  #   steps:
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v3
+  #     - name: Install git
+  #       run: sudo dnf -y --quiet --nodocs install git
+  #     - name: Silence some git warnings
+  #       run: |
+  #         git config --global advice.detachedHead false
+  #         git config --global init.defaultBranch main
+  #     - name: Install and build all benchmarks and allocators
+  #       # gd: infinite loop in the redis benchmark
+  #       # mesh/nomesh: error: '__malloc_hook' was not declared in this scope;
+  #       # mi: error: '__malloc_hook' was not declared in this scope;
+  #       # rp: mixing declarations and code is incompatible with standards before C99
+  #       # lf: crashes redis server
+  #       # fg: crashes redis server
+  #       # pa: python3: can't open file '/__w/mimalloc-bench/mimalloc-bench/extern/pa/partition_alloc_builder/tools/rust/update_rust.py': [Errno 2] No such file or directory
+  #       # lp: /__w/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/pas_thread_local_cache.c:218:22: error: call to undeclared function 'pthread_getname_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+  #       # tcg: https://github.com/bazelbuild/bazel/issues/19295 bazel5 is required but unavailable
+  #       run: ./build-bench-env.sh all no-lean no-mi no-mesh no-nomesh no-gd no-rp no-lf no-fg no-pa no-lp no-sh8 no-tcg
+  #     - name: Run everything.
+  #       run: |
+  #         cd out/bench
+  #         ../../bench.sh alla allt
+  # build-all-osx:
+  #   runs-on: macos-11
+  #   steps:
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v3
+  #     - name: Silence some git warnings
+  #       run: |
+  #         git config --global advice.detachedHead false
+  #         git config --global init.defaultBranch main
+  #     - name: Install and build all benchmarks and allocators
+  #       # ff:ffmalloc.c:1140:14: error: implicit declaration of function 'sched_getcpu' is invalid in C99 [-Werror,-Wimplicit-function-declaration] 
+  #       # fg: unknown type name 'pthread_spinlock_t'; did you mean 'pthread_rwlock_t'?
+  #       # gd: so many errors
+  #       # pa: ninja: error: '../../buildtools/third_party/libc++/trunk/src/utility.cpp', needed by 'obj/buildtools/third_party/libc++/libc++/utility.o', missing and no known rule to make it
+  #       # lp: /home/runner/work/mimalloc-bench/mimalloc-bench/extern/lp/Source/bmalloc/libpas/src/libpas/hotbit_heap_inlines.h:64:51: error: too few arguments to function call, expected 3, have 2
+  #       run: ./build-bench-env.sh all no-lean no-gd no-ff no-fg no-pa no-lp
+  #     - name: Run everything.
+  #       run: |
+  #         cd out/bench
+  #         ../../bench.sh alla allt
