@@ -24,8 +24,7 @@ jobs:
           tags: bench
           target: bench-env
           build-args: |
-            platform=ubuntu
-            platform_version=24.04
+            platform=ubuntu:24.04
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -51,8 +50,7 @@ jobs:
           push: false
           target: benchmark
           build-args: |
-            platform=ubuntu
-            platform_version=24.04
+            platform=ubuntu:24.04
             allocator=${{ matrix.allocator }}
             benchs=allt
             repeats=1

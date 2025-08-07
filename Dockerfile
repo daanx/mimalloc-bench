@@ -1,7 +1,6 @@
-ARG platform=ubuntu
-ARG platform_version=24.04
+ARG platform=ubuntu:24.04
 
-FROM ${platform}:${platform_version} as bench-env
+FROM ${platform} AS bench-env
 
 # Pull mimalloc-bench
 RUN mkdir -p /mimalloc-bench
@@ -21,7 +20,7 @@ RUN ./build-bench-env.sh bench
 # RUN ./build-bench-env.sh lean
 
 
-FROM bench-env as benchmark
+FROM bench-env AS benchmark
 
 WORKDIR /mimalloc-bench
 
