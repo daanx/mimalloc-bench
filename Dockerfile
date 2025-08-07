@@ -5,7 +5,7 @@ FROM ${platform}:${platform_version} as bench-env
 
 # Pull mimalloc-bench
 RUN mkdir -p /mimalloc-bench
-COPY --exclude=.github . /mimalloc-bench
+COPY . /mimalloc-bench
 
 WORKDIR /mimalloc-bench
 # Install dependencies
