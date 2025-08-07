@@ -13,12 +13,11 @@ RUN ./build-bench-env.sh packages
 # Build benchmarks
 RUN ./build-bench-env.sh bench
 
-# RUN ./build-bench-env.sh redis
+RUN ./build-bench-env.sh redis
 
-# RUN ./build-bench-env.sh rocksdb
+RUN ./build-bench-env.sh rocksdb
 
-# RUN ./build-bench-env.sh lean
-
+RUN ./build-bench-env.sh lean
 
 FROM bench-env AS benchmark
 
