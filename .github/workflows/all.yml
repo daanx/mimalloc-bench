@@ -11,6 +11,7 @@ jobs:
         platform: [ubuntu:24.04, fedora:latest]
       fail-fast: false
     uses: ./.github/workflows/platform.yml
+    name: ${{ matrix.platform }}
     with:
       platform: ${{ matrix.platform }}
 
