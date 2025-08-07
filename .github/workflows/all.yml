@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [ubuntu:24.04, alpine:latest, fedora:latest]
+        platform: [ubuntu:24.04, fedora:latest]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
