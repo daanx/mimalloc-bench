@@ -34,21 +34,18 @@ jobs:
 
   build-and-benchmark-allocator:
     runs-on: ubuntu-latest
-    
     needs: build-base-with-docker
     strategy:
       matrix:
         allocator: [mi, sn, je, dh, hd]
-        isAlpine: ${{ inputs.platform == 'alpine' }}
-        isFedora: ${{ inputs.platform == 'fedora' }}
-        isUbuntu: ${{ inputs.platform == 'ubuntu' }}
+        platform: ${{ inputs.platform }}
         exclude:
           # dh: glibc-specific
           - allocator: dh
-            isAlpine: true
+            platform: alpine
           # hd: glibc-specific
           - allocator: hd
-            isAlpine: true
+            platform: alpine
 
       fail-fast: false
     name: ${{ matrix.allocator }} - build and benchmark
