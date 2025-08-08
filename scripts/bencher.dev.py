@@ -1,5 +1,4 @@
-# This script is adapted from the mimalloc-bench project.
-# It converts the benchmark outputs to the format required by bencher.dev.
+# This script converts the benchmark outputs to the format required by bencher.dev.
 # It creates a file for each allocator with the results in JSON format.
 # It requires numpy for statistical calculations.
 # It generates file names of the form bencher.dev.<allocator>.json.
@@ -49,7 +48,7 @@ if len(sys.argv) != 2:
     print('The script generates a file per allocator for submission to bencher.dev.')
     sys.exit(1)
 
-parse_line = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+) +([0-9]+)')
+parse_line = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+) +([0-9]+)$')
 data = []
 test_names = set()
 
