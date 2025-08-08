@@ -75,9 +75,6 @@ jobs:
           # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
           - allocator: sm
             predicate: ${{ inputs.platform == 'alpine' }}
-          # sn: __cxa_thread_at_exit_impl is not available in musl
-          - allocator: sn
-            predicate: ${{ inputs.platform == 'alpine' }}
           # tcg: [...] specifies less restrictive attribute than its target [...]
           - allocator: tcg
             predicate: ${{ inputs.platform == 'alpine' }}
