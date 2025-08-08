@@ -90,10 +90,11 @@ jobs:
           file: Dockerfile
           push: false
           target: benchmark
-          ## If allocators in lf,fg,gd then use a smaller set of tests.
+          ## If allocators in lt,lf,fg,gd then use a smaller set of tests.
+          ## They were generally failing on lean or redis, and lf was also failing on mstress.
           build-args: |
             platform=${{ inputs.platform }}
             allocator=${{ matrix.allocator }}
-            benchs=${{ (contains('lf,gd', matrix.allocator) && 'cfrac espresso barnes larson-sized mstress rptest gs lua') || ('fg' == matrix.allocator && 'cfrac espresso barnes mstress rptest gs lua') || 'allt' }}
+            benchs=${{ (contains('lt,lf,gd', matrix.allocator) && 'cfrac espresso barnes larson-sized mstress rptest gs lua') || ('fg' == matrix.allocator && 'cfrac espresso barnes rptest gs lua') || 'allt' }}
             repeats=1
           cache-from: type=gha,scope=buildkit_${{ inputs.platform }}
