@@ -94,6 +94,6 @@ jobs:
           build-args: |
             platform=${{ inputs.platform }}
             allocator=${{ matrix.allocator }}
-            benchs=${{ contains('lf,fg,gd', matrix.allocator) && 'cfrac espresso barnes larson-sized mstress rptest gs lua' || 'allt' }}
+            benchs=${{ (contains('lf,gd', matrix.allocator) && 'cfrac espresso barnes larson-sized mstress rptest gs lua') || ('fg' == matrix.allocator && 'cfrac espresso barnes mstress rptest gs lua') || 'allt' }}
             repeats=1
           cache-from: type=gha,scope=buildkit_${{ inputs.platform }}
