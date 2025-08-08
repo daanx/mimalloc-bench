@@ -37,12 +37,15 @@ jobs:
     needs: build-base-with-docker
     strategy:
       matrix:
-        allocator: [mi, sn, je, dh, hd]
+        allocator: [ff, fg, gd, hd, hm, iso, je, lf, lp, lt, mesh, mng, mi, mi2, nomesh, pa, rp, scudo, sm, sn, sg, tbb, tc, yal, tcg]
         predicate: [true, false]
         exclude:
           - predicate: false
           # dh: glibc-specific
           - allocator: dh
+            predicate: ${{ inputs.platform == 'alpine' }}
+          # fg: Uses execinfo.h, which is a GNU extension
+          - allocator: fg
             predicate: ${{ inputs.platform == 'alpine' }}
           # hd: glibc-specific
           - allocator: hd

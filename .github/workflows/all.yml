@@ -8,7 +8,7 @@ jobs:
   build-and-run:
     strategy:
       matrix:
-        platform: [ubuntu, fedora, alpine]
+        platform: [ubuntu, alpine] # Dropped fedora as not currently building lean.
       fail-fast: false
     uses: ./.github/workflows/platform.yml
     name: ${{ matrix.platform }}
