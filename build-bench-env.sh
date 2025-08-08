@@ -441,7 +441,7 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby ninja-build libtool autoconf git patch time sed \
-      ghostscript libatomic which gflags-devel xz readline-devel snappy-devel"
+      ghostscript libatomic libstdc++ which gflags-devel xz readline-devel snappy-devel"
     # bazel5 is broken on the copr: https://github.com/bazelbuild/bazel/issues/19295
     #dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
@@ -656,7 +656,8 @@ if test "$setup_sn" = "1"; then
   else
     mkdir -p release
     cd release
-    env CXX=clang++ cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+    # CXX11_DESTRUCTORS is needed as broken on Alpine without, should be fixed in the future upstrem.
+    env CXX=clang++ cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DSNMALLOC_CLEANUP=CXX11_DESTRUCTORS
     cd ..
   fi
   cd release
