@@ -48,7 +48,7 @@ if len(sys.argv) != 2:
     print('The script generates a file per allocator for submission to bencher.dev.')
     sys.exit(1)
 
-parse_line = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+) +([0-9]+)$')
+parse_line = re.compile('^([^ ]+) +([^ ]+) +([0-9:.]+) +([0-9]+) [0-9:.]+ [0-9:.]+ [0-9:.]+ [0-9:.]+$')
 data = []
 test_names = set()
 
