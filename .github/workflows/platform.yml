@@ -77,7 +77,7 @@ jobs:
     name: ${{ matrix.allocator }} - build and benchmark
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -94,6 +94,6 @@ jobs:
           build-args: |
             platform=${{ inputs.platform }}
             allocator=${{ matrix.allocator }}
-            benchs=${{ contains('lf,fg,gd', matrix.allocator) && 'cfrac espresso barnes lean larson-sized mstress rptest gs lua' || 'allt' }}
+            benchs=${{ contains('lf,fg,gd', matrix.allocator) && 'cfrac espresso barnes larson-sized mstress rptest gs lua' || 'allt' }}
             repeats=1
           cache-from: type=gha,scope=buildkit_${{ inputs.platform }}
