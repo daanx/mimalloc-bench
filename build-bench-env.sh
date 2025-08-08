@@ -656,7 +656,7 @@ if test "$setup_sn" = "1"; then
   else
     mkdir -p release
     cd release
-    env CXX=clang++ cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+    env CXX=clang++ cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release -
     cd ..
   fi
   cd release

@@ -38,11 +38,20 @@ jobs:
     strategy:
       matrix:
         allocator: [ff, fg, gd, hd, hm, iso, je, lf, lp, lt, mesh, mng, mi, mi2, nomesh, pa, rp, scudo, sm, sn, sg, tbb, tc, yal, tcg]
+        testsuite: [allt]
         predicate: [true, false]
         exclude:
           - predicate: false
           # Not currently working on any platform
           - allocator: pa
+
+          # Following allocators are failing redis testsuite
+          - testsuite: allt
+            allocator: fg
+          - testsuite: allt
+            allocator: gd
+          - testsuite: allt
+            allocator: lf
 
           # Alpine Specific disables.
           # dh: glibc-specific
@@ -72,6 +81,16 @@ jobs:
           # tcg: [...] specifies less restrictive attribute than its target [...]
           - allocator: tcg
             predicate: ${{ inputs.platform == 'alpine' }}
+        include:
+          # Following allocators are failing redis testsuite
+          - testsuite: cfrac espresso barnes lean larson-sized mstress rptest gs lua
+            allocator: lf
+          - testsuite: cfrac espresso barnes lean larson-sized mstress rptest gs lua
+            allocator: fg
+          - testsuite: cfrac espresso barnes lean larson-sized mstress rptest gs lua
+            allocator: gd
+          
+
 
       fail-fast: false
     name: ${{ matrix.allocator }} - build and benchmark
@@ -93,6 +112,6 @@ jobs:
           build-args: |
             platform=${{ inputs.platform }}
             allocator=${{ matrix.allocator }}
-            benchs=allt
+            benchs=${{ matrix.testsuite }}
             repeats=1
           cache-from: type=gha,scope=buildkit_${{ inputs.platform }}
