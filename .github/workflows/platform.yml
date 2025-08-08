@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         allocator: [mi, sn, je, dh, hd]
-        pedicate: [true, false]
+        predicate: [true, false]
         exclude:
           - predicate: false
           # dh: glibc-specific
