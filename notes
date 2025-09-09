@@ -20,7 +20,6 @@ Decisions made:
 	sm: instead of default target, switched to building supermalloc only
 
 Problems:
-	lt: same.
 	sc: same. re-add
 	sm: same. NO_RTM=1 during compilation helps, but does not solve; re-add
 	lp needs only part of WebKit (like scudo): port partial_checkout? Also, github does not serve archives on that repo. Re-add when solved.
