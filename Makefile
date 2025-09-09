@@ -1,22 +1,22 @@
-CFLAGS+="-march=native"
-CXXFLAGS+="-march=native"
+CFLAGS+=-march=native
+CXXFLAGS+=-march=native
 
-SUDO="sudo"
-ifeq ($(shell whoami), 'root')
+SUDO=sudo
+ifeq ($(shell whoami), root)
 	echo "running as root, avoid doing this if possible."
-	SUDO=""
+	SUDO=
 endif
 
-DARWIN="no"
+DARWIN=no
 PROCS=$(shell nproc)
-EXTSO="so"
+EXTSO=so
 SHA256SUM="sha256sum"
 
-ifeq ($(shell uname), 'Darwin')
-	DARWIN="yes"
+ifeq ($(shell uname), Darwin)
+	DARWIN=yes
 	PROCS=$(shell sysctl -n hw.physicalcpu)
-	EXTSO="dylib"
-	SHA256SUM="shasum -a 256"
+	EXTSO=dylib
+	SHA256SUM=shasum -a 256
 	export HOMEBREW_NO_EMOJI=1
 endif
 
