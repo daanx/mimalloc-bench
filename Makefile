@@ -22,7 +22,7 @@ endif
 
 BENCHMARKS_EXTERN=lean lua redis rocksdb
 ALLOCS_TRIVIAL = ff fg iso je lf lt mng sg tbb tc
-ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp sc scudo sn tcg yal
+ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp sc scudo sm sn tcg yal
 PDFDOC=extern/large.pdf
 
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big
