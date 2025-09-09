@@ -21,7 +21,7 @@ ifeq ($(shell uname), 'Darwin')
 endif
 
 BENCHMARKS_EXTERN=lean lua redis rocksdb
-ALLOCS_TRIVIAL = ff iso je lf mng sg tbb tc
+ALLOCS_TRIVIAL = ff fg iso je lf mng sg tbb tc
 ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp scudo sn tcg yal
 PDFDOC=extern/large.pdf
 
@@ -74,6 +74,7 @@ dependencies:
 # respective target name.                                              #
 ########################################################################
 
+fg_env=SSE2RNG=1
 #Todo: only set this if not running on x86
 gd_ENV=ARC4RNG=1
 iso_ENV=library
