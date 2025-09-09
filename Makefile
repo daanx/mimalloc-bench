@@ -21,7 +21,7 @@ ifeq ($(shell uname), 'Darwin')
 endif
 
 BENCHMARKS_EXTERN=lean lua redis rocksdb
-ALLOCS_TRIVIAL = ff fg iso je lf mng sg tbb tc
+ALLOCS_TRIVIAL = ff fg iso je lf lt mng sg tbb tc
 ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp scudo sn tcg yal
 PDFDOC=extern/large.pdf
 
