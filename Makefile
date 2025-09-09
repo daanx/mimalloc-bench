@@ -25,6 +25,12 @@ ALLOCS_TRIVIAL = ff fg iso je lf lt mng sg tbb tc
 ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp sc scudo sm sn tcg yal
 PDFDOC=extern/large.pdf
 
+# TODO: Mac seems to report 'arm64' here
+ifeq ($(shell uname -m), aarch64)
+	ALLOCS_TRIVIAL := $(filter-out fg lt, $(ALLOCS_TRIVIAL))
+	ALLOCS_NONTRIVIAL := $(filter-out sc sm, $(ALLOCS_NONTRIVIAL))
+endif
+
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big
 
 all: allocs benchmarks_all
