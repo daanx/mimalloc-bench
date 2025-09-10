@@ -236,7 +236,7 @@ extern/yal/.built: extern/yal/.unpacked
 extern/lean/.built: extern/lean/.unpacked
 	mkdir -p $(@D)/out/release
 	env CC=gcc CXX="g++" cmake -S $(@D)/src -B $(@D)/out/release -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-	make -C $(@D)/out/release -j$(PROCS)
+	make -C $(@D)/out/release -j$(PROCS) lean
 	rm -rf $(@D)/out/release/tests
 	mkdir -p extern/mathlib
 	cp -u $(@D)/leanpkg/leanpkg.toml extern/mathlib

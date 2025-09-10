@@ -7,7 +7,6 @@ TODO
 	pa: re-add
 	gd: detect architecture and set SSE2RNG if on x86, see gd/Makefile
 	gd: arc4random named a function getentropy which chalshes with a libc functions
-	lean: test bench.sh with smaller make-target: lean
 	adapt CI-scripts to use Makefile
 	we can give tar the list of files we want to extract or not extract
 
