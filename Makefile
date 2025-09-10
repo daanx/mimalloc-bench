@@ -20,7 +20,7 @@ ifeq ($(shell uname), Darwin)
 	export HOMEBREW_NO_EMOJI=1
 endif
 
-BENCHMARKS_EXTERN=lean lua redis rocksdb
+BENCHMARKS_EXTERN=lean linux lua redis rocksdb
 ALLOCS_TRIVIAL = ff fg iso je lf lt mng sg tbb tc
 ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp sc scudo sm sn tcg yal
 PDFDOC=extern/large.pdf
@@ -244,4 +244,8 @@ extern/lean/.built: extern/lean/.unpacked
 
 # lua only needs to be fetched, not more.
 extern/lua/.built: extern/lua/.unpacked
+	touch $@
+
+# llinux only needs to be fetched, not more.
+extern/linux/.built: extern/linux/.unpacked
 	touch $@
