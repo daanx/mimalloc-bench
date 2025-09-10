@@ -1,7 +1,6 @@
 TODO
 	put archives in extra storage (and somehow map that for CI)
 		versionize archives for that
-	port linux
 	hd: Makefile fix (build-bench-env.sh, line 612: port to patch?)
 	scudo needs only part of the source archive, maybe port partial_checkout to make?
 	pa: re-add, but smaller? https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator
@@ -17,6 +16,7 @@ Decisions made:
 	lua: moved to extern benchmarks because it is built in extern/
 	benchmarks: if something is updated, CMakeLists.txt needs to be touched (because bench/ is not part of the make logic at all)
 	sm: instead of default target, switched to building supermalloc only
+	linux: updated version to LTS series
 
 Problems:
 	lp needs only part of WebKit (like scudo): port partial_checkout? Also, github does not serve archives on that repo. Re-add when solved.

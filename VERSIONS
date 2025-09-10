@@ -8,6 +8,7 @@ iso: 1.2.5, 2670d5f, https://github.com/struct/isoalloc
 je: 5.3.0, 54eaed1d, https://github.com/jemalloc/jemalloc
 lean: 21d264a66d53b0a910178ae7d9529cb5886a39b6, 21d264a66, https://github.com/leanprover-community/lean
 lf: master, 915f51b, https://github.com/Begun/lockfree-malloc
+linux: 6.6.105, fe9731e1, https://github.com/torvalds/linux
 lp: main, 08f06e1d, https://github.com/WebKit/WebKit
 lt: master, f2d7df0, https://github.com/r-lyeh-archived/ltalloc
 lua: v5.4.7, 1ab3208a, https://github.com/lua/lua
