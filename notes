@@ -4,7 +4,6 @@ TODO
 	hd: Makefile fix (build-bench-env.sh, line 612: port to patch?)
 	scudo needs only part of the source archive, maybe port partial_checkout to make?
 	pa: re-add, but smaller? https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator
-	gd: detect architecture and set SSE2RNG if on x86, see gd/Makefile
 	gd: arc4random named a function getentropy which chalshes with a libc functions
 	adapt CI-scripts to use Makefile
 	we can give tar the list of files we want to extract or not extract
