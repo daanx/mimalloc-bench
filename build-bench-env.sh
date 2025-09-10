@@ -59,7 +59,7 @@ readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
-readonly version_sn=0.7.1
+readonly version_sn=0.7.2
 readonly version_tbb=v2021.9.0
 readonly version_tc=gperftools-2.16.90
 readonly version_tcg=98fd24303c7b5ef5e30da625f11fb623a5e038b6 # 2025-07-18
@@ -70,6 +70,7 @@ readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.7
+readonly version_linux=6.5.1
 
 # HTTP-downloaded files checksums
 readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
@@ -109,6 +110,7 @@ setup_bench=0
 setup_lean=0
 setup_redis=0
 setup_rocksdb=0
+setup_linux=0
 
 # various
 setup_packages=0
@@ -168,6 +170,7 @@ while : ; do
         setup_lean=$flag_arg
         setup_redis=$flag_arg
         setup_rocksdb=$flag_arg
+        setup_linux=$flag_arg
         setup_bench=$flag_arg
         setup_packages=$flag_arg
         ;;
@@ -215,6 +218,8 @@ while : ; do
         setup_redis=$flag_arg;;
     rocksdb)
         setup_rocksdb=$flag_arg;;
+    linux)
+        setup_linux=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
     sc)
@@ -281,6 +286,7 @@ while : ; do
         echo "  packages                     setup required packages"
         echo "  redis                        setup redis benchmark"
         echo "  rocksdb                      setup rocksdb benchmark"
+        echo "  linux                        setup linux benchmark"
         echo ""
         echo "Prefix an option with 'no-' to disable an option"
         exit 0;;
@@ -373,7 +379,7 @@ function aptinstall {
   echo ""
   echo "> $SUDO apt install $1"
   echo ""
-  $SUDO apt install --no-install-recommends $1
+  $SUDO apt install -y --no-install-recommends $1
 }
 
 function dnfinstall {
@@ -435,13 +441,13 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby ninja-build libtool autoconf git patch time sed \
-      ghostscript libatomic which gflags-devel xz readline-devel snappy-devel"
+      ghostscript libatomic libstdc++ which gflags-devel xz readline-devel snappy-devel"
     # bazel5 is broken on the copr: https://github.com/bazelbuild/bazel/issues/19295
     #dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
-    aptinstall "g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
+    aptinstall "build-essential git gpg g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
       liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux"
@@ -650,7 +656,8 @@ if test "$setup_sn" = "1"; then
   else
     mkdir -p release
     cd release
-    env CXX=clang++ cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+    # CXX11_DESTRUCTORS is needed as broken on Alpine without, should be fixed in the future upstrem.
+    env CXX=clang++ cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DSNMALLOC_CLEANUP=CXX11_DESTRUCTORS
     cd ..
   fi
   cd release
@@ -763,6 +770,9 @@ if test "$setup_rocksdb" = "1"; then
   fi
 
   cd "rocksdb-$version_rocksdb"
+  set +e
+  patch -p1 -N -r- < ../../patches/rocksdb_build.patch > /dev/null
+  set -e
   DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 make db_bench -j $procs
   [ "$CI" ] && find . -name '*.o' -delete
   popd
@@ -848,6 +858,18 @@ if test "$setup_bench" = "1"; then
   cmake --build out/bench --parallel $procs
 fi
 
+if test "$setup_linux" = "1"; then
+  phase "fetch linux"
+  pushd "$devdir"
+  if test -d "linux-$version_linux"; then
+    echo "$devdir/linux-$version_linux already exists; no need to download it"
+  else
+    wget --no-verbose "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$version_linux.tar.xz"
+    tar xf "linux-$version_linux.tar.xz"
+    rm "./linux-$version_linux.tar.xz"
+  fi
+  popd
+fi
 
 curdir=`pwd`
 
