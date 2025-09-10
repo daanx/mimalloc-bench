@@ -7,6 +7,9 @@ TODO
 	gd: arc4random named a function getentropy which chalshes with a libc functions
 	adapt CI-scripts to use Makefile
 	we can give tar the list of files we want to extract or not extract
+	package installation
+		document in README
+		move to CI instead of build_bench_env.sh
 
 Decisions made:
 	VERSIONS: demand versions instead of reporting them in the end
@@ -14,6 +17,7 @@ Decisions made:
 	dh: move build directory (dh/src/build -> dh/build)
 	lua: moved to extern benchmarks because it is built in extern/
 	benchmarks: if something is updated, CMakeLists.txt needs to be touched (because bench/ is not part of the make logic at all)
+		that could be fixed by suppplying a Makefile in bench/, too.
 	sm: instead of default target, switched to building supermalloc only
 	linux: updated version to LTS series
 
