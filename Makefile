@@ -29,6 +29,8 @@ PDFDOC=extern/large.pdf
 ifeq ($(shell uname -m), aarch64)
 	ALLOCS_TRIVIAL := $(filter-out fg lt, $(ALLOCS_TRIVIAL))
 	ALLOCS_NONTRIVIAL := $(filter-out sc sm, $(ALLOCS_NONTRIVIAL))
+	# gd uses SSE on x86, but ARC4 on ARM
+	gd_ENV := ARC4RNG=1
 endif
 
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big
@@ -81,8 +83,6 @@ dependencies:
 ########################################################################
 
 fg_env=SSE2RNG=1
-#Todo: only set this if not running on x86
-gd_ENV=ARC4RNG=1
 iso_ENV=library
 lf_ENV=liblite-malloc-shared.so
 lt_ENV=-C gnu.make.lib
@@ -217,7 +217,6 @@ extern/tc/Makefile: extern/tc/configure
 
 extern/tc/configure: extern/tc/.unpacked
 	cd $(@D) && ./autogen.sh
-
 
 #tcg: bazel
 extern/tcg/.built: extern/tcg/.unpacked
