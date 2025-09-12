@@ -2,8 +2,6 @@ TODO
 	put archives in extra storage (and somehow map that for CI)
 		versionize archives for that
 	hd: Makefile fix (build-bench-env.sh, line 612: port to patch?)
-	scudo needs only part of the source archive, maybe port partial_checkout to make?
-	pa: re-add, but smaller? https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator
 	gd: arc4random named a function getentropy which chalshes with a libc functions
 	adapt CI-scripts to use Makefile
 	we can give tar the list of files we want to extract or not extract
@@ -13,6 +11,7 @@ TODO
 
 Decisions made:
 	VERSIONS: demand versions instead of reporting them in the end
+		bench.sh needs to be adapted in the way it finds 'installed allocators'
 	switched from git cloning to grabbing a snapshot of the reqeuested version from github
 	dh: move build directory (dh/src/build -> dh/build)
 	lua: moved to extern benchmarks because it is built in extern/
@@ -20,6 +19,11 @@ Decisions made:
 		that could be fixed by suppplying a Makefile in bench/, too.
 	sm: instead of default target, switched to building supermalloc only
 	linux: updated version to LTS series
+	lean: switched to smaller build target
 
-Problems:
-	lp needs only part of WebKit (like scudo): port partial_checkout? Also, github does not serve archives on that repo. Re-add when solved.
+open Questions:
+	partial_checkout
+		lp Also, github does not serve archives on that repo. Re-add when solved.
+		scudo
+	pa: re-add, but smaller? https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator
+		build system uses depot_tools which come with problems, also does not compile even when installed
