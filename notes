@@ -23,4 +23,4 @@ Decisions made:
 
 Problems:
 	lp needs only part of WebKit (like scudo): port partial_checkout? Also, github does not serve archives on that repo. Re-add when solved.
-	mesh, nomesh: bazel currently only supports x86_64; re-add when tested on x86
+	nomesh: bazel currently only supports x86_64; re-add when tested on x86

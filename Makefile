@@ -21,13 +21,13 @@ ifeq ($(shell uname), Darwin)
 endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
-ALLOCS_TRIVIAL = ff fg iso je lf lt mng sg tbb tc
+ALLOCS_TRIVIAL = ff fg iso je lf lt mesh mng sg tbb tc
 ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp sc scudo sm sn tcg yal
 PDFDOC=extern/large.pdf
 
 # TODO: Mac seems to report 'arm64' here
 ifeq ($(shell uname -m), aarch64)
-	ALLOCS_TRIVIAL := $(filter-out fg lt, $(ALLOCS_TRIVIAL))
+	ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
 	ALLOCS_NONTRIVIAL := $(filter-out sc sm, $(ALLOCS_NONTRIVIAL))
 	# gd uses SSE on x86, but ARC4 on ARM
 	gd_ENV := ARC4RNG=1
@@ -84,6 +84,7 @@ dependencies:
 
 fg_env=SSE2RNG=1
 iso_ENV=library
+mesh_ENV=build
 lf_ENV=liblite-malloc-shared.so
 lt_ENV=-C gnu.make.lib
 hd_ENV=-C src
