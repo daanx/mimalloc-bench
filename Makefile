@@ -22,13 +22,13 @@ endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
 ALLOCS_TRIVIAL = ff fg iso je lf lt mesh mng sg tbb tc
-ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 rp sc scudo sm sn tcg yal
+ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 nomesh rp sc scudo sm sn tcg yal
 PDFDOC=extern/large.pdf
 
 # TODO: Mac seems to report 'arm64' here
 ifeq ($(shell uname -m), aarch64)
 	ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
-	ALLOCS_NONTRIVIAL := $(filter-out sc sm, $(ALLOCS_NONTRIVIAL))
+	ALLOCS_NONTRIVIAL := $(filter-out nomesh sc sm, $(ALLOCS_NONTRIVIAL))
 	# gd uses SSE on x86, but ARC4 on ARM
 	gd_ENV := ARC4RNG=1
 endif
@@ -114,7 +114,7 @@ archives/%.tar.gz:
 	wget -O $@ $(shell grep "$*:" VERSIONS | cut -d, -f3)/archive/$(shell grep "$*:" VERSIONS | cut -d, -f2| tr -d ' ').tar.gz
 
 ########################################################################
-# ALLOCS: special cases
+# ALLOCS: nontrivial cases
 ########################################################################
 #dh: uses cmake
 extern/dh/.configured: extern/dh/.unpacked
@@ -157,6 +157,15 @@ extern/mi/.built extern/mi2/.built: extern/%/.built: extern/%/.unpacked
 	cmake --build $(@D)/out/debug -j$(PROCS)
 	cmake -S $(@D) -B $(@D)/out/secure -DMI_SECURE=ON
 	cmake --build $(@D)/out/secure -j$(PROCS)
+	touch $@
+
+# nomesh: built from mesh's source
+nomesh_ENV=DISABLE_MESHING=ON build
+extern/nomesh/.built: extern/mesh/.unpacked
+	cp -r $(<D) $(@D)
+	make -C $(@D) clean
+	# only single job: https://github.com/plasma-umass/Mesh/issues/96
+	make -C $(@D) $(nomesh_ENV)
 	touch $@
 
 #rp: uses ninja, one fix in build.ninja
