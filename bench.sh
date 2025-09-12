@@ -98,7 +98,7 @@ readonly lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
 readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
 
-alloc_lib_add "dh"     "$localdevdir/dh/src/build/libdieharder$extso"
+alloc_lib_add "dh"     "$localdevdir/dh/build/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
 alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
