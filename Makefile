@@ -107,9 +107,11 @@ extern/%/.built: extern/%/.unpacked
 	make -C $(@D) $($*_ENV) -j$(PROCS)
 	touch $@
 
+dh_TAR_FLAG=--wildcards --exclude=*/docs --exclude=*/benchmarks --exclude=*/src/{exterminator,local,replicated}
+sm_TAR_FLAG=--wildcards --exclude=*/{doc,paper,short-talk,talk,other-mallocs,benchmarks,tests}
 extern/%/.unpacked: archives/%.tar.gz
 	mkdir -p $(@D)
-	tar -x --strip-components=1 --overwrite -f $< -C $(@D)
+	tar -x --strip-components=1 --overwrite -f $< -C $(@D) $($*_TAR_FLAG)
 	touch $@
 
 .PRECIOUS: archives/%.tar.gz
@@ -122,7 +124,6 @@ archives/%.tar.gz:
 ########################################################################
 #dh: uses cmake
 extern/dh/.configured: extern/dh/.unpacked
-	cd $(@D) && rm -rf ./benchmarks/ ./src/exterminator/ ./src/local/ ./src/replicated/ ./docs
 	cmake -S $(@D)/src -B $(@D)/build
 	touch $@
 
@@ -200,7 +201,6 @@ extern/scudo/.built: extern/scudo/.unpacked
 
 #sm: make, but a fix before
 extern/sm/.built: extern/sm/.unpacked
-	rm -rf ./$(@D)/doc ./$(@D)/paper ./$(@D)/short-talk ./$(@D)/talk
 	sed -i "s/-Werror//" $(@D)/Makefile.include
 	make -C $(@D)/release -j$(PROCS) ../release/lib/libsupermalloc.so
 
