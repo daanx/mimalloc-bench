@@ -2,7 +2,6 @@ TODO
 	put archives in extra storage (and somehow map that for CI)
 		versionize archives for that
 	hd: Makefile fix (build-bench-env.sh, line 612: port to patch?)
-	gd: arc4random named a function getentropy which chalshes with a libc functions
 	adapt CI-scripts to use Makefile
 	we can give tar the list of files we want to extract or not extract
 	package installation
