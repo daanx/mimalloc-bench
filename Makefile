@@ -29,8 +29,12 @@ PDFDOC=extern/large.pdf
 ifeq ($(shell uname -m), aarch64)
 	ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
 	ALLOCS_NONTRIVIAL := $(filter-out nomesh sc sm, $(ALLOCS_NONTRIVIAL))
-	# gd uses SSE on x86, but ARC4 on ARM
+	# gd uses SSE on x86, but ARC4 on ARM - and arc4 needs a fix
 	gd_ENV := ARC4RNG=1
+extern/gd/.built: extern/gd/.unpacked
+	sed -i_orig 's/getentropy(/_getentropy(/g' $(@D)/rng/arc4random.{c,h}
+	make -C $(@D) $(gd_ENV) -j$(PROCS)
+	touch $@
 endif
 
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big
