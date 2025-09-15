@@ -1,7 +1,6 @@
 TODO
 	put archives in extra storage (and somehow map that for CI)
 		versionize archives for that
-	hd: Makefile fix (build-bench-env.sh, line 612: port to patch?)
 	adapt CI-scripts to use Makefile
 	we can give tar the list of files we want to extract or not extract
 	package installation
@@ -26,3 +25,5 @@ open Questions:
 		scudo
 	pa: re-add, but smaller? https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator
 		build system uses depot_tools which come with problems, also does not compile even when installed
+	sed patches in Makefile: port to proper patch?
+		at least gd, hd, rp are patched with sed right now, we could port that to a patch
