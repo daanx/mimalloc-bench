@@ -1,7 +1,12 @@
 ARG platform=ubuntu
 
 FROM ubuntu:24.04 AS ubuntu
-
+RUN sudo apt-get install --no-install-recommends build-essential git gpg \
+  g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
+  cmake python3 ruby ninja-build libtool autoconf sed ghostscript \
+  time curl automake libatomic1 libgflags-dev libsnappy-dev \
+  zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libreadline-dev \
+  pkg-config gawk util-linux bazel-bootstrap
 
 FROM fedora:latest AS fedora
 
@@ -18,7 +23,7 @@ COPY . /mimalloc-bench
 
 WORKDIR /mimalloc-bench
 # Install dependencies
-RUN ./build-bench-env.sh packages
+# RUN ./build-bench-env.sh packages
 
 # Build benchmarks
 RUN ./build-bench-env.sh bench
