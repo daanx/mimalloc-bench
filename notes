@@ -2,8 +2,6 @@ TODO
 	put archives in extra storage (and somehow map that for CI)
 		versionize archives for that
 	adapt CI-scripts to use Makefile
-	we can give tar the list of files we want to extract or not extract
-		sm: check file exclusion list on x86, also choose minmal make target
 	package installation
 		document in README
 		move to CI instead of build_bench_env.sh
