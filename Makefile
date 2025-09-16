@@ -108,7 +108,7 @@ extern/%/.built: extern/%/.unpacked
 	touch $@
 
 dh_TAR_FLAG=--wildcards --exclude=*/docs --exclude=*/benchmarks --exclude=*/src/{exterminator,local,replicated}
-sm_TAR_FLAG=--wildcards --exclude=*/{doc,paper,short-talk,talk,other-mallocs,benchmarks,tests}
+sm_TAR_FLAG=--wildcards --exclude=*/{.junk,benchmarks,coverage,debug,doc,other-mallocs,paper,short-talk,talk,tests,tools}
 extern/%/.unpacked: archives/%.tar.gz
 	mkdir -p $(@D)
 	tar -x --strip-components=1 --overwrite -f $< -C $(@D) $($*_TAR_FLAG)
@@ -203,6 +203,7 @@ extern/scudo/.built: extern/scudo/.unpacked
 extern/sm/.built: extern/sm/.unpacked
 	sed -i "s/-Werror//" $(@D)/Makefile.include
 	make -C $(@D)/release -j$(PROCS) ../release/lib/libsupermalloc.so
+	touch $@
 
 #sn: cmake+ninja, builds in sn/release
 extern/sn/.built: extern/sn/build.ninja
