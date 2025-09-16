@@ -10,15 +10,8 @@ Collection of various benchmarks from the academic literature, together with
 automated scripts to pull specific versions of benchmark programs and
 allocators from Github and build them.
 
-Due to the large variance in programs and allocators, the suite is currently
-only developed for Unix-like systems, and specifically Ubuntu with `apt-get`, Fedora with `dnf`,
-and macOS (for a limited set of allocators and benchmarks).
 The only system-installed allocator used is glibc's implementation that ships as part of Linux's libc.
-All other allocators are downloaded and built as part of `build-bench-env.sh` --
-if you are looking to run these benchmarks on a different Linux distribution look at
-the `setup_packages` function to see the packages required to build the full set of
-allocators.
-
+All other allocators are downloaded and built with `make`.
 
 It is quite easy to add new benchmarks and allocator implementations --
 please do so!.
@@ -27,19 +20,73 @@ Enjoy,
   Daan
 
 
-
 Note that all the code in the `bench` directory is not part of
 _mimalloc-bench_ as such, and all programs in the `bench` directory are
 governed under their own specific licenses and copyrights as detailed in
 their `README.md` (or `license.txt`) files. They are just included here for convenience.
 
+# Dependencies
+Some of the allocators and benchmarks need packages installed on the
+system to be built and/or run. See the following collection for your
+distribution:
+<details>
+	<summary>Ubuntu/Debian</summary>
+
+```bash
+sudo apt-get install --no-install-recommends build-essential git gpg \
+  g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
+  cmake python3 ruby ninja-build libtool autoconf sed ghostscript \
+  time curl automake libatomic1 libgflags-dev libsnappy-dev \
+  zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libreadline-dev \
+  pkg-config gawk util-linux bazel-bootstrap
+```
+</details>
+
+<details>
+	<summary>Fedora</summary>
+
+```bash
+sudo dnf --nodocs gcc-c++ clang lld llvm-devel unzip dos2unix bc \
+  gmp-devel wget gawk cmake python3 ruby ninja-build libtool autoconf \
+  git patch time sed ghostscript libatomic libstdc++ which gflags-devel \
+  xz readline-devel snappy-devel
+```
+</details>
+
+<details>
+	<summary>Alpine</summary>
+
+```bash
+sudo apk add clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
+  automake gawk samurai libtool git build-base linux-headers autoconf \
+  util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev
+```
+</details>
+
+<details>
+	<summary>ArchLinux</summary>
+
+```bash
+sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed \
+  ghostscript bazelisk gflags snappy python-six
+```
+</details>
+
+<details>
+	<summary>Mac OS</summary>
+
+```bash
+brew install dos2unix wget cmake ninja automake libtool gnu-time gmp \
+  mpir gnu-sed ghostscript bazelisk gflags snappy
+```
+</details>
 
 # Benchmarking
 
-The `build-bench-env.sh` script with the `all` argument will automatically pull
-all needed benchmarks and allocators and build them in the `extern` directory:
+`make all` will automatically pull all needed benchmarks and allocators
+and build them in the `extern` directory:
 ```
-~/dev/mimalloc-bench> ./build-bench-env.sh all
+~/dev/mimalloc-bench> make all
 ```
 It starts installing packages and you will need to enter the sudo password.
 All other programs are build in the `mimalloc-bench/extern` directory.

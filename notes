@@ -3,7 +3,7 @@ TODO
 		versionize archives for that
 	adapt CI-scripts to use Makefile
 	package installation
-		document in README
+		document in README: bazel5 missing, rest is done
 		move to CI instead of build_bench_env.sh
 
 Decisions made:
