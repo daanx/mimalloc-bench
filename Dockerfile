@@ -1,7 +1,8 @@
 ARG platform=ubuntu
 
 FROM ubuntu:24.04 AS ubuntu
-RUN sudo apt-get install --no-install-recommends build-essential git gpg \
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends build-essential git gpg \
   g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
   cmake python3 ruby ninja-build libtool autoconf sed ghostscript \
   time curl automake libatomic1 libgflags-dev libsnappy-dev \
