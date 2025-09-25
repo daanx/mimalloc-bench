@@ -10,14 +10,20 @@ endif
 DARWIN=no
 PROCS=$(shell nproc)
 EXTSO=so
-SHA256SUM="sha256sum"
+SHA256SUM=sha256sum
+SHA256SUM_FLAGS=-c --status
 
 ifeq ($(shell uname), Darwin)
 DARWIN=yes
 PROCS=$(shell sysctl -n hw.physicalcpu)
 EXTSO=dylib
-SHA256SUM=shasum -a 256
+SHA256SUM=shasum
+SHA256SUM_FLAGS=-a 256
 export HOMEBREW_NO_EMOJI=1
+endif
+
+ifneq ($(shell grep -e 'ID=alpine' /etc/os-release),)
+SHA256SUM_FLAGS=-c -s
 endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
@@ -77,7 +83,7 @@ bench_FILENAME=shbench/bench.zip
 bench_SHA256SUM=506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1
 bench/shbench/%.zip:
 	@cd $(@D) && wget -nc --no-verbose http://www.microquill.com/smartheap/$($*_FILENAME)
-	@(echo "$($*_SHA256SUM) $@" | $(SHA256SUM) --check --status) || { echo $(err_msg); exit 1; }
+	@(echo "$($*_SHA256SUM) $@" | $(SHA256SUM) $(SHA256SUM_FLAGS)) || { echo $(err_msg); exit 1; }
 
 ########################################################################
 # Environment flags for the individual make processes, may just be the #
