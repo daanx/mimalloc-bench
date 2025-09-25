@@ -3,8 +3,8 @@ CXXFLAGS+=-march=native
 
 SUDO=sudo
 ifeq ($(shell whoami), root)
-	echo "running as root, avoid doing this if possible."
-	SUDO=
+$(warning running as root, avoid doing this if possible.)
+SUDO=
 endif
 
 DARWIN=no
@@ -13,11 +13,11 @@ EXTSO=so
 SHA256SUM="sha256sum"
 
 ifeq ($(shell uname), Darwin)
-	DARWIN=yes
-	PROCS=$(shell sysctl -n hw.physicalcpu)
-	EXTSO=dylib
-	SHA256SUM=shasum -a 256
-	export HOMEBREW_NO_EMOJI=1
+DARWIN=yes
+PROCS=$(shell sysctl -n hw.physicalcpu)
+EXTSO=dylib
+SHA256SUM=shasum -a 256
+export HOMEBREW_NO_EMOJI=1
 endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
@@ -27,10 +27,10 @@ PDFDOC=extern/large.pdf
 
 # TODO: Mac seems to report 'arm64' here
 ifeq ($(shell uname -m), aarch64)
-	ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
-	ALLOCS_NONTRIVIAL := $(filter-out nomesh sc sm, $(ALLOCS_NONTRIVIAL))
-	# gd uses SSE on x86, but ARC4 on ARM - and arc4 needs a fix
-	gd_ENV := ARC4RNG=1
+ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
+ALLOCS_NONTRIVIAL := $(filter-out nomesh sc sm, $(ALLOCS_NONTRIVIAL))
+# gd uses SSE on x86, but ARC4 on ARM - and arc4 needs a fix
+gd_ENV := ARC4RNG=1
 extern/gd/.built: extern/gd/.unpacked
 	sed -i_orig 's/getentropy(/_getentropy(/g' $(@D)/rng/arc4random.{c,h}
 	make -C $(@D) $(gd_ENV) -j$(PROCS)
