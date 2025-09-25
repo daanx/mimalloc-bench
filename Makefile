@@ -79,8 +79,6 @@ bench/shbench/%.zip:
 	@cd $(@D) && wget -nc --no-verbose http://www.microquill.com/smartheap/$($*_FILENAME)
 	@(echo "$($*_SHA256SUM) $@" | $(SHA256SUM) --check --status) || { echo $(err_msg); exit 1; }
 
-dependencies:
-
 ########################################################################
 # Environment flags for the individual make processes, may just be the #
 # respective target name.                                              #

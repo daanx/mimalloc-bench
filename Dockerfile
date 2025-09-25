@@ -10,11 +10,17 @@ RUN apt-get install -y --no-install-recommends build-essential git gpg \
   pkg-config gawk util-linux bazel-bootstrap
 
 FROM fedora:latest AS fedora
-
+RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
+  dos2unix bc gmp-devel wget gawk cmake python3 ruby ninja-build libtool \
+  autoconf git patch time sed ghostscript libatomic libstdc++ which \
+  gflags-devel xz readline-devel snappy-devel
 
 FROM alpine:latest AS alpine
+RUN apk update
 RUN apk add --no-cache bash
-
+RUN apk add -q clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
+  automake gawk samurai libtool git build-base linux-headers autoconf \
+  util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev
 
 FROM ${platform} AS bench-env
 
@@ -23,17 +29,13 @@ RUN mkdir -p /mimalloc-bench
 COPY . /mimalloc-bench
 
 WORKDIR /mimalloc-bench
-# Install dependencies
-# RUN ./build-bench-env.sh packages
 
-# Build benchmarks
-RUN ./build-bench-env.sh bench
-
-RUN ./build-bench-env.sh redis
-
-RUN ./build-bench-env.sh rocksdb
-
-RUN ./build-bench-env.sh lean
+RUN make benchmarks
+RUN make redis
+RUN make rocksdb
+RUN make lean
+RUN make lua
+RUN make linux
 
 FROM bench-env AS benchmark
 
@@ -43,7 +45,7 @@ ARG allocator=mi
 ARG benchs=cfrac
 ARG repeats=1
 
-RUN ./build-bench-env.sh $allocator
+RUN make $allocator
 
 # Run benchmarks
 WORKDIR /mimalloc-bench/out/bench
