@@ -55,6 +55,7 @@ benchmarks: bench/CMakeLists.txt bench/shbench/sh6bench-new.c bench/shbench/sh8b
 
 PDF_URL=https://raw.githubusercontent.com/geekaaron/Resources/master/resources/Writing_a_Simple_Operating_System--from_Scratch.pdf
 $(PDFDOC):
+	mkdir -p extern
 	wget --no-verbose -O $(PDFDOC) $(PDF_URL)
 
 bench/shbench/sh6bench-new.c: bench/shbench/sh6bench.patch bench/shbench/sh6bench.c
