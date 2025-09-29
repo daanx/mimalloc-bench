@@ -21,6 +21,8 @@ RUN apk add --no-cache bash
 RUN apk add -q clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
   automake gawk samurai libtool git build-base linux-headers autoconf \
   util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev
+RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN apk add -q bazel@testing
 
 FROM ${platform} AS bench-env
 
