@@ -25,14 +25,6 @@ tests_exclude=""
 readonly tests_exclude_macos="sh6bench sh8bench redis"
 
 # --------------------------------------------------------------------
-# benchmark versions
-# --------------------------------------------------------------------
-
-readonly version_redis=6.2.7
-readonly version_rocksdb=8.1.1
-readonly version_linux=6.5.1
-
-# --------------------------------------------------------------------
 # Environment
 # --------------------------------------------------------------------
 
@@ -163,10 +155,10 @@ fi
 readonly luadir="$localdevdir/lua"
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
-readonly redis_dir="$localdevdir/redis-$version_redis/src"
+readonly redis_dir="$localdevdir/redis/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
-readonly rocksdb_dir="$localdevdir/rocksdb-$version_rocksdb"
-readonly linux_dir="$localdevdir/linux-$version_linux"
+readonly rocksdb_dir="$localdevdir/rocksdb"
+readonly linux_dir="$localdevdir/linux"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
