@@ -15,7 +15,7 @@ RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
   autoconf git patch time sed ghostscript libatomic libstdc++ which \
   gflags-devel xz readline-devel snappy-devel
 RUN dnf -y --quiet copr enable ohadm/bazel
-RUN dnf -y --quiet --nodocs install bazel5
+RUN dnf -y --quiet --nodocs install bazel8
 
 FROM alpine:latest AS alpine
 RUN apk update
