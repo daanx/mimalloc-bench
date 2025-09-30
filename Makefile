@@ -279,6 +279,6 @@ extern/lean/.built: extern/lean/.unpacked
 extern/lua/.built: extern/lua/.unpacked
 	touch $@
 
-# llinux only needs to be fetched, not more.
+# linux only needs to be fetched, not more.
 extern/linux/.built: extern/linux/.unpacked
 	touch $@
