@@ -49,7 +49,9 @@ sudo apt-get install --no-install-recommends build-essential git gpg \
 sudo dnf --nodocs gcc-c++ clang lld llvm-devel unzip dos2unix bc \
   gmp-devel wget gawk cmake python3 ruby ninja-build libtool autoconf \
   git patch time sed ghostscript libatomic libstdc++ which gflags-devel \
-  xz readline-devel snappy-devel
+  xz readline-devel snappy-devel dnf-plugins-core
+sudo dnf copr -y enable ohadm/bazel
+sudo dnf --nodocs install bazel8
 ```
 </details>
 
@@ -60,6 +62,8 @@ sudo dnf --nodocs gcc-c++ clang lld llvm-devel unzip dos2unix bc \
 sudo apk add clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
   automake gawk samurai libtool git build-base linux-headers autoconf \
   util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev
+sudo echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+sudo apk add -q bazel@testing
 ```
 </details>
 
