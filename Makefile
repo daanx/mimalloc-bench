@@ -31,6 +31,20 @@ ALLOCS_TRIVIAL = ff fg iso je lf lt mesh mng sg tbb tc
 ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 nomesh rp sc scudo sm sn tcg yal
 PDFDOC=extern/large.pdf
 
+########################################################################
+# Environment flags for the individual make processes, may just be the  #
+# respective target name.                                              #
+########################################################################
+
+fg_env=SSE2RNG=1
+iso_ENV=library
+mesh_ENV=build
+lf_ENV=liblite-malloc-shared.so
+lt_ENV=-C gnu.make.lib
+hd_ENV=-C src
+redis_ENV=USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no -C src
+rocksdb_ENV=DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 db_bench
+
 # TODO: Mac seems to report 'arm64' here
 ifeq ($(shell uname -m), aarch64)
 ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
@@ -101,19 +115,6 @@ bench/shbench/%.zip:
 	@cd $(@D) && wget -nc --no-verbose http://www.microquill.com/smartheap/$($*_FILENAME)
 	@(echo "$($*_SHA256SUM) $@" | $(SHA256SUM) $(SHA256SUM_FLAGS)) || { echo $(err_msg); exit 1; }
 
-########################################################################
-# Environment flags for the individual make processes, may just be the #
-# respective target name.                                              #
-########################################################################
-
-fg_env=SSE2RNG=1
-iso_ENV=library
-mesh_ENV=build
-lf_ENV=liblite-malloc-shared.so
-lt_ENV=-C gnu.make.lib
-hd_ENV=-C src
-redis_ENV=USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no -C src
-rocksdb_ENV=DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 db_bench
 ########################################################################
 # ALLOCS: generic targets for the standard scheme: download, unpack,   #
 # configure (nop for the standard), compile (using make).              #
