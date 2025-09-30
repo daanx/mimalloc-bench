@@ -35,6 +35,25 @@ PDFDOC=extern/large.pdf
 ifeq ($(shell uname -m), aarch64)
 ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
 ALLOCS_NONTRIVIAL := $(filter-out nomesh sc sm, $(ALLOCS_NONTRIVIAL))
+endif
+
+all: allocs benchmarks_all
+allocs: $(ALLOCS_TRIVIAL) $(ALLOCS_NONTRIVIAL)
+benchmarks_all: benchmarks $(BENCHMARKS_EXTERN)
+
+# rocksdb: needs a fix on fedora
+ifneq ($(shell grep -e 'ID=fedora' /etc/os-release),)
+extern/rocksdb/.built: extern/rocksdb/.patched
+	make -C $(@D) $($*_ENV) -j$(PROCS)
+	touch $@
+
+extern/rocksdb/.patched: extern/rocksdb/.unpacked
+	cd $(@D) && patch -p1 -N -r- < ../../patches/rocksdb_build.patch
+	touch $@
+endif
+
+# TODO: Mac seems to report 'arm64' here
+ifeq ($(shell uname -m), aarch64)
 # gd uses SSE on x86, but ARC4 on ARM - and arc4 needs a fix
 gd_ENV := ARC4RNG=1
 extern/gd/.built: extern/gd/.unpacked
@@ -44,10 +63,6 @@ extern/gd/.built: extern/gd/.unpacked
 endif
 
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big
-
-all: allocs benchmarks_all
-allocs: $(ALLOCS_TRIVIAL) $(ALLOCS_NONTRIVIAL)
-benchmarks_all: benchmarks $(BENCHMARKS_EXTERN)
 
 benchmarks: bench/CMakeLists.txt bench/shbench/sh6bench-new.c bench/shbench/sh8bench-new.c $(PDFDOC)
 	cmake -B out/bench -S bench
