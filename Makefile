@@ -226,11 +226,11 @@ extern/sm/.built: extern/sm/.unpacked
 	touch $@
 
 #sn: cmake+ninja, builds in sn/release
-extern/sn/.built: extern/sn/build.ninja
+extern/sn/.built: extern/sn/release/build.ninja
 	cd $(@D)/release && ninja libsnmallocshim.$(EXTSO) libsnmallocshim-checks.$(EXTSO)
 	touch $@
 
-extern/sn/build.ninja: extern/sn/.unpacked
+extern/sn/release/build.ninja: extern/sn/.unpacked
 	env CXX=clang++ cmake -S $(@D) -B $(@D)/release -G Ninja -DCMAKE_BUILD_TYPE=Release
 
 #tbb: cmake to configure
