@@ -279,5 +279,5 @@ extern/rocksdb/.built: extern/rocksdb/.patched
 	touch $@
 
 extern/rocksdb/.patched: extern/rocksdb/.unpacked
-	cd $(@D) && patch -p1 -N -r- < ../../patches/rocksdb_build.patch
+	patch -d $(@D) -p1 -N -r- < patches/rocksdb_build.patch
 	touch $@
