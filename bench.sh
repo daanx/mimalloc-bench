@@ -221,15 +221,13 @@ function alloc_run_add {  # <allocator>   :add to runnable
 }
 
 function alloc_run_remove {   # <allocator>  :remove from runnables
-  if contains "$alloc_run" "$1"; then
-    alloc_run_old="$alloc_run"
-    alloc_run=""
-    for s in $alloc_run_old; do
-      if [ "$s" != "$1" ]; then
-        alloc_run_add "$s"
-      fi
-    done
-  fi
+  alloc_run_old="$alloc_run"
+  alloc_run=""
+  for s in $alloc_run_old; do
+    if [ "$s" != "$1" ]; then
+      alloc_run_add "$s"
+    fi
+  done
 }
 
 function alloc_run_add_remove { # <allocator> <add?> 
@@ -259,15 +257,13 @@ function tests_run_add {  # <tests>   :add to runnable tests
 }
 
 function tests_run_remove {   # <test>  :remove from runnable tests
-  if contains "$tests_run" "$1"; then
-    tests_run_old="$tests_run"
-    tests_run=""
-    for tst in $tests_run_old; do
-      if [ "$tst" != "$1" ]; then
-        tests_run_add "$tst"
-      fi
-    done
-  fi
+  tests_run_old="$tests_run"
+  tests_run=""
+  for tst in $tests_run_old; do
+    if [ "$tst" != "$1" ]; then
+      tests_run_add "$tst"
+    fi
+  done
 }
 
 function tests_run_add_remove { # <test> <add?> 
