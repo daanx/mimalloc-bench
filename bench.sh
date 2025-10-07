@@ -6,8 +6,8 @@
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mi3 mi3-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg mi3-dbg xmi xsmi xmi-dbg yal rmalloc"
-readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mi3-sec mng pa scudo sg sn-sec sg"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-dbg mi-sec mi2 mi2-dbg mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg xmi xsmi xmi-dbg yal"
+readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mng pa scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
