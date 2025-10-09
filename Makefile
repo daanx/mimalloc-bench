@@ -36,7 +36,7 @@ PDFDOC=extern/large.pdf
 # respective target name.                                              #
 ########################################################################
 
-fg_env=SSE2RNG=1
+fg_ENV=SSE2RNG=1
 iso_ENV=library
 mesh_ENV=build
 lf_ENV=liblite-malloc-shared.so
