@@ -17,8 +17,8 @@ ifeq ($(shell uname), Darwin)
 DARWIN=yes
 PROCS=$(shell sysctl -n hw.physicalcpu)
 EXTSO=dylib
-SHA256SUM=shasum
-SHA256SUM_FLAGS=-a 256
+SHA256SUM=shasum -a 256
+SHA256SUM_FLAGS=-c -s
 export HOMEBREW_NO_EMOJI=1
 endif
 
