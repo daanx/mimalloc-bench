@@ -124,10 +124,18 @@ extern/%/.unpacked: archives/%.tar.gz
 	tar -x --strip-components=1 --overwrite -f $< -C $(@D) $($*_TAR_FLAG)
 	touch $@
 
+define parse_version =
+	$(eval $1_URL		:= $(shell grep "$(1):" VERSIONS | cut -d, -f3))
+	$(eval $1_VERSION	:= $(shell grep "$(1):" VERSIONS | cut -d, -f2| tr -d ' '))
+endef
+
+$(foreach alloc,$(ALLOCS_NONTRIVIAL) $(ALLOCS_TRIVIAL),$(eval $(call parse_version,$(alloc))))
+$(foreach bench,$(BENCHMARKS_EXTERN),$(eval $(call parse_version,$(bench))))
+
 .PRECIOUS: archives/%.tar.gz
 archives/%.tar.gz:
 	mkdir -p $(@D)
-	wget -O $@ $(shell grep "$*:" VERSIONS | cut -d, -f3)/archive/$(shell grep "$*:" VERSIONS | cut -d, -f2| tr -d ' ').tar.gz
+	wget -O $@ $($*_URL)/archive/$($*_VERSION).tar.gz
 
 ########################################################################
 # ALLOCS: nontrivial cases
