@@ -27,8 +27,7 @@ SHA256SUM_FLAGS=-c -s
 endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
-ALLOCS_TRIVIAL = ff fg iso je lf lt mesh mng sg tbb tc
-ALLOCS_NONTRIVIAL = dh gd hd hm mi mi2 nomesh rp sc scudo sm sn tcg yal
+ALLOCS = dh ff fg gd hd hm iso je lf lt mesh mi mi2 mng nomesh rp sc scudo sg sm sn tbb tc tcg yal
 PDFDOC=extern/large.pdf
 
 ########################################################################
@@ -47,12 +46,11 @@ rocksdb_ENV=DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALL
 
 # TODO: Mac seems to report 'arm64' here
 ifeq ($(shell uname -m), aarch64)
-ALLOCS_TRIVIAL := $(filter-out fg mesh lt, $(ALLOCS_TRIVIAL))
-ALLOCS_NONTRIVIAL := $(filter-out nomesh sc sm, $(ALLOCS_NONTRIVIAL))
+ALLOCS := $(filter-out fg lt mesh nomesh sc sm, $(ALLOCS_TRIVIAL))
 endif
 
 all: allocs benchmarks_all
-allocs: $(ALLOCS_TRIVIAL) $(ALLOCS_NONTRIVIAL)
+allocs: $(ALLOCS)
 benchmarks_all: benchmarks $(BENCHMARKS_EXTERN)
 
 # TODO: Mac seems to report 'arm64' here
@@ -110,8 +108,8 @@ bench/shbench/%.zip:
 ########################################################################
 
 # Todo: check for the big benchmarks
-$(ALLOCS_TRIVIAL) $(BENCHMARKS_EXTERN): %: extern/%/.built
-$(ALLOCS_NONTRIVIAL): %: extern/%/.built
+$(BENCHMARKS_EXTERN): %: extern/%/.built
+$(ALLOCS): %: extern/%/.built
 
 extern/%/.built: extern/%/.unpacked
 	make -C $(@D) $($*_ENV) -j$(PROCS)
@@ -129,7 +127,7 @@ define parse_version =
 	$(eval $1_VERSION	:= $(shell grep "$(1):" VERSIONS | cut -d, -f2| tr -d ' '))
 endef
 
-$(foreach alloc,$(ALLOCS_NONTRIVIAL) $(ALLOCS_TRIVIAL),$(eval $(call parse_version,$(alloc))))
+$(foreach alloc,$(ALLOCS),$(eval $(call parse_version,$(alloc))))
 $(foreach bench,$(BENCHMARKS_EXTERN),$(eval $(call parse_version,$(bench))))
 
 .PRECIOUS: archives/%.tar.gz
@@ -149,7 +147,7 @@ extern/dh/.built: extern/dh/.configured
 	cmake --build $(@D)/build -j $(PROCS)
 	touch $@
 
-#hd: fix in Makefile. If later ported into a patch, hd can be reintegrated with ALLOCS_TRIVIAL
+#hd: fix in Makefile.
 extern/hd/.built: extern/hd/.unpacked
 	sed -i_orig 's/-arch arm64e//g' $(@D)/src/GNUmakefile
 	sed -i_orig 's/-arch arm64//g' $(@D)/src/GNUmakefile
