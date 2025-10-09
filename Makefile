@@ -214,7 +214,7 @@ extern/sc/build/gyp/gyp: extern/sc/.unpacked
 
 #scudo: native clang, in a sub-directory
 extern/scudo/.built: extern/scudo/.unpacked
-	cd $(@D)/compiler-rt/lib/scudo/standalone && clang++ -flto -fuse-ld=lld -fPIC -std=c++17 -fno-exceptions $(CXXFLAGS) -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
+	cd $(@D)/compiler-rt/lib/scudo/standalone && clang++ -flto -fuse-ld=lld -fPIC -std=c++17 -fno-exceptions $(CXXFLAGS) -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$(EXTSO) *.cpp -pthread
 	touch $@
 
 #sm: make, but a fix before
