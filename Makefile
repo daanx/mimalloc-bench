@@ -142,7 +142,7 @@ archives/%.tar.gz:
 ########################################################################
 #dh: uses cmake
 extern/dh/.configured: extern/dh/.unpacked
-	cmake -S $(@D)/src -B $(@D)/build
+	cmake -S $(@D) -B $(@D)/build
 	touch $@
 
 extern/dh/.built: extern/dh/.configured
