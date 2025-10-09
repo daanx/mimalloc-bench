@@ -62,7 +62,7 @@ sudo dnf --nodocs install bazel8
 sudo apk add clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
   automake gawk samurai libtool git build-base linux-headers autoconf \
   util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev
-sudo echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" | sudo tee -a /etc/apk/repositories
 sudo apk add -q bazel@testing
 ```
 </details>
