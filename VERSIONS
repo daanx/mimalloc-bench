@@ -21,7 +21,7 @@ redis: 6.2.7, e6f6709, https://github.com/redis/redis
 rocksdb: 8.1.1, 6a43615, https://github.com/facebook/rocksdb
 rp: 1.4.5, e4393ff, https://github.com/mjansson/rpmalloc
 sc: master, master, https://github.com/cksystemsgroup/scalloc
-scudo: main, 30d3bb59, https://github.com/llvm/llvm-project
+scudo: main, main, https://github.com/llvm/llvm-project
 sg: master, master, https://github.com/ssrg-vt/SlimGuard
 sm: master, master, https://github.com/kuszmaul/SuperMalloc
 sn: 0.7.1, 32495fd, https://github.com/Microsoft/snmalloc
