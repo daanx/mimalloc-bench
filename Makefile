@@ -181,7 +181,7 @@ extern/lp/.unpacked:
 	git clone --depth 1 --single-branch -b main --sparse --filter=blob:none https://github.com/WebKit/WebKit $(@D)
 	cd $(@D) && git sparse-checkout add Source/bmalloc/libpas
 	cd $(@D)/Source/bmalloc/libpas && sed -i $(ORIG) 's/extra_cmake_options=""/extra_cmake_options="-D_GNU_SOURCE=1"/' build.sh
-	cd $(@D)/Source/bmalloc/libpas && sed -i $(ORIG) 's/cmake --build $build_dir --parallel/cmake --build $build_dir --target pas_lib --parallel/' build.sh
+	cd $(@D)/Source/bmalloc/libpas && sed -i $(ORIG) 's/cmake --build $$build_dir --parallel/cmake --build $$build_dir --target pas_lib --parallel/' build.sh
 	touch $@
 
 # mi,mi2: cmake, and 3 different variants
