@@ -12,6 +12,7 @@ PROCS=$(shell nproc)
 EXTSO=so
 SHA256SUM=sha256sum
 SHA256SUM_FLAGS=-c --status
+ORIG=
 
 ifeq ($(shell uname), Darwin)
 DARWIN=yes
@@ -20,6 +21,7 @@ EXTSO=dylib
 SHA256SUM=shasum -a 256
 SHA256SUM_FLAGS=-c -s
 export HOMEBREW_NO_EMOJI=1
+ORIG=_orig
 endif
 
 ifneq ($(shell grep -e 'ID=alpine' /etc/os-release),)
@@ -27,7 +29,7 @@ SHA256SUM_FLAGS=-c -s
 endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
-ALLOCS = dh ff fg gd hd hm iso je lf lt mesh mi mi2 mng nomesh rp sc scudo sg sm sn tbb tc tcg yal
+ALLOCS = dh ff fg gd hd hm iso je lf lp lt mesh mi mi2 mng nomesh rp sc scudo sg sm sn tbb tc tcg yal
 PDFDOC=extern/large.pdf
 
 ########################################################################
@@ -169,6 +171,18 @@ extern/je/.built: extern/je/config.status
 
 extern/je/config.status: extern/je/.unpacked
 	cd $(@D) && ./autogen.sh --enable-doc=no --enable-static=no --disable-stats
+
+# lp: partial checkout and some fixes
+extern/lp/.built: extern/lp/.unpacked
+	cd $(@D)/Source/bmalloc/libpas && CC=clang CXX=clang++ LDFLAGS='-lpthread -latomic -pthread' bash ./build.sh -s cmake -v default -t pas_lib
+	touch $@
+
+extern/lp/.unpacked:
+	git clone --depth 1 --single-branch -b main --sparse --filter=blob:none https://github.com/WebKit/WebKit $(@D)
+	cd $(@D) && git sparse-checkout add Source/bmalloc/libpas
+	cd $(@D)/Source/bmalloc/libpas && sed -i $(ORIG) 's/extra_cmake_options=""/extra_cmake_options="-D_GNU_SOURCE=1"/' build.sh
+	cd $(@D)/Source/bmalloc/libpas && sed -i $(ORIG) 's/cmake --build $build_dir --parallel/cmake --build $build_dir --target pas_lib --parallel/' build.sh
+	touch $@
 
 # mi,mi2: cmake, and 3 different variants
 extern/mi/.built extern/mi2/.built: extern/%/.built: extern/%/.unpacked
