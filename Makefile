@@ -1,6 +1,3 @@
-CFLAGS+=-march=native
-CXXFLAGS+=-march=native
-
 SUDO=sudo
 ifeq ($(shell whoami), root)
 $(warning running as root, avoid doing this if possible.)
