@@ -221,9 +221,14 @@ extern/sc/Makefile: extern/sc/build/gyp/gyp
 extern/sc/build/gyp/gyp: extern/sc/.unpacked
 	cd extern/sc && tools/make_deps.sh
 
-#scudo: native clang, in a sub-directory
+#scudo: partial checkout, native clang, in a sub-directory
+extern/scudo/.unpacked:
+	git clone --depth 1 --single-branch -b $(scudo_VERSION) --sparse --filter=blob:none $(scudo_URL) $(@D)
+	cd $(@D) && git sparse-checkout add compiler-rt/lib/scudo/standalone
+	touch $@
+
 extern/scudo/.built: extern/scudo/.unpacked
-	cd $(@D)/compiler-rt/lib/scudo/standalone && clang++ -flto -fuse-ld=lld -fPIC -std=c++17 -fno-exceptions $(CXXFLAGS) -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$(EXTSO) *.cpp -pthread
+	cd $(@D)/compiler-rt/lib/scudo/standalone && clang++ -flto -fuse-ld=lld -fPIC -fno-exceptions $(CXXFLAGS) -fno-rtti -fvisibility=internal -O3 -I include -shared -o libscudo.$(EXTSO) *.cpp
 	touch $@
 
 #sm: make, but a fix before
