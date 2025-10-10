@@ -46,7 +46,7 @@ rocksdb_ENV=DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALL
 
 # TODO: Mac seems to report 'arm64' here
 ifeq ($(shell uname -m), aarch64)
-ALLOCS := $(filter-out fg lt mesh nomesh sc sm, $(ALLOCS_TRIVIAL))
+ALLOCS := $(filter-out fg lt mesh nomesh sc sm, $(ALLOCS))
 endif
 
 all: allocs benchmarks_all
