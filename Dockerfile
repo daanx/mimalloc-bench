@@ -7,7 +7,14 @@ RUN apt-get install -y --no-install-recommends build-essential git gpg \
   cmake python3 ruby ninja-build libtool autoconf sed ghostscript \
   time curl automake libatomic1 libgflags-dev libsnappy-dev \
   zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libreadline-dev \
-  pkg-config gawk util-linux bazel-bootstrap
+  pkg-config gawk util-linux
+# Install bazel
+RUN apt-get install -y --no-install-recommends openjdk-8-jdk apt-transport-https
+RUN add-apt-repository ppa:webupd8team/java
+RUN apt-get update && apt-get install oracle-java8-installer
+RUN echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" > /etc/apt/sources.list.d/bazel.list
+RUN curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
+RUN apt-get update && apt-get install bazel
 
 FROM fedora:latest AS fedora
 RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
