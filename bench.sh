@@ -6,7 +6,7 @@
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec s tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mng pa scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
@@ -120,6 +120,7 @@ alloc_lib_add "scudo"  "$localdevdir/scudo/compiler-rt/lib/scudo/standalone/libs
 alloc_lib_add "sg"     "$localdevdir/sg/libSlimGuard.so"
 alloc_lib_add "sm"     "$localdevdir/sm/release/lib/libsupermalloc$extso"
 alloc_lib_add "sn"     "$localdevdir/sn/release/libsnmallocshim$extso"
+alloc_lib_add "s"      "$localdevdir/s/target/release/libsmalloc_ffi$extso"
 alloc_lib_add "sn-sec" "$localdevdir/sn/release/libsnmallocshim-checks$extso"
 alloc_lib_add "tbb"    "$lib_tbb"
 alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
@@ -413,6 +414,7 @@ while : ; do
             echo "  sm                           use supermalloc"
             echo "  sn                           use snmalloc"
             echo "  sn-sec                       use secure version of snmalloc"
+            echo "  s                            use smalloc"
             echo "  sys                          use system malloc ($libc)"
             echo "  tbb                          use Intel TBB malloc"
             echo "  tc                           use tcmalloc (from gperftools)"
