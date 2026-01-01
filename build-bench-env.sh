@@ -62,6 +62,7 @@ readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
 readonly version_sn=0.7.5
+readonly version_s=v7.4.7
 readonly version_tbb=v2023.1.0
 readonly version_tc=gperftools-2.18
 readonly version_tcg=81f4e44f23f2936303f9404fee7315119b9df623 # 2026-02-23
@@ -107,6 +108,7 @@ setup_scudo=0
 setup_sg=0
 setup_sm=0
 setup_sn=0
+setup_s=0
 setup_tbb=0
 setup_tc=0
 setup_tcg=0
@@ -153,6 +155,7 @@ while : ; do
         setup_mi3=$flag_arg
         setup_pa=$flag_arg
         setup_sn=$flag_arg
+        setup_s=$flag_arg
         setup_sg=$flag_arg
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
@@ -249,6 +252,8 @@ while : ; do
         setup_sm=$flag_arg;;
     sn)
         setup_sn=$flag_arg;;
+    s)
+        setup_s=$flag_arg;;
     tbb)
         setup_tbb=$flag_arg;;
     tc)
@@ -295,6 +300,7 @@ while : ; do
         echo "  sg                           setup slimguard ($version_sg)"
         echo "  sm                           setup supermalloc ($version_sm)"
         echo "  sn                           setup snmalloc ($version_sn)"
+        echo "  s                            setup smalloc ($version_s)"
         echo "  tbb                          setup Intel TBB malloc ($version_tbb)"
         echo "  tc                           setup tcmalloc ($version_tc)"
         echo "  tcg                          setup Google's tcmalloc ($version_tcg)"
@@ -707,6 +713,12 @@ if test "$setup_sn" = "1"; then
   fi
   cd release
   ninja libsnmallocshim$extso libsnmallocshim-checks$extso
+  popd
+fi
+
+if test "$setup_s" = "1"; then
+  checkout s $version_s https://github.com/zooko/smalloc
+  cargo build --release --package smalloc-ffi
   popd
 fi
 
