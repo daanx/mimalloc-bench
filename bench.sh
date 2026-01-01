@@ -13,7 +13,7 @@ alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs lua"
-readonly tests_all2="alloc-test sh6bench sh8bench xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
+readonly tests_all2="alloc-test xmalloc-test cscratch glibc-simple glibc-thread rocksdb"
 readonly tests_all3="larson lean-mathlib linux malloc-large mleak rbstress cthrash"
 readonly tests_all4="z3 spec spec-bench security"
 
@@ -22,7 +22,7 @@ readonly tests_allt="$tests_all1 $tests_all2"  # run with 'allt' command option
 
 tests_run=""
 tests_exclude=""
-readonly tests_exclude_macos="sh6bench sh8bench redis"
+readonly tests_exclude_macos="redis"
 
 # --------------------------------------------------------------------
 # benchmark versions
@@ -715,10 +715,6 @@ function run_test {  # <test>
       run_test_cmd "larsonN" "./larson 5 8 1000 5000 100 4141 $procs";;
     larson-sized)
       run_test_cmd "larsonN-sized" "./larson-sized 5 8 1000 5000 100 4141 $procs";;
-    sh6bench)
-      run_test_cmd "sh6benchN" "./sh6bench $procsx2";;
-    sh8bench)
-      run_test_cmd "sh8benchN" "./sh8bench $procsx2";;
     xmalloc-test)
       run_test_cmd "xmalloc-testN" "./xmalloc-test -w $procs -t 5 -s 64";;
     cthrash)

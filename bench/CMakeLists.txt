@@ -72,16 +72,6 @@ add_executable(alloc-test alloc-test/test_common.cpp alloc-test/allocator_tester
 target_compile_definitions(alloc-test PRIVATE BENCH=4)
 target_link_libraries(alloc-test pthread)
 
-if(NOT APPLE)
-  add_executable(sh6bench shbench/sh6bench-new.c)
-  target_compile_definitions(sh6bench PRIVATE BENCH=1 SYS_MULTI_THREAD=1)
-  target_link_libraries(sh6bench pthread)
-
-  add_executable(sh8bench shbench/sh8bench-new.c)
-  target_compile_definitions(sh8bench PRIVATE BENCH=1 SYS_MULTI_THREAD=1)
-  target_link_libraries(sh8bench pthread)
-endif()
-
 add_executable(cache-scratch cache-scratch/cache-scratch.cpp)
 target_link_libraries(cache-scratch pthread)
 

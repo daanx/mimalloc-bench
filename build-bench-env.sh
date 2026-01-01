@@ -73,10 +73,6 @@ readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.7
 readonly version_linux=6.5.1
 
-# HTTP-downloaded files checksums
-readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
-readonly sha256sum_sh8bench="12a8e75248c9dcbfee28245c12bc937a16ef56ec9cbfab88d0e348271667726f"
-
 # allocators
 setup_dh=0
 setup_ff=0
@@ -822,30 +818,6 @@ if test "$setup_redis" = "1"; then
 fi
 
 if test "$setup_bench" = "1"; then
-  phase "patch shbench"
-  pushd "bench/shbench"
-  if test -f sh6bench-new.c; then
-    echo "do nothing: bench/shbench/sh6bench-new.c already exists"
-  else
-    wget --no-verbose http://www.microquill.com/smartheap/shbench/bench.zip
-    check_checksum "bench.zip" "$sha256sum_sh6bench"
-    unzip -o bench.zip
-    dos2unix sh6bench.patch
-    dos2unix sh6bench.c
-    patch -p1 -o sh6bench-new.c sh6bench.c sh6bench.patch
-  fi
-  if test -f sh8bench-new.c; then
-    echo "do nothing: bench/shbench/sh8bench-new.c already exists"
-  else
-    wget --no-verbose http://www.microquill.com/smartheap/SH8BENCH.zip
-    check_checksum "SH8BENCH.zip" "$sha256sum_sh8bench"
-    unzip -o SH8BENCH.zip
-    dos2unix sh8bench.patch
-    dos2unix SH8BENCH.C
-    patch -p1 -o sh8bench-new.c SH8BENCH.C sh8bench.patch
-  fi
-  popd
-
   phase "get large PDF document"
 
   readonly pdfdoc="large.pdf"
