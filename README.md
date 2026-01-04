@@ -196,19 +196,6 @@ The second set of benchmarks are stress tests and consist of:
   after each phase all threads are destroyed and new threads created where some objects survive between phases.
 - __rbstress__: modified version of [allocator_bench](https://github.com/SamSaffron/allocator_bench),
   allocates chunks in memory via ruby shenanigans.
-- __sh6bench__: by [MicroQuill](http://www.microquill.com) as part of
-  [SmartHeap](http://www.microquill.com/smartheap/sh_tspec.htm). Stress test
-  where some of the objects are freed in a usual last-allocated, first-freed
-  (LIFO) order, but others are freed in reverse order. Using the public
-  [source](http://www.microquill.com/smartheap/shbench/bench.zip) (retrieved
-  2019-01-02)
-- __sh8benchN__: by [MicroQuill](http://www.microquill.com) as part of
-  [SmartHeap](http://www.microquill.com/smartheap/sh_tspec.htm). Stress test
-  for multi-threaded allocation (with N threads) where, just as in _larson_,
-  some objects are freed by other threads, and some objects freed in reverse
-  (as in _sh6bench_). Using the public
-  [source](http://www.microquill.com/smartheap/SH8BENCH.zip) (retrieved
-  2019-01-02)
 - __xmalloc-testN__: by Lever and Boreham \[5] and Christian Eder. We use the
   updated version from the
   [SuperMalloc](https://github.com/kuszmaul/SuperMalloc) repository. This is a
