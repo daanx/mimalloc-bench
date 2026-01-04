@@ -120,6 +120,8 @@ for the versions:
 - **sn**: The [_snmalloc_](https://github.com/microsoft/snmalloc) allocator
   is a recent concurrent message passing
   allocator by Liétar et al. \[8].
+- **s**: The [_smalloc_](https://github.com/zooko/smalloc) allocator is a 
+  recent allocator that has a very small codebase but delivers high performance.
 - **tbb**: The Intel [TBB](https://github.com/intel/tbb) allocator that comes
   with the Thread Building Blocks (TBB) library \[7].
 - **tc**: The [_tcmalloc_](https://github.com/gperftools/gperftools)
