@@ -49,7 +49,7 @@ fi
 # other benchmarks in here.
 BENCHES="gs leanN lua"
 
-EXTRA_BENCHES="rocksdb linux"
+EXTRA_BENCHES="rocksdb linux redis"
 
 ./build-bench-env.sh ${ALLOCATORS} packages bench ${EXTRA_BENCHES} &&
 
