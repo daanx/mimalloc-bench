@@ -56,4 +56,11 @@ EXTRA_BENCHES="rocksdb linux"
 (
     cd out/bench &&
     ../../bench.sh ${ALLOCATORS} ${BENCHES} ${EXTRA_BENCHES}
-) 2>&1 | tee $RESF
+) 2>&1 | tee tmp/log.txt
+
+echo "#------------------------------------------------------------------" >> $RESF &&
+echo "# test    alloc   time  rss    user  sys  page-faults page-reclaims" >> $RESF &&
+
+cat out/bench/benchres.csv >> $RESF &&
+
+echo "# Results are in \"${RESF}\" ."
