@@ -53,8 +53,6 @@ EXTRA_BENCHES="rocksdb linux"
 
 ./build-bench-env.sh ${ALLOCATORS} packages bench ${EXTRA_BENCHES} &&
 
-mkdir out/bench &&
-
 (
     cd out/bench &&
     ../../bench.sh ${ALLOCATORS} ${BENCHES} ${EXTRA_BENCHES}
