@@ -644,6 +644,9 @@ if test "$setup_rp" = "1"; then
   else
     python3 configure.py
   fi
+  # fix build using clang-16
+  # see https://github.com/mjansson/rpmalloc/issues/316
+  sed -i 's/-Werror//' build.ninja
   ninja
   popd
 fi
