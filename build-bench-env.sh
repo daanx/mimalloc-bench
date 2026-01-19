@@ -54,7 +54,7 @@ readonly version_mi2=v2.1.2
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
 readonly version_pa=main
-readonly version_rp=1.4.5
+readonly version_rp=feb43aee0d4dcca9fd91b3dd54311c34c6cc6187 # 2025-10-26
 readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
@@ -644,9 +644,6 @@ if test "$setup_rp" = "1"; then
   else
     python3 configure.py
   fi
-  # fix build using clang-16
-  # see https://github.com/mjansson/rpmalloc/issues/316
-  sed -i 's/-Werror//' build.ninja
   ninja
   popd
 fi
