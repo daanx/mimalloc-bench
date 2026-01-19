@@ -8,3 +8,4 @@ bench/shbench/SH8BENCH.C
 bench/shbench/sh8bench-new.c
 bench/shbench/*.zip*
 *.zip
+tmp
