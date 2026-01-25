@@ -42,14 +42,7 @@ echo "CPUCOUNT: ${CPUCOUNT}" 2>&1 | tee -a $RESF
 
 mkdir -p ${OUTPUT_DIR}
 
-if [ "x${OSTYPE}" = "xmsys" ]; then
-    # no jemalloc or snmalloc on windows
-    ALLOCATORS=mimalloc,rpmalloc
-else
-    ALLOCATORS=jemalloc,snmalloc,mimalloc,rpmalloc
-fi
-
-ALLOCATORS="je sn mi2 rp s"
+ALLOCATORS="sys je sn mi2 rp s"
 
 # I picked these ones because I imagine they are more representative of real workloads than the
 # other benchmarks in here.
@@ -67,6 +60,8 @@ case "$OSTYPE" in
     darwin*)
         # macOS: no rpmalloc (it doesn't build the C wrapper support)
         ALLOCATORS="${ALLOCATORS//rp/}"
+
+        # macOS: these two tests don't build
         EXTRA_BENCHES="${EXTRA_BENCHES//rocksdb/}"
         EXTRA_BENCHES="${EXTRA_BENCHES//linux/}"
         ;;
