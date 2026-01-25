@@ -104,4 +104,8 @@ target_link_libraries(glibc-simple pthread)
 add_executable(glibc-thread glibc-bench/bench-malloc-thread.c)
 target_link_libraries(glibc-thread pthread)
 
-add_subdirectory(security)
+option(BUILD_SECURITY_BENCHMARKS "Build security test benchmarks" OFF)
+
+if(BUILD_SECURITY_BENCHMARKS)
+    add_subdirectory(security)
+endif()
