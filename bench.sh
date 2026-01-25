@@ -31,6 +31,7 @@ readonly tests_exclude_macos="redis"
 readonly version_redis=6.2.7
 readonly version_rocksdb=8.1.1
 readonly version_linux=6.5.1
+readonly version_lua=5.5.0
 
 # --------------------------------------------------------------------
 # Environment
@@ -161,7 +162,7 @@ if test "$use_packages" = "1"; then
   fi
 fi
 
-readonly luadir="$localdevdir/lua"
+readonly luadir="$localdevdir/lua/lua-${version_lua}"
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
 readonly redis_dir="$localdevdir/redis-$version_redis/src"

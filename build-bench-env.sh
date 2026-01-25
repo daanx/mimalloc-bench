@@ -70,7 +70,7 @@ readonly version_yal=main
 readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
 readonly version_rocksdb=8.1.1
-readonly version_lua=v5.4.7
+readonly version_lua=5.5.0
 readonly version_linux=6.5.1
 
 # allocators
@@ -375,6 +375,24 @@ function check_checksum {  # name, sha256sum
     echo "$2 was expected"
     $SHA256SUM_CMD $1
   fi
+}
+
+function wgetunpack {  # name, url-up-to-fname, fname-incl-version
+  phase "build $1: version $3"
+  pushd $devdir
+  if test "$rebuild" = "1"; then
+    rm -rf "$1"
+  fi
+  if test -d "$1"; then
+    echo "$devdir/$1 already exists; no need to wget+unpack"
+  else
+    mkdir "$devdir/$1"
+    cd "$devdir/$1"
+    wget --no-verbose "$2$3"
+    tar xf "$3"
+    rm "$3"
+  fi
+  popd
 }
 
 function aptinstall {
@@ -833,8 +851,7 @@ if test "$setup_bench" = "1"; then
   popd
 
   phase "get lua"
-  checkout lua $version_lua https://github.com/lua/lua
-  popd
+  wgetunpack lua https://www.lua.org/ftp/ lua-${version_lua}.tar.gz
 
   phase "build benchmarks"
 
