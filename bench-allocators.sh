@@ -1,55 +1,76 @@
-# CPU type on linuxy
-CPUTYPE=`grep "model name" /proc/cpuinfo 2>/dev/null | uniq | cut -d':' -f2-`
-
-if [ "x${CPUTYPE}" = "x" ] ; then
-    # CPU type on macos
-    CPUTYPE=`sysctl -n machdep.cpu.brand_string 2>/dev/null`
-fi
-
-CPUTYPE="${CPUTYPE//[^[:alnum:]]/}"
-
-OSTYPESTR="${OSTYPE//[^[:alnum:]]/}"
-
-ARGS=$*
-ARGSSTR="${ARGS//[^[:alnum:]]/}"
+#!/bin/bash
+set -e
 
 BNAME="mimalloc-bench"
-FNAME="${BNAME}.result.${CPUTYPE}.${OSTYPESTR}.${ARGSSTR}.txt"
-RESF="tmp/${FNAME}"
 
-echo "# Saving result into \"${RESF}\""
+# Collect metadata
+GITCOMMIT=$(git rev-parse HEAD)
+GITCLEANSTATUS=$( [ -z "$( git status --porcelain )" ] && echo \"Clean\" || echo \"Uncommitted changes\" )
+TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
-rm -f $RESF
+# CPU type on linuxy
+CPUTYPE=$(grep -m1 "model name" /proc/cpuinfo 2>/dev/null | cut -d':' -f2-)
+if [ -z "${CPUTYPE}" ] ; then
+    # CPU type on macos
+    CPUTYPE=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "Unknown")
+fi
+CPUTYPE=${CPUTYPE:-Unknown}
+CPUTYPE=${CPUTYPE## }  # Trim leading space
+
+CPUTYPESTR="${CPUTYPE//[^[:alnum:]]/}"
+OSTYPESTR="${OSTYPE//[^[:alnum:]]/}"
+
+CPUCOUNT=$(nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-unknown}")
+
+ARGS=$*
+
+CPUSTR_DOT_OSSTR="${CPUTYPESTR}.${OSTYPESTR}"
+OUTPUT_DIR="${OUTPUT_DIR:-./bench/results}/${CPUSTR_DOT_OSSTR}"
+
+RESF="${OUTPUT_DIR}/${BNAME}.result.txt"
+GRAPH_BASE="${OUTPUT_DIR}/${BNAME}.graph-"
+
 mkdir -p tmp
+mkdir -p ${OUTPUT_DIR}
+rm -f $RESF
 
-echo "# git log -1 | head -1" 2>&1 | tee -a $RESF
-git log -1 | head -1 2>&1 | tee -a $RESF
-echo 2>&1 | tee -a $RESF
+echo "GITCOMMIT: ${GITCOMMIT}" 2>&1 | tee -a $RESF
+echo "GITCLEANSTATUS: ${GITCLEANSTATUS}" 2>&1 | tee -a $RESF
+echo "CPUTYPE: ${CPUTYPE}" 2>&1 | tee -a $RESF
+echo "OSTYPE: ${OSTYPE}" 2>&1 | tee -a $RESF
+echo "CPUCOUNT: ${CPUCOUNT}" 2>&1 | tee -a $RESF
 
-echo "( [ -z \"\$(git status --porcelain)\" ] && echo \"Clean\" || echo \"Uncommitted changes\" )" 2>&1 | tee -a $RESF
-( [ -z "$(git status --porcelain)" ] && echo "Clean" || echo "Uncommitted changes" ) 2>&1 | tee -a $RESF
-echo 2>&1 | tee -a $RESF
-
-echo CPU type: 2>&1 | tee -a $RESF
-echo $CPUTYPE 2>&1 | tee -a $RESF
-echo 2>&1 | tee -a $RESF
-
-echo OS type: 2>&1 | tee -a $RESF
-echo $OSTYPE 2>&1 | tee -a $RESF
-echo 2>&1 | tee -a $RESF
+mkdir -p ${OUTPUT_DIR}
 
 if [ "x${OSTYPE}" = "xmsys" ]; then
-    # No jemalloc or snmalloc on windows
-    ALLOCATORS="mi2 rp s"
+    # no jemalloc or snmalloc on windows
+    ALLOCATORS=mimalloc,rpmalloc
 else
-    ALLOCATORS="je sn mi2 rp s"
+    ALLOCATORS=jemalloc,snmalloc,mimalloc,rpmalloc
 fi
+
+ALLOCATORS="je sn mi2 rp s"
 
 # I picked these ones because I imagine they are more representative of real workloads than the
 # other benchmarks in here.
-BENCHES="gs leanN lua"
+BENCHES="gs lean lua"
 
-EXTRA_BENCHES="rocksdb linux redis"
+EXTRA_BENCHES="rocksdb linux"
+
+# Platform-specific exclusions
+case "$OSTYPE" in
+    msys*)
+        # Windows: no jemalloc or snmalloc
+        ALLOCATORS="${ALLOCATORS//je/}"
+        ALLOCATORS="${ALLOCATORS//sn/}"
+        ;;
+    darwin*)
+        # macOS: no rpmalloc (it doesn't build the C wrapper support)
+        ALLOCATORS="${ALLOCATORS//rp/}"
+        EXTRA_BENCHES="${EXTRA_BENCHES//rocksdb/}"
+        EXTRA_BENCHES="${EXTRA_BENCHES//linux/}"
+        ;;
+esac
 
 ./build-bench-env.sh ${ALLOCATORS} packages bench ${EXTRA_BENCHES} &&
 
