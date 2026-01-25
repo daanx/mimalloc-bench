@@ -664,7 +664,7 @@ if test "$setup_rp" = "1"; then
   fi
   # fix build using clang-16
   # see https://github.com/mjansson/rpmalloc/issues/316
-  sed -i 's/-Werror//' build.ninja
+  sed -i.bak 's/-Werror//' build.ninja && rm -f build.ninja.bak
   ninja
   popd
 fi
