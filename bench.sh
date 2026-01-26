@@ -94,7 +94,7 @@ function alloc_lib_add {  # <allocator> <variable> <librarypath>
   alloc_libs="$1=$2 $alloc_libs"
 }
 
-readonly lib_rp="`find ${localdevdir}/rp/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
+readonly lib_rp="`find ${localdevdir}/rp/bin/*/release -name librpmalloc$extso 2> /dev/null`"
 readonly lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
 readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
