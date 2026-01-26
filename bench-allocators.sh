@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 BNAME="mimalloc-bench"
 
@@ -42,36 +42,36 @@ echo "CPUCOUNT: ${CPUCOUNT}" 2>&1 | tee -a $RESF
 
 mkdir -p ${OUTPUT_DIR}
 
-ALLOCATORS="sys je sn mi2 rp s"
+ALLOCATORS="je sn mi2 rp s"
 
-# I picked these ones because I imagine they are more representative of real workloads than the
-# other benchmarks in here.
-BENCHES="gs lean lua"
-
-EXTRA_BENCHES="rocksdb linux"
+# I picked these ones because I hope are more representative of real workloads than the other
+# benchmarks in here. I asked Claude Opus 4.5 to pick which mimalloc-bench benches were
+# representative of real-world workloads and he picked these ones, too.
+BUILD_BENCHES="linux redis rocksdb"
+TEST_BENCHES="gs linux lua redis rocksdb"
 
 # Platform-specific exclusions
 case "$OSTYPE" in
     msys*)
         # Windows: no jemalloc or snmalloc
-        ALLOCATORS="${ALLOCATORS//je/}"
-        ALLOCATORS="${ALLOCATORS//sn/}"
+        for REMOVE_ALLOCATOR in je sn; do
+            ALLOCATORS="${ALLOCATORS//${REMOVE_ALLOCATOR}/}"
+        done
         ;;
     darwin*)
-        # macOS: no rpmalloc (it doesn't build the C wrapper support)
-        ALLOCATORS="${ALLOCATORS//rp/}"
-
-        # macOS: these two tests don't build
-        EXTRA_BENCHES="${EXTRA_BENCHES//rocksdb/}"
-        EXTRA_BENCHES="${EXTRA_BENCHES//linux/}"
+        # macOS: these tests don't build
+        for REMOVE_BENCH in redis rocksdb linux; do
+            BUILD_BENCHES="${BUILD_BENCHES//${REMOVE_BENCH}/}"
+            TEST_BENCHES="${TEST_BENCHES//${REMOVE_BENCH}/}"
+        done
         ;;
 esac
 
-./build-bench-env.sh ${ALLOCATORS} packages bench ${EXTRA_BENCHES} &&
+./build-bench-env.sh ${ALLOCATORS} packages bench ${BUILD_BENCHES} &&
 
 (
     cd out/bench &&
-    ../../bench.sh ${ALLOCATORS} ${BENCHES} ${EXTRA_BENCHES}
+    ../../bench.sh sys ${ALLOCATORS} ${TEST_BENCHES}
 ) 2>&1 | tee tmp/log.txt
 
 echo "#------------------------------------------------------------------" >> $RESF &&
