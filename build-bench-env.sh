@@ -470,7 +470,7 @@ if test "$setup_packages" = "1"; then
     aptinstall "build-essential git gpg g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
-      liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux"
+      liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux z3"
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
