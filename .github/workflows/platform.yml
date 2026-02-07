@@ -37,7 +37,7 @@ jobs:
     needs: build-base-with-docker
     strategy:
       matrix:
-        allocator: [ff, fg, gd, hd, hm, iso, je, lf, lp, lt, mesh, mng, mi, mi2, nomesh, pa, rp, scudo, sm, sn, sg, tbb, tc, yal, tcg]
+        allocator: [ff, fg, gd, hd, hm, iso, je, lf, lp, lt, mesh, mng, mi, mi2, nomesh, pa, rp, scudo, s, sm, sn, sg, tbb, tc, yal, tcg]
         testsuite: [allt]
         # Used to provide a platform-specific predicate
         predicate: [true, false]
