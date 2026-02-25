@@ -46,6 +46,8 @@ procs=8
 repeats=1          # repeats of all tests
 test_repeats=1     # repeats per test
 sleep=0            # mini sleeps between tests seem to improve stability
+error=0            # binary marker for errors during the run
+failed_runs=""     # accumulated failed runs
 case "$OSTYPE" in
   darwin*) 
     darwin="1"
@@ -559,16 +561,27 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     redis*)
        echo "start server"
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
-       sleep 1s
-       $redis_dir/redis-cli flushall
-       sleep 1s
+       tmpfile=$(mktemp)
+       (
+         $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"
+         echo $? > "$tmpfile"
+       ) &
+       sleep 0.1
+       if [ -s "$tmpfile" ]; then
+         error="1"
+         failed_runs+="$1:$2 "
+         return
+       fi
+       rm -f "$tmpfile"
+       while true; do
+         $redis_dir/redis-cli flushall > /dev/null 2>&1
+         if test "$?" = "0"; then
+           break
+         fi
+       done
        $4 >> "$outfile"
-       sleep 1s
-       $redis_dir/redis-cli flushall
-       sleep 1s
-       $redis_dir/redis-cli shutdown
-       sleep 1s
+       $redis_dir/redis-cli flushall > /dev/null
+       $redis_dir/redis-cli shutdown 2> /dev/null
        ;;
     security)
        echo $2 >> $outfile
@@ -602,7 +615,12 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        done
        ;;
     *)
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile"
+       if test "$?" != "0"; then
+         error="1"
+         failed_runs+="$1:$2 "
+       fi
+       ;;
   esac
 
   # fixup larson with relative time
@@ -797,3 +815,8 @@ do
     echo ""
   fi
 done
+
+if test "$error" != "0"; then
+  echo "Failed tests: $failed_runs"
+  exit 1
+fi
