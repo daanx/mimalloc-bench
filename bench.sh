@@ -25,14 +25,6 @@ tests_exclude=""
 readonly tests_exclude_macos="sh6bench sh8bench redis"
 
 # --------------------------------------------------------------------
-# benchmark versions
-# --------------------------------------------------------------------
-
-readonly version_redis=6.2.7
-readonly version_rocksdb=8.1.1
-readonly version_linux=6.5.1
-
-# --------------------------------------------------------------------
 # Environment
 # --------------------------------------------------------------------
 
@@ -98,7 +90,7 @@ readonly lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
 readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
 
-alloc_lib_add "dh"     "$localdevdir/dh/src/build/libdieharder$extso"
+alloc_lib_add "dh"     "$localdevdir/dh/build/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
 alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
@@ -110,9 +102,9 @@ alloc_lib_add "je"     "$localdevdir/je/lib/libjemalloc$extso"
 alloc_lib_add "lf"     "$localdevdir/lf/liblite-malloc-shared$extso"
 alloc_lib_add "lp"     "$localdevdir/lp/Source/bmalloc/libpas/build-cmake-default/Release/libpas_lib$extso"
 alloc_lib_add "lt"     "$localdevdir/lt/gnu.make.lib/libltalloc$extso"
-alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
+alloc_lib_add "mesh"   "$localdevdir/mesh/bazel-bin/src/libmesh$extso"
 alloc_lib_add "mng"    "$localdevdir/mng/libmallocng$extso"
-alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
+alloc_lib_add "nomesh" "$localdevdir/nomesh/bazel-bin/src/libmesh$extso"
 alloc_lib_add "pa"     "$localdevdir/pa/partition_alloc_builder/out/Default/libpalib$extso"
 alloc_lib_add "rp"     "$lib_rp"
 alloc_lib_add "sc"     "$localdevdir/sc/out/Release/lib.target/libscalloc$extso"
@@ -163,10 +155,10 @@ fi
 readonly luadir="$localdevdir/lua"
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
-readonly redis_dir="$localdevdir/redis-$version_redis/src"
+readonly redis_dir="$localdevdir/redis/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
-readonly rocksdb_dir="$localdevdir/rocksdb-$version_rocksdb"
-readonly linux_dir="$localdevdir/linux-$version_linux"
+readonly rocksdb_dir="$localdevdir/rocksdb"
+readonly linux_dir="$localdevdir/linux"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
