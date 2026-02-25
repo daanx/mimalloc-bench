@@ -68,6 +68,7 @@ readonly version_yal=main
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
+readonly version_mathlib=release_812
 readonly version_rocksdb=8.1.1
 readonly version_lua=v5.4.7
 readonly version_linux=6.5.1
@@ -787,8 +788,8 @@ if test "$setup_lean" = "1"; then
   echo "make -j$procs"
   make -j $procs
   rm -rf ./tests/  # we don't need tests
-  mkdir -p "$devdir/mathlib"
-  cp -u "$devdir/lean/leanpkg/leanpkg.toml" "$devdir/mathlib"
+  popd
+  checkout mathlib $version_mathlib https://github.com/leanprover-community/mathlib3
   popd
 fi
 
