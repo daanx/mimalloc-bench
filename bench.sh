@@ -6,10 +6,9 @@
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-dbg mi-sec mi2 mi2-dbg mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg xmi xsmi xmi-dbg yal"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mng pa scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
-alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs lua"
@@ -193,24 +192,42 @@ function contains {  # <string> <substring>   does string contain substring?
   return 1
 }
 
-function is_installed {  # <allocator>
-  contains "$alloc_installed" $1
+function get_so_path () { # <alloc> : name of alloc to look up in alloc_libs
+  for entry in $alloc_libs; do
+    entry_name="${entry%=*}"
+    entry_lib="${entry#*=}"
+    if test "$entry_name" = "$1"; then
+      echo "$entry_lib"
+    fi
+  done
+}
+
+function alloc_is_installed { # <path> : path to .$extso-file
+  if [ ! -f "$1" ]; then
+    return 1
+  fi
+  tmp=$(LD_PRELOAD="$1" /bin/true &>/dev/null)
+  if [ "$?" -ne 0 ]; then
+    echo "failed to LD_PRELOAD a selected allocator: $1"
+    return 1
+  fi
+  return 0
 }
 
 function alloc_run_add {  # <allocator>   :add to runnable
-  alloc_run="$alloc_run $1"
+  if alloc_is_installed $(get_so_path "$1"); then
+    alloc_run="$alloc_run $1"
+  fi
 }
 
 function alloc_run_remove {   # <allocator>  :remove from runnables
-  if contains "$alloc_run" "$1"; then
-    alloc_run_old="$alloc_run"
-    alloc_run=""
-    for s in $alloc_run_old; do
-      if [ "$s" != "$1" ]; then
-        alloc_run_add "$s"
-      fi
-    done
-  fi
+  alloc_run_old="$alloc_run"
+  alloc_run=""
+  for s in $alloc_run_old; do
+    if [ "$s" != "$1" ]; then
+      alloc_run_add "$s"
+    fi
+  done
 }
 
 function alloc_run_add_remove { # <allocator> <add?> 
@@ -220,22 +237,6 @@ function alloc_run_add_remove { # <allocator> <add?>
     alloc_run_remove "$1"
   fi
 }
-
-# read in the installed allocators
-while read word _; do alloc_installed="$alloc_installed ${word%:*}"; done < ${localdevdir}/versions.txt
-if is_installed "mi"; then
-  alloc_installed="$alloc_installed mi-sec mi-dbg"   # secure mimalloc
-fi
-if is_installed "mi2"; then
-  alloc_installed="$alloc_installed mi2-sec mi2-dbg"   # secure mimalloc
-fi
-if is_installed "hm"; then
-  alloc_installed="$alloc_installed hml"   # hardened_malloc light
-fi
-if is_installed "sn"; then
-  alloc_installed="$alloc_installed sn-sec"   # secure snmalloc
-fi
-
 
 alloc_lib=""
 function alloc_lib_set {  # <allocator>
@@ -256,15 +257,13 @@ function tests_run_add {  # <tests>   :add to runnable tests
 }
 
 function tests_run_remove {   # <test>  :remove from runnable tests
-  if contains "$tests_run" "$1"; then
-    tests_run_old="$tests_run"
-    tests_run=""
-    for tst in $tests_run_old; do
-      if [ "$tst" != "$1" ]; then
-        tests_run_add "$tst"
-      fi
-    done
-  fi
+  tests_run_old="$tests_run"
+  tests_run=""
+  for tst in $tests_run_old; do
+    if [ "$tst" != "$1" ]; then
+      tests_run_add "$tst"
+    fi
+  done
 }
 
 function tests_run_add_remove { # <test> <add?> 
@@ -321,9 +320,6 @@ while : ; do
   esac
 
   if contains "$alloc_all" "$flag"; then
-    if ! contains "$alloc_installed" "$flag"; then
-      warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
-    fi
     alloc_run_add_remove "$flag" "$flag_arg"    
   else
     if contains "$tests_all" "$flag"; then
@@ -333,17 +329,13 @@ while : ; do
         "") break;;
         alla)
             # use all installed allocators (iterate to maintain order as specified in alloc_all)
-            for alloc in $alloc_all; do 
-              if is_installed "$alloc"; then
-                alloc_run_add_remove "$alloc" "$flag_arg"
-              fi
+            for alloc in $alloc_all; do
+              alloc_run_add_remove "$alloc" "$flag_arg"
             done;;
         allsa)
             # use all "secure" installed allocators (iterate to maintain order as specified in alloc_secure)
             for alloc in $alloc_secure; do 
-              if is_installed "$alloc"; then
-                alloc_run_add_remove "$alloc" "$flag_arg"
-              fi
+              alloc_run_add_remove "$alloc" "$flag_arg"
             done;;
         allt)
             for tst in $tests_allt; do
