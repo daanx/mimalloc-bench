@@ -43,7 +43,7 @@ readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=6577c22b # HEAD as of 2025-07-18, no release since 2019
 readonly version_hm=11
-readonly version_iso=1.2.6
+readonly version_iso=1.2.7
 readonly version_je=5.3.0
 readonly version_lf=master   # ~unmaintained since 2018
 readonly version_lp=main
@@ -482,7 +482,7 @@ fi
 
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso https://github.com/struct/isoalloc
-  make library -j $procs
+  make library_less_strict -j $procs
   popd
 fi
 
