@@ -6,7 +6,7 @@
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg xmi xsmi xmi-dbg yal rmalloc"
 readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mng pa scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
 alloc_installed="sys"  # later expanded to include all installed allocators
@@ -125,6 +125,7 @@ alloc_lib_add "tbb"    "$lib_tbb"
 alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 alloc_lib_add "yal"    "$localdevdir/yal/yalloc$extso"
+alloc_lib_add "rmalloc" "$localdevdir/rmalloc/lib/librmalloc$extso"
 
 alloc_lib_add "mi"     "$localdevdir/mi/out/release/libmimalloc$extso"
 alloc_lib_add "mi-sec" "$localdevdir/mi/out/secure/libmimalloc-secure$extso"
