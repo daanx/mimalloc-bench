@@ -61,7 +61,7 @@ esac
 # --------------------------------------------------------------------
 
 readonly curdir=`pwd`
-if ! test -f ../../build-bench-env.sh; then
+if ! test -f ../../bench.sh; then
   echo "error: you must run this script from the 'out/bench' directory!"
   exit 1
 fi
