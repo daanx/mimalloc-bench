@@ -26,7 +26,7 @@ SHA256SUM_FLAGS=-c -s
 endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
-ALLOCS = dh ff fg gd hd hm iso je lf lp lt mesh mi mi2 mng nomesh rp sc scudo sg sm sn tbb tc tcg yal
+ALLOCS = dh ff fg gd hd hm iso je lf lp lt mesh mi mi2 mng nomesh rmalloc rp sc scudo sg sm sn tbb tc tcg yal
 PDFDOC=extern/large.pdf
 
 ########################################################################
@@ -198,6 +198,13 @@ extern/nomesh/.built: extern/mesh/.unpacked
 	make -C $(@D) clean
 	# only single job: https://github.com/plasma-umass/Mesh/issues/96
 	make -C $(@D) $(nomesh_ENV)
+	touch $@
+
+# rmalloc: uses CMake
+extern/rmalloc/.built: extern/rmalloc/.configured
+
+extern/rmalloc/.configured: extern/rmalloc/.unpacked
+	cmake -S $(@D) -B $(@D)
 	touch $@
 
 #rp: uses ninja, one fix in build.ninja

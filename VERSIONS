@@ -18,6 +18,7 @@ mi: v1.8.2, b66e3214, https://github.com/microsoft/mimalloc
 mng: master, master, https://github.com/richfelker/mallocng-draft
 pa: main, main, https://github.com/1c3t3a/partition_alloc_builder
 redis: 6.2.7, e6f6709, https://github.com/redis/redis
+rmalloc: master, master, https://github.com/newell-romario/rmalloc
 rocksdb: 8.1.1, 6a43615, https://github.com/facebook/rocksdb
 rp: 1.4.5, e4393ff, https://github.com/mjansson/rpmalloc
 sc: master, master, https://github.com/cksystemsgroup/scalloc
