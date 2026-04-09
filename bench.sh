@@ -29,7 +29,7 @@ readonly tests_exclude_macos="sh6bench sh8bench redis"
 # --------------------------------------------------------------------
 
 readonly version_redis=6.2.7
-readonly version_rocksdb=8.1.1
+readonly version_rocksdb=10.10.1
 readonly version_linux=6.5.1
 
 # --------------------------------------------------------------------

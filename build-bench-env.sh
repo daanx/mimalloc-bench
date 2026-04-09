@@ -69,7 +69,7 @@ readonly version_rmalloc=master
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
-readonly version_rocksdb=8.1.1
+readonly version_rocksdb=10.10.1
 readonly version_lua=v5.4.7
 readonly version_linux=6.5.1
 
@@ -783,9 +783,6 @@ if test "$setup_rocksdb" = "1"; then
   fi
 
   cd "rocksdb-$version_rocksdb"
-  set +e
-  patch -p1 -N -r- < ../../patches/rocksdb_build.patch > /dev/null
-  set -e
   DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 make db_bench -j $procs
   [ "$CI" ] && find . -name '*.o' -delete
   popd
