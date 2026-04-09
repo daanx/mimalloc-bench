@@ -287,6 +287,7 @@ extern/yal/.built: extern/yal/.unpacked
 ########################################################################
 # lean: cmake, additional mathlib setup
 extern/lean/.built: extern/lean/.unpacked
+	patch -d $(@D) -p1 -N -r- < patches/lean.patch
 	mkdir -p $(@D)/out/release
 	env CC=gcc CXX="g++" cmake -S $(@D)/src -B $(@D)/out/release -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 	make -C $(@D)/out/release -j$(PROCS) bin_lean
