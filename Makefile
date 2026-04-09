@@ -301,12 +301,3 @@ extern/lua/.built: extern/lua/.unpacked
 # linux only needs to be fetched, not more.
 extern/linux/.built: extern/linux/.unpacked
 	touch $@
-
-# rocksdb: needs patching
-extern/rocksdb/.built: extern/rocksdb/.patched
-	make -C $(@D) $(rocksdb_ENV) -j$(PROCS)
-	touch $@
-
-extern/rocksdb/.patched: extern/rocksdb/.unpacked
-	patch -d $(@D) -p1 -N -r- < patches/rocksdb_build.patch
-	touch $@
