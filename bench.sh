@@ -202,7 +202,13 @@ function is_installed {  # <allocator>
 }
 
 function alloc_run_add {  # <allocator>   :add to runnable
-  alloc_run="$alloc_run $1"
+  if test "$1" = "sys"; then
+    alloc_run="$alloc_run $1"
+    return
+  fi
+  if alloc_is_installed $(get_so_path "$1"); then
+    alloc_run="$alloc_run $1"
+  fi
 }
 
 function alloc_run_remove {   # <allocator>  :remove from runnables
