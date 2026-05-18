@@ -481,8 +481,8 @@ fi
 
 if test "$setup_rmalloc" = "1"; then
   checkout rmalloc $version_rmalloc https://github.com/newell-romario/rmalloc
-  cmake  -DCMAKE_BUILD_TYPE=RELEASE .
-  make
+  cmake --preset linux-release
+  cmake --build --preset linux-release
   popd
 fi
 
