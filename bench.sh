@@ -125,7 +125,7 @@ alloc_lib_add "tbb"    "$lib_tbb"
 alloc_lib_add "tc"     "$localdevdir/tc/.libs/libtcmalloc_minimal$extso"
 alloc_lib_add "tcg"    "$localdevdir/tcg/bazel-bin/tcmalloc/libtcmalloc$extso"
 alloc_lib_add "yal"    "$localdevdir/yal/yalloc$extso"
-alloc_lib_add "rmalloc" "$localdevdir/rmalloc/lib/librmalloc$extso"
+alloc_lib_add "rmalloc" "$localdevdir/rmalloc/build/lib/release/librmalloc$extso"
 
 alloc_lib_add "mi"     "$localdevdir/mi/out/release/libmimalloc$extso"
 alloc_lib_add "mi-sec" "$localdevdir/mi/out/secure/libmimalloc-secure$extso"
