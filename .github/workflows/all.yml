@@ -17,9 +17,6 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu, alpine, fedora]
-        exclude:
-          # Fedora is not currently building lean.
-          - platform: fedora
       fail-fast: false
     uses: ./.github/workflows/platform.yml
     name: ${{ matrix.platform }}

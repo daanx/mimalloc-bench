@@ -44,13 +44,14 @@ readonly version_gd=master   # ~unmaintained since 2021
 readonly version_hd=6577c22b # HEAD as of 2025-07-18, no release since 2019
 readonly version_hm=11
 readonly version_iso=1.2.5
-readonly version_je=5.3.0
+readonly version_je=5.3.1
 readonly version_lf=master   # ~unmaintained since 2018
 readonly version_lp=main
 readonly version_lt=master   # ~unmaintained since 2019
 readonly version_mesh=master # ~unmaintained since 2021
 readonly version_mi=v1.8.2
 readonly version_mi2=v2.1.2
+readonly version_mi3=v3.3.2
 readonly version_mng=master  # ~unmaintained
 readonly version_nomesh=$version_mesh
 readonly version_pa=main
@@ -59,17 +60,18 @@ readonly version_sc=master   # unmaintained since 2016
 readonly version_scudo=main
 readonly version_sg=master   # ~unmaintained since 2021
 readonly version_sm=master   # ~unmaintained since 2017
-readonly version_sn=0.7.3
+readonly version_sn=0.7.4
 readonly version_s=v7.6.0
-readonly version_tbb=v2021.9.0
+readonly version_tbb=v2023.0.0
 readonly version_tc=gperftools-2.18
-readonly version_tcg=98fd24303c7b5ef5e30da625f11fb623a5e038b6 # 2025-07-18
+readonly version_tcg=81f4e44f23f2936303f9404fee7315119b9df623 # 2026-02-23
 readonly version_yal=main
+readonly version_rmalloc=master
 
 # benchmark versions
 readonly version_redis=6.2.7
 readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for recent compilers
-readonly version_rocksdb=8.1.1
+readonly version_rocksdb=10.10.1
 readonly version_lua=v5.4.7
 readonly version_linux=6.5.1
 
@@ -92,6 +94,7 @@ setup_lt=0
 setup_mesh=0
 setup_mi=0
 setup_mi2=0
+setup_mi3=0
 setup_mng=0
 setup_nomesh=0
 setup_pa=0
@@ -106,6 +109,7 @@ setup_tbb=0
 setup_tc=0
 setup_tcg=0
 setup_yal=0
+setup_rmalloc=0
 
 # bigger benchmarks
 setup_bench=0
@@ -143,6 +147,7 @@ while : ; do
         setup_lp=$flag_arg
         setup_mi=$flag_arg
         setup_mi2=$flag_arg
+        setup_mi3=$flag_arg
         setup_pa=$flag_arg
         setup_sn=$flag_arg
         setup_s=$flag_arg
@@ -150,6 +155,7 @@ while : ; do
         setup_tbb=$flag_arg
         setup_tc=$flag_arg
         setup_yal=$flag_arg
+        setup_rmalloc=$flag_arg
         if [ -z "$darwin" ]; then
           setup_tcg=$flag_arg       # lacking 'malloc.h'
           setup_dh=$flag_arg
@@ -179,6 +185,8 @@ while : ; do
         ;;
     bench)
         setup_bench=$flag_arg;;
+    rmalloc)
+        setup_rmalloc=$flag_arg;;
     ff)
         setup_ff=$flag_arg;;
     fg)
@@ -211,6 +219,8 @@ while : ; do
         setup_mi=$flag_arg;;
     mi2)
         setup_mi2=$flag_arg;;
+    mi3)
+        setup_mi3=$flag_arg;;
     nomesh)
         setup_nomesh=$flag_arg;;
     pa)
@@ -272,6 +282,7 @@ while : ; do
         echo "  mesh                         setup mesh allocator ($version_mesh)"
         echo "  mi                           setup mimalloc ($version_mi)"
         echo "  mi2                          setup mimalloc ($version_mi2)"
+        echo "  mi3                          setup mimalloc ($version_mi3)"
         echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  pa                           setup PartitionAlloc ($version_pa)"
@@ -286,6 +297,7 @@ while : ; do
         echo "  tc                           setup tcmalloc ($version_tc)"
         echo "  tcg                          setup Google's tcmalloc ($version_tcg)"
         echo "  yal                          setup yalloc ($version_yal)"
+        echo "  rmalloc                      setup rmalloc($version_rmalloc)"
         echo ""
         echo "  bench                        build all local benchmarks"
         echo "  lean                         setup lean 3 benchmark"
@@ -471,6 +483,13 @@ if test "$setup_packages" = "1"; then
   elif grep -q 'Arch Linux' /etc/os-release; then
     sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy
   fi
+fi
+
+if test "$setup_rmalloc" = "1"; then
+  checkout rmalloc $version_rmalloc https://github.com/newell-romario/rmalloc
+  cmake --preset linux-release
+  cmake --build --preset linux-release
+  popd
 fi
 
 if test "$setup_hm" = "1"; then
@@ -762,6 +781,29 @@ if test "$setup_mi2" = "1"; then
   popd
 fi
 
+if test "$setup_mi3" = "1"; then
+  checkout mi3 $version_mi3 https://github.com/microsoft/mimalloc
+
+  echo ""
+  echo "- build mimalloc3 release"
+
+  cmake -B out/release
+  cmake --build out/release --parallel $procs
+
+  echo ""
+  echo "- build mimalloc3 debug with full checking"
+
+  cmake -B out/debug -DMI_CHECK_FULL=ON
+  cmake --build out/debug --parallel $procs
+
+  echo ""
+  echo "- build mimalloc3 secure"
+
+  cmake -B out/secure -DMI_SECURE=ON
+  cmake --build out/secure --parallel $procs
+  popd
+fi
+
 if test "$setup_yal" = "1"; then
   checkout yal $version_yal https://github.com/jorisgeer/yalloc
   ./build.sh -V
@@ -782,9 +824,6 @@ if test "$setup_rocksdb" = "1"; then
   fi
 
   cd "rocksdb-$version_rocksdb"
-  set +e
-  patch -p1 -N -r- < ../../patches/rocksdb_build.patch > /dev/null
-  set -e
   DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 make db_bench -j $procs
   [ "$CI" ] && find . -name '*.o' -delete
   popd
@@ -793,9 +832,12 @@ fi
 if test "$setup_lean" = "1"; then
   phase "build lean $version_lean"
   checkout lean $version_lean https://github.com/leanprover-community/lean
+  set +e
+  patch -p1 -N -r- < ../../patches/lean.patch
+  set -e
   mkdir -p out/release
   cd out/release
-  env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w"
+  env CC=gcc CXX="g++" cmake ../../src -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   echo "make -j$procs"
   make -j $procs
   rm -rf ./tests/  # we don't need tests
