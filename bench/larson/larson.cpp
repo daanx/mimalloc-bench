@@ -75,6 +75,7 @@ void QueryPerformanceFrequency(long * x)
 #include  <ctype.h>
 #include  <time.h>
 #include  <assert.h>
+#include  <atomic>
 
 #define _REENTRANT 1
 #include <pthread.h>
@@ -158,7 +159,14 @@ void operator delete[](void *pUserData )
 #define MAX_THREADS     100
 #define MAX_BLOCKS  1000000
 
-int volatile  stopflag=FALSE ;
+// stopflag and thread_data::finished are shared between the main thread
+// (runthreads: sets stopflag, then spins on each finished) and the worker /
+// respawn threads (exercise_heap: reads stopflag, writes finished).  As plain
+// `volatile int` these accesses are an unsynchronized data race (UB) — volatile
+// provides neither atomicity nor inter-thread ordering.  ThreadSanitizer flags
+// the stopflag and finished races, and the race can strand a slot's `finished`
+// at FALSE after a respawn, hanging the completion loop forever.  Use atomics.
+std::atomic<int> stopflag{FALSE} ;
 
 struct lran2_st {
   long x, y, v[97];
@@ -184,7 +192,7 @@ typedef struct thr_data {
   long   cThreads ;
   long   cBytesAlloced ;
 
-  volatile int finished ;
+  std::atomic<int> finished ;   // was `volatile int`; raced main<->workers (see stopflag note above)
   struct lran2_st rgen ;
 
 } thread_data;
@@ -586,9 +594,14 @@ static void * exercise_heap( void *pinput)
   size_t        blk_size;
   int           range ;
 
-  if( stopflag ) return 0;
-
+  // A worker that starts after main has set stopflag=TRUE must still mark its slot
+  // finished, otherwise main's `while(!de_area[i].finished)` completion loop waits on
+  // it forever.  The original `return 0` left finished at its initial 0 — a hang that
+  // shows up when thread startup is slow enough to deliver a just-created worker after
+  // stopflag is set (the stuck slot has cThreads==cAllocs==0: it never entered the loop).
   pdea = (thread_data *)pinput ;
+  if( stopflag ){ pdea->finished = TRUE ; return 0; }
+
   pdea->finished = FALSE ;
   pdea->cThreads++ ;
   range = pdea->max_size - pdea->min_size ;
