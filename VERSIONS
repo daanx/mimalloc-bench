@@ -20,7 +20,7 @@ mng: master, master, https://github.com/richfelker/mallocng-draft
 pa: main, main, https://github.com/1c3t3a/partition_alloc_builder
 redis: 6.2.7, e6f6709, https://github.com/redis/redis
 rmalloc: master, master, https://github.com/newell-romario/rmalloc
-rocksdb: 10.10.1, 4595a5e9, https://github.com/facebook/rocksdb
+rocksdb: 11.1.2, 3b44608, https://github.com/facebook/rocksdb
 rp: master, c95b04d, https://github.com/mjansson/rpmalloc
 sc: master, master, https://github.com/cksystemsgroup/scalloc
 scudo: main, main, https://github.com/llvm/llvm-project
