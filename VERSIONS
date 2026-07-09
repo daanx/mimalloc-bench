@@ -5,7 +5,7 @@ gd: master, master, https://github.com/UTSASRG/Guarder
 hd: 6577c22b, 6577c22, https://github.com/emeryberger/Hoard
 hm: 11, 995ce07, https://github.com/GrapheneOS/hardened_malloc
 iso: 1.2.5, 2670d5f, https://github.com/struct/isoalloc
-je: 5.3.0, 54eaed1d, https://github.com/jemalloc/jemalloc
+je: master, 82e379b, https://github.com/jemalloc/jemalloc
 lean: 21d264a66d53b0a910178ae7d9529cb5886a39b6, 21d264a66, https://github.com/leanprover-community/lean
 lf: master, master, https://github.com/Begun/lockfree-malloc
 linux: 6.6.105, fe9731e1, https://github.com/torvalds/linux
