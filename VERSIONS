@@ -26,7 +26,7 @@ sc: master, master, https://github.com/cksystemsgroup/scalloc
 scudo: main, main, https://github.com/llvm/llvm-project
 sg: master, master, https://github.com/ssrg-vt/SlimGuard
 sm: master, master, https://github.com/kuszmaul/SuperMalloc
-sn: 0.7.1, 32495fd, https://github.com/Microsoft/snmalloc
+sn: 0.7.5, 526c55b, https://github.com/Microsoft/snmalloc
 tbb: v2023.0.0, ea2f73b, https://github.com/oneapi-src/oneTBB
 tcg: 98fd24303c7b5ef5e30da625f11fb623a5e038b6, 98fd2430, https://github.com/google/tcmalloc
 tc: gperftools-2.16.90, 83edb60, https://github.com/gperftools/gperftools
