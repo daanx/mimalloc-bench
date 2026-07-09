@@ -204,7 +204,8 @@ extern/nomesh/.built: extern/mesh/.unpacked
 extern/rmalloc/.built: extern/rmalloc/.configured
 
 extern/rmalloc/.configured: extern/rmalloc/.unpacked
-	cmake -S $(@D) -B $(@D)
+	cmake --preset linux-release
+	cmake --build --preset linux-release
 	touch $@
 
 #rp: uses ninja, one fix in build.ninja
