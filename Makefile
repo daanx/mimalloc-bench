@@ -223,10 +223,10 @@ extern/sc/.built: extern/sc/Makefile
 	make -C $(@D) $(sc_ENV) -j$(PROCS)
 	touch $@
 
-extern/sc/Makefile: extern/sc/build/gyp/gyp
+extern/sc/Makefile: extern/sc/tools/gyp
 	cd $(@D) && tools/gyp --depth=. scalloc.gyp
 
-extern/sc/build/gyp/gyp: extern/sc/.unpacked
+extern/sc/tools/gyp: extern/sc/.unpacked
 	cd extern/sc && tools/make_deps.sh
 
 #scudo: partial checkout, native clang, in a sub-directory
