@@ -13,6 +13,7 @@ lp: main, main, https://github.com/WebKit/WebKit
 lt: master, master, https://github.com/r-lyeh-archived/ltalloc
 lua: v5.4.7, 1ab3208a, https://github.com/lua/lua
 mesh: master, master, https://github.com/plasma-umass/mesh
+mi3: v3.3.2, 30b2d9d, https://github.com/microsoft/mimalloc
 mi2: v2.1.2, 43ce4bd7, https://github.com/microsoft/mimalloc
 mi: v1.8.2, b66e3214, https://github.com/microsoft/mimalloc
 mng: master, master, https://github.com/richfelker/mallocng-draft

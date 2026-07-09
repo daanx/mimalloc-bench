@@ -26,7 +26,7 @@ SHA256SUM_FLAGS=-c -s
 endif
 
 BENCHMARKS_EXTERN=lean linux lua redis rocksdb
-ALLOCS = dh ff fg gd hd hm iso je lf lp lt mesh mi mi2 mng nomesh rmalloc rp sc scudo sg sm sn tbb tc tcg yal
+ALLOCS = dh ff fg gd hd hm iso je lf lp lt mesh mi mi2 mi3 mng nomesh rmalloc rp sc scudo sg sm sn tbb tc tcg yal
 PDFDOC=extern/large.pdf
 
 ########################################################################
@@ -182,7 +182,7 @@ extern/lp/.unpacked:
 	touch $@
 
 # mi,mi2: cmake, and 3 different variants
-extern/mi/.built extern/mi2/.built: extern/%/.built: extern/%/.unpacked
+extern/mi/.built extern/mi2/.built extern/mi3/.built: extern/%/.built: extern/%/.unpacked
 	cmake -S $(@D) -B $(@D)/out/release
 	cmake --build $(@D)/out/release -j$(PROCS)
 	cmake -S $(@D) -B $(@D)/out/debug -DMI_CHECK_FULL=ON

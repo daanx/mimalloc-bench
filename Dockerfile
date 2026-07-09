@@ -20,8 +20,9 @@ RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
   dos2unix bc gmp-devel wget gawk cmake python3 ruby ninja-build libtool \
   autoconf git patch time sed ghostscript libatomic libstdc++ which \
   gflags-devel xz readline-devel snappy-devel
-RUN dnf -y --quiet copr enable ohadm/bazel
-RUN dnf -y --quiet --nodocs install bazel8
+# Install bazel - off for now, only tcg needs it and that's not building anyway
+#RUN dnf -y --quiet copr enable ohadm/bazel
+#RUN dnf -y --quiet --nodocs install bazel8
 
 FROM alpine:latest AS alpine
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
