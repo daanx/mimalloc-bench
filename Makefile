@@ -223,7 +223,7 @@ extern/sc/.built: extern/sc/Makefile
 	touch $@
 
 extern/sc/Makefile: extern/sc/build/gyp/gyp
-	cd $(@D) && build/gyp/gyp --depth=. scalloc.gyp
+	cd $(@D) && tools/gyp --depth=. scalloc.gyp
 
 extern/sc/build/gyp/gyp: extern/sc/.unpacked
 	cd extern/sc && tools/make_deps.sh
