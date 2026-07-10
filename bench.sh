@@ -6,10 +6,9 @@
 # Allocators and tests
 # --------------------------------------------------------------------
 
-readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mi3 mi3-sec mng mesh nomesh pa rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg mi3-dbg xmi xsmi xmi-dbg yal rmalloc"
-readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mi3-sec mng pa scudo sg sn-sec sg"
+readonly alloc_all="sys dh ff fg gd hd hm hml iso je lf lp lt mi mi-sec mi2 mi2-sec mi3 mi3-sec mng mesh nomesh pa rmalloc rp sc scudo sg sm sn sn-sec tbb tc tcg mi-dbg mi2-dbg mi3-dbg xmi xsmi xmi-dbg yal"
+readonly alloc_secure="dh ff gd hm hml iso mi-sec mi2-sec mng pa scudo sg sn-sec sg"
 alloc_run=""           # allocators to run (expanded by command line options)
-alloc_installed="sys"  # later expanded to include all installed allocators
 alloc_libs="sys="      # mapping from allocator to its .so as "<allocator>=<sofile> ..."
 
 readonly tests_all1="cfrac espresso barnes redis lean larson-sized mstress rptest gs lua"
@@ -25,14 +24,6 @@ tests_exclude=""
 readonly tests_exclude_macos="sh6bench sh8bench redis"
 
 # --------------------------------------------------------------------
-# benchmark versions
-# --------------------------------------------------------------------
-
-readonly version_redis=6.2.7
-readonly version_rocksdb=10.10.1
-readonly version_linux=6.5.1
-
-# --------------------------------------------------------------------
 # Environment
 # --------------------------------------------------------------------
 
@@ -46,6 +37,8 @@ procs=8
 repeats=1          # repeats of all tests
 test_repeats=1     # repeats per test
 sleep=0            # mini sleeps between tests seem to improve stability
+error=0            # binary marker for errors during the run
+failed_runs=""     # accumulated failed runs
 case "$OSTYPE" in
   darwin*) 
     darwin="1"
@@ -69,7 +62,7 @@ esac
 # --------------------------------------------------------------------
 
 readonly curdir=`pwd`
-if ! test -f ../../build-bench-env.sh; then
+if ! test -f ../../bench.sh; then
   echo "error: you must run this script from the 'out/bench' directory!"
   exit 1
 fi
@@ -93,12 +86,12 @@ function alloc_lib_add {  # <allocator> <variable> <librarypath>
   alloc_libs="$1=$2 $alloc_libs"
 }
 
-readonly lib_rp="`find ${localdevdir}/rp/bin/*/release -name librpmallocwrap$extso 2> /dev/null`"
+readonly lib_rp="`find ${localdevdir}/rp/bin/*/release -name librpmalloc$extso 2> /dev/null`"
 readonly lib_tbb="$localdevdir/tbb/bench_release/libtbbmalloc_proxy$extso"
 readonly lib_tbb_dir="$(dirname $lib_tbb)"
 
 
-alloc_lib_add "dh"     "$localdevdir/dh/src/build/libdieharder$extso"
+alloc_lib_add "dh"     "$localdevdir/dh/build/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
 alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
@@ -110,9 +103,9 @@ alloc_lib_add "je"     "$localdevdir/je/lib/libjemalloc$extso"
 alloc_lib_add "lf"     "$localdevdir/lf/liblite-malloc-shared$extso"
 alloc_lib_add "lp"     "$localdevdir/lp/Source/bmalloc/libpas/build-cmake-default/Release/libpas_lib$extso"
 alloc_lib_add "lt"     "$localdevdir/lt/gnu.make.lib/libltalloc$extso"
-alloc_lib_add "mesh"   "$localdevdir/mesh/build/lib/libmesh$extso"
+alloc_lib_add "mesh"   "$localdevdir/mesh/bazel-bin/src/libmesh$extso"
 alloc_lib_add "mng"    "$localdevdir/mng/libmallocng$extso"
-alloc_lib_add "nomesh" "$localdevdir/nomesh/build/lib/libmesh$extso"
+alloc_lib_add "nomesh" "$localdevdir/nomesh/bazel-bin/src/libmesh$extso"
 alloc_lib_add "pa"     "$localdevdir/pa/partition_alloc_builder/out/Default/libpalib$extso"
 alloc_lib_add "rp"     "$lib_rp"
 alloc_lib_add "sc"     "$localdevdir/sc/out/Release/lib.target/libscalloc$extso"
@@ -167,10 +160,10 @@ fi
 readonly luadir="$localdevdir/lua"
 readonly leandir="$localdevdir/lean"
 readonly leanmldir="$leandir/../mathlib"
-readonly redis_dir="$localdevdir/redis-$version_redis/src"
+readonly redis_dir="$localdevdir/redis/src"
 readonly pdfdoc="$localdevdir/large.pdf" 
-readonly rocksdb_dir="$localdevdir/rocksdb-$version_rocksdb"
-readonly linux_dir="$localdevdir/linux-$version_linux"
+readonly rocksdb_dir="$localdevdir/rocksdb"
+readonly linux_dir="$localdevdir/linux"
 
 readonly spec_dir="$localdevdir/../../spec2017"
 readonly spec_base="base"
@@ -197,24 +190,46 @@ function contains {  # <string> <substring>   does string contain substring?
   return 1
 }
 
-function is_installed {  # <allocator>
-  contains "$alloc_installed" $1
+function get_so_path () { # <alloc> : name of alloc to look up in alloc_libs
+  for entry in $alloc_libs; do
+    entry_name="${entry%=*}"
+    entry_lib="${entry#*=}"
+    if test "$entry_name" = "$1"; then
+      echo "$entry_lib"
+    fi
+  done
+}
+
+function alloc_is_installed { # <path> : path to .$extso-file
+  if [ ! -f "$1" ]; then
+    return 1
+  fi
+  tmp=$(LD_PRELOAD="$1" /bin/true &>/dev/null)
+  if [ "$?" -ne 0 ]; then
+    echo "failed to LD_PRELOAD a selected allocator: $1"
+    return 1
+  fi
+  return 0
 }
 
 function alloc_run_add {  # <allocator>   :add to runnable
-  alloc_run="$alloc_run $1"
+  if test "$1" = "sys"; then
+    alloc_run="$alloc_run $1"
+    return
+  fi
+  if alloc_is_installed $(get_so_path "$1"); then
+    alloc_run="$alloc_run $1"
+  fi
 }
 
 function alloc_run_remove {   # <allocator>  :remove from runnables
-  if contains "$alloc_run" "$1"; then
-    alloc_run_old="$alloc_run"
-    alloc_run=""
-    for s in $alloc_run_old; do
-      if [ "$s" != "$1" ]; then
-        alloc_run_add "$s"
-      fi
-    done
-  fi
+  alloc_run_old="$alloc_run"
+  alloc_run=""
+  for s in $alloc_run_old; do
+    if [ "$s" != "$1" ]; then
+      alloc_run_add "$s"
+    fi
+  done
 }
 
 function alloc_run_add_remove { # <allocator> <add?> 
@@ -224,25 +239,6 @@ function alloc_run_add_remove { # <allocator> <add?>
     alloc_run_remove "$1"
   fi
 }
-
-# read in the installed allocators
-while read word _; do alloc_installed="$alloc_installed ${word%:*}"; done < ${localdevdir}/versions.txt
-if is_installed "mi"; then
-  alloc_installed="$alloc_installed mi-sec mi-dbg"   # secure mimalloc
-fi
-if is_installed "mi2"; then
-  alloc_installed="$alloc_installed mi2-sec mi2-dbg"   # secure mimalloc
-fi
-if is_installed "mi3"; then
-  alloc_installed="$alloc_installed mi3-sec mi3-dbg"   # secure mimalloc
-fi
-if is_installed "hm"; then
-  alloc_installed="$alloc_installed hml"   # hardened_malloc light
-fi
-if is_installed "sn"; then
-  alloc_installed="$alloc_installed sn-sec"   # secure snmalloc
-fi
-
 
 alloc_lib=""
 function alloc_lib_set {  # <allocator>
@@ -263,15 +259,13 @@ function tests_run_add {  # <tests>   :add to runnable tests
 }
 
 function tests_run_remove {   # <test>  :remove from runnable tests
-  if contains "$tests_run" "$1"; then
-    tests_run_old="$tests_run"
-    tests_run=""
-    for tst in $tests_run_old; do
-      if [ "$tst" != "$1" ]; then
-        tests_run_add "$tst"
-      fi
-    done
-  fi
+  tests_run_old="$tests_run"
+  tests_run=""
+  for tst in $tests_run_old; do
+    if [ "$tst" != "$1" ]; then
+      tests_run_add "$tst"
+    fi
+  done
 }
 
 function tests_run_add_remove { # <test> <add?> 
@@ -328,10 +322,7 @@ while : ; do
   esac
 
   if contains "$alloc_all" "$flag"; then
-    if ! contains "$alloc_installed" "$flag"; then
-      warning "allocator '$flag' selected but it seems it is not installed ($alloc_installed)"
-    fi
-    alloc_run_add_remove "$flag" "$flag_arg"    
+    alloc_run_add_remove "$flag" "$flag_arg"
   else
     if contains "$tests_all" "$flag"; then
       tests_run_add_remove "$flag" "$flag_arg"
@@ -340,17 +331,13 @@ while : ; do
         "") break;;
         alla)
             # use all installed allocators (iterate to maintain order as specified in alloc_all)
-            for alloc in $alloc_all; do 
-              if is_installed "$alloc"; then
-                alloc_run_add_remove "$alloc" "$flag_arg"
-              fi
+            for alloc in $alloc_all; do
+              alloc_run_add_remove "$alloc" "$flag_arg"
             done;;
         allsa)
             # use all "secure" installed allocators (iterate to maintain order as specified in alloc_secure)
             for alloc in $alloc_secure; do 
-              if is_installed "$alloc"; then
-                alloc_run_add_remove "$alloc" "$flag_arg"
-              fi
+              alloc_run_add_remove "$alloc" "$flag_arg"
             done;;
         allt)
             for tst in $tests_allt; do
@@ -569,16 +556,27 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     redis*)
        echo "start server"
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
-       sleep 1s
-       $redis_dir/redis-cli flushall
-       sleep 1s
+       tmpfile=$(mktemp)
+       (
+         $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"
+         echo $? > "$tmpfile"
+       ) &
+       sleep 0.1
+       if [ -s "$tmpfile" ]; then
+         error="1"
+         failed_runs+="$1:$2 "
+         return
+       fi
+       rm -f "$tmpfile"
+       while true; do
+         $redis_dir/redis-cli flushall > /dev/null 2>&1
+         if test "$?" = "0"; then
+           break
+         fi
+       done
        $4 >> "$outfile"
-       sleep 1s
-       $redis_dir/redis-cli flushall
-       sleep 1s
-       $redis_dir/redis-cli shutdown
-       sleep 1s
+       $redis_dir/redis-cli flushall > /dev/null
+       $redis_dir/redis-cli shutdown 2> /dev/null
        ;;
     security)
        echo $2 >> $outfile
@@ -612,7 +610,12 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        done
        ;;
     *)
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile"
+       if test "$?" != "0"; then
+         error="1"
+         failed_runs+="$1:$2 "
+       fi
+       ;;
   esac
 
   # fixup larson with relative time
@@ -808,3 +811,8 @@ do
     echo ""
   fi
 done
+
+if test "$error" != "0"; then
+  echo "Failed tests: $failed_runs"
+  exit 1
+fi
