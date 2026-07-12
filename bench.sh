@@ -545,9 +545,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       popd;;
     mathlib)
       echo "preprocess..."
-      pushd "../lean/out/release"
-      make clean-olean
-      popd;;
+      make -C ../lean/out/release clean-olean;;
     lua)
       pushd "$luadir"
       make clean
