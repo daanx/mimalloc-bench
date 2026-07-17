@@ -47,6 +47,7 @@ readonly version_iso=1.2.5
 readonly version_je=5.3.1
 readonly version_lf=master   # ~unmaintained since 2018
 readonly version_lp=main
+readonly version_kp=v1.0.2
 readonly version_lt=master   # ~unmaintained since 2019
 readonly version_mesh=master # ~unmaintained since 2021
 readonly version_mi=v1.8.2
@@ -97,6 +98,7 @@ setup_mi3=0
 setup_mng=0
 setup_nomesh=0
 setup_pa=0
+setup_kp=0
 setup_rp=0
 setup_sc=0
 setup_scudo=0
@@ -135,6 +137,7 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
+        setup_kp=$flag_arg
         setup_dh=$flag_arg
         setup_ff=$flag_arg
         setup_fg=$flag_arg
@@ -230,6 +233,8 @@ while : ; do
         setup_rocksdb=$flag_arg;;
     linux)
         setup_linux=$flag_arg;;
+    kp)
+        setup_kp=$flag_arg;;
     rp)
         setup_rp=$flag_arg;;
     sc)
@@ -281,6 +286,7 @@ while : ; do
         echo "  mng                          setup mallocng ($version_mng)"
         echo "  nomesh                       setup mesh allocator w/o meshing ($version_mesh)"
         echo "  pa                           setup PartitionAlloc ($version_pa)"
+        echo "  kp                           setup kamepoolalloc ($version_kp)"
         echo "  rp                           setup rpmalloc ($version_rp)"
         echo "  sc                           setup scalloc ($version_sc)"
         echo "  scudo                        setup scudo ($version_scudo)"
@@ -651,6 +657,13 @@ if test "$setup_je" = "1"; then
   make -j $procs
   [ "$CI" ] && rm -rf ./src/*.o  # jemalloc has like ~100MiB of object files
   [ "$CI" ] && rm -rf ./lib/*.a  # jemalloc produces 80MiB of static files
+  popd
+fi
+
+if test "$setup_kp" = "1"; then
+  checkout kp $version_kp https://github.com/northriv/kamepoolalloc
+  cmake -B out -DCMAKE_BUILD_TYPE=Release
+  cmake --build out --parallel $procs
   popd
 fi
 
