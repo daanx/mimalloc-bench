@@ -75,6 +75,7 @@ readonly version_mathlib=release_812
 readonly version_rocksdb=10.10.1
 readonly version_lua=v5.4.7
 readonly version_linux=6.5.1
+readonly version_bazel=8.8.0
 
 # HTTP-downloaded files checksums
 readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
@@ -431,7 +432,8 @@ function aptinstallbazel {
   $SUDO mv bazel-archive-keyring.gpg /usr/share/keyrings
   echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | $SUDO tee /etc/apt/sources.list.d/bazel.list
   $SUDO apt update -qq
-  aptinstall bazel
+  aptinstall bazel-$version_bazel
+  $SUDO ln -sf /usr/bin/bazel-$version_bazel /usr/bin/bazel
 }
 
 function dnfinstallbazel {
@@ -635,7 +637,7 @@ fi
 if test "$setup_tcg" = "1"; then
   checkout tcg $version_tcg https://github.com/google/tcmalloc
   if command -v bazelisk > /dev/null; then
-    bazelisk build -c opt tcmalloc
+    USE_BAZEL_VERSION=$version_bazel bazelisk build -c opt tcmalloc
   else
     bazel build -c opt tcmalloc
   fi
