@@ -465,14 +465,14 @@ if test "$setup_packages" = "1"; then
   if grep -q 'ID=fedora' /etc/os-release 2>/dev/null; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
-      cmake python3 ruby ninja-build libtool autoconf git patch time sed \
+      cmake python3 ruby cargo ninja-build libtool autoconf git patch time sed \
       ghostscript libatomic libstdc++ libstdc++-static which gflags-devel xz readline-devel snappy-devel"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
     aptinstall "build-essential git gpg g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
-      cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
+      cmake python3 ruby cargo ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
       liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux"
     aptinstallbazel
@@ -480,14 +480,14 @@ if test "$setup_packages" = "1"; then
     echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
-      samurai libtool git build-base linux-headers autoconf util-linux sed \
+      samurai libtool git cargo build-base linux-headers autoconf util-linux sed \
       ghostscript libatomic gflags-dev readline-dev snappy-dev"
     apkinstall "bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
-      ghostscript bazelisk gflags snappy"
+      ghostscript bazelisk gflags snappy rust"
   elif grep -q 'Arch Linux' /etc/os-release; then
-    sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy
+    sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy rust
   fi
 fi
 
