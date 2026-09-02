@@ -657,7 +657,8 @@ fi
 if test "$setup_je" = "1"; then
   checkout je $version_je https://github.com/jemalloc/jemalloc
   if grep -q 'std::__throw_bad_alloc' src/jemalloc_cpp.cpp; then
-    patch -p1 < ../../patches/jemalloc.patch
+    sed -i 's/std::__throw_bad_alloc();/throw std::bad_alloc();/g' src/jemalloc_cpp.cpp
+    ! grep -q 'std::__throw_bad_alloc' src/jemalloc_cpp.cpp
   fi
   if test -f config.status; then
     echo "$devdir/jemalloc is already configured; no need to reconfigure"
