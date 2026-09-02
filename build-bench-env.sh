@@ -436,11 +436,9 @@ function aptinstallbazel {
 
 function dnfinstallbazel {
   echo ""
-  echo "> installing bazel"
+  echo "> installing bazelisk"
   echo ""
-  dnfinstall dnf-plugins-core
-  $SUDO dnf copr -y enable vbatts/bazel
-  dnfinstall bazel5
+  dnfinstall bazelisk
 }
 
 if test "$all" = "1"; then
@@ -461,8 +459,7 @@ if test "$setup_packages" = "1"; then
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby ninja-build libtool autoconf git patch time sed \
       ghostscript libatomic libstdc++ libstdc++-static which gflags-devel xz readline-devel snappy-devel"
-    # bazel5 is broken on the copr: https://github.com/bazelbuild/bazel/issues/19295
-    #dnfinstallbazel
+    dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
@@ -634,7 +631,11 @@ fi
 
 if test "$setup_tcg" = "1"; then
   checkout tcg $version_tcg https://github.com/google/tcmalloc
-  bazel build -c opt tcmalloc
+  if command -v bazelisk > /dev/null; then
+    bazelisk build -c opt tcmalloc
+  else
+    bazel build -c opt tcmalloc
+  fi
   popd
 fi
 
