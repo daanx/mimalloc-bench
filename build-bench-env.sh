@@ -495,7 +495,9 @@ fi
 if test "$setup_hm" = "1"; then
   checkout hm $version_hm https://github.com/GrapheneOS/hardened_malloc
   if grep -q 'std::__throw_bad_alloc' new.cc; then
-    patch -p1 < ../../patches/hardened_malloc.patch
+    sed -i '/^#include <bits\/functexcept.h>$/d' new.cc
+    sed -i 's/std::__throw_bad_alloc();/throw std::bad_alloc();/g' new.cc
+    ! grep -q 'std::__throw_bad_alloc' new.cc
   fi
   make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=light -j $procs
   make CONFIG_NATIVE=true CONFIG_WERROR=false VARIANT=default -j $procs
