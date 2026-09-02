@@ -3,10 +3,10 @@ ARG platform=ubuntu
 FROM ubuntu:24.04 AS ubuntu
 
 
-FROM fedora:latest AS fedora
+FROM fedora:44 AS fedora
 
 
-FROM alpine:latest AS alpine
+FROM alpine:3.24 AS alpine
 RUN apk add --no-cache bash
 
 
