@@ -77,6 +77,7 @@ readonly version_rocksdb=10.10.1
 readonly version_lua=v5.4.7
 readonly version_linux=6.5.1
 readonly version_bazel=8.8.0
+readonly version_rust=1.87.0
 
 # HTTP-downloaded files checksums
 readonly sha256sum_sh6bench="506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1"
@@ -472,9 +473,10 @@ if test "$setup_packages" = "1"; then
     echo "updating package database... ($SUDO apt update)"
     $SUDO apt update -qq
     aptinstall "build-essential git gpg g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
-      cmake python3 ruby cargo ninja-build libtool autoconf sed ghostscript time \
+      cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
       liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain $version_rust
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
@@ -718,7 +720,11 @@ fi
 
 if test "$setup_s" = "1"; then
   checkout s $version_s https://github.com/zooko/smalloc
-  cargo build --release --package smalloc-ffi
+  cargo_cmd=cargo
+  if test -x "$HOME/.cargo/bin/cargo"; then
+    cargo_cmd="$HOME/.cargo/bin/cargo"
+  fi
+  "$cargo_cmd" build --release --package smalloc-ffi
   popd
 fi
 
