@@ -29,3 +29,29 @@ index b4529df92..f58d3c618 100644
  #include <string>
  
  namespace lean {
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index b4529df92..f58d3c618 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -141,4 +141,4 @@
+ # Windows does not support ulimit -s unlimited. So, we reserve a lot of stack space: 100Mb
+-if((${CYGWIN} EQUAL "1") OR (${CMAKE_SYSTEM_NAME} MATCHES "Windows"))
++if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   message(STATUS "Windows detected")
+   set(LEAN_WIN_STACK_SIZE "104857600")
+@@ -301,6 +301,6 @@
+ # DL
+ if (EMSCRIPTEN)
+     # no dlopen
+-elseif((${CYGWIN} EQUAL "1") OR (${CMAKE_SYSTEM_NAME} MATCHES "Windows"))
++elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   # TODO(Jared): config dlopen windows support
+ else()
+@@ -353,5 +353,5 @@
+ endif()
+ set(CMAKE_EXE_LINKER_FLAGS_TESTCOV "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
+-if ((${CYGWIN} EQUAL "1") OR (${CMAKE_SYSTEM_NAME} MATCHES "Windows"))
++if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--export-all")
+ endif()
