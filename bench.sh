@@ -562,7 +562,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     redis*)
        echo "start server"
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %e %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
        sleep 1s
        $redis_dir/redis-cli flushall
        sleep 1s
@@ -605,7 +605,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        done
        ;;
     *)
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %e %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
   esac
 
   # fixup larson with relative time
