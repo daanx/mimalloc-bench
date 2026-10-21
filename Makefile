@@ -62,7 +62,7 @@ extern/gd/.built: extern/gd/.unpacked
 	touch $@
 endif
 
-.PHONY: all allocs benchmarks benchmarks_all benchmarks_big
+.PHONY: all allocs benchmarks benchmarks_all benchmarks_big clean-archives
 
 benchmarks: bench/CMakeLists.txt bench/shbench/sh6bench-new.c bench/shbench/sh8bench-new.c $(PDFDOC)
 	cmake -B out/bench -S bench
@@ -116,23 +116,38 @@ extern/%/.built: extern/%/.unpacked
 
 dh_TAR_FLAG=--wildcards --exclude=*/docs --exclude=*/benchmarks --exclude=*/src/{exterminator,local,replicated}
 sm_TAR_FLAG=--wildcards --exclude=*/{.junk,benchmarks,coverage,debug,doc,other-mallocs,paper,short-talk,talk,tests,tools}
-extern/%/.unpacked: archives/%.tar.gz
-	mkdir -p $(@D)
-	tar -x --strip-components=1 --overwrite -f $< -C $(@D) $($*_TAR_FLAG)
-	touch $@
 
 define parse_version =
 	$(eval $1_URL		:= $(shell grep "^$(1):" VERSIONS | cut -d, -f3))
 	$(eval $1_VERSION	:= $(shell grep "^$(1):" VERSIONS | cut -d, -f2| tr -d ' '))
+	$(eval $1_LABEL		:= $(shell grep "^$(1):" VERSIONS | cut -d, -f1 | cut -d: -f2 | tr -d ' '))
 endef
 
 $(foreach alloc,$(ALLOCS),$(eval $(call parse_version,$(alloc))))
 $(foreach bench,$(BENCHMARKS_EXTERN),$(eval $(call parse_version,$(bench))))
 
-.PRECIOUS: archives/%.tar.gz
-archives/%.tar.gz:
+label_of = $($(1)_LABEL)
+
+projects := $(filter-out lp scudo nomesh,$(ALLOCS) $(BENCHMARKS_EXTERN))
+archives := $(foreach project,$(projects),archives/$(project)-$($(project)_LABEL).tar.gz)
+clones := $(foreach project,lp scudo,archives/$(project)-$($(project)_LABEL).clone)
+
+$(archives): archives/%.tar.gz:
 	mkdir -p $(@D)
-	wget -O $@ $($*_URL)/archive/$($*_VERSION).tar.gz
+	wget -O $@ $($(firstword $(subst -, ,$*))_URL)/archive/$($(firstword $(subst -, ,$*))_VERSION).tar.gz
+
+$(clones): archives/%.clone:
+	mkdir -p $(@D)
+	echo $* > $@
+
+.SECONDEXPANSION:
+extern/%/.unpacked: archives/%-$$(call label_of,$$*).tar.gz
+	mkdir -p $(@D)
+	tar -x --strip-components=1 --overwrite -f $< -C $(@D) $($*_TAR_FLAG)
+	echo "$($*_LABEL) $($*_VERSION)" > $@
+
+clean-archives:
+	rm -f $(filter-out $(archives) $(clones),$(wildcard archives/*))
 
 ########################################################################
 # ALLOCS: nontrivial cases
@@ -174,12 +189,16 @@ extern/lp/.built: extern/lp/.unpacked
 	cd $(@D)/Source/bmalloc/libpas && CC=clang CXX=clang++ LDFLAGS='-lpthread -latomic -pthread' bash ./build.sh -s cmake -v default -t pas_lib
 	touch $@
 
-extern/lp/.unpacked:
-	git clone --depth 1 --single-branch -b $(lp_VERSION) --sparse --filter=blob:none $(lp_URL) $(@D)
-	cd $(@D) && git sparse-checkout add Source/bmalloc/libpas
+extern/lp/.unpacked: archives/lp-$(lp_LABEL).clone
+	rm -rf $(@D)
+	git clone --depth 1 --no-checkout --filter=blob:none $(lp_URL) $(@D)
+	printf '/*\n!/*/\n/Source/bmalloc/libpas/*\n' > $(@D)/.git/info/sparse-checkout
+	git -C $(@D) config core.sparseCheckout true
+	git -C $(@D) fetch --depth 1 origin $(lp_VERSION)
+	git -C $(@D) checkout --detach FETCH_HEAD
 	cd $(@D)/Source/bmalloc/libpas && sed -i $(ORIG) 's/extra_cmake_options=""/extra_cmake_options="-D_GNU_SOURCE=1"/' build.sh
 	cd $(@D)/Source/bmalloc/libpas && sed -i $(ORIG) 's/cmake --build $$build_dir --parallel/cmake --build $$build_dir --target pas_lib --parallel/' build.sh
-	touch $@
+	echo "$(lp_LABEL) $(lp_VERSION)" > $@
 
 # mi,mi2: cmake, and 3 different variants
 extern/mi/.built extern/mi2/.built extern/mi3/.built: extern/%/.built: extern/%/.unpacked
@@ -236,10 +255,14 @@ extern/sc/tools/gyp: extern/sc/.unpacked
 	cd extern/sc && tools/make_deps.sh
 
 #scudo: partial checkout, native clang, in a sub-directory
-extern/scudo/.unpacked:
-	git clone --depth 1 --single-branch -b $(scudo_VERSION) --sparse --filter=blob:none $(scudo_URL) $(@D)
-	cd $(@D) && git sparse-checkout add compiler-rt/lib/scudo/standalone
-	touch $@
+extern/scudo/.unpacked: archives/scudo-$(scudo_LABEL).clone
+	rm -rf $(@D)
+	git clone --depth 1 --no-checkout --filter=blob:none $(scudo_URL) $(@D)
+	printf '/*\n!/*/\n/compiler-rt/lib/scudo/standalone/*\n' > $(@D)/.git/info/sparse-checkout
+	git -C $(@D) config core.sparseCheckout true
+	git -C $(@D) fetch --depth 1 origin $(scudo_VERSION)
+	git -C $(@D) checkout --detach FETCH_HEAD
+	echo "$(scudo_LABEL) $(scudo_VERSION)" > $@
 
 extern/scudo/.built: extern/scudo/.unpacked
 	cd $(@D)/compiler-rt/lib/scudo/standalone && clang++ -flto -fuse-ld=lld -fPIC -fno-exceptions $(CXXFLAGS) -fno-rtti -fvisibility=internal -O3 -I include -shared -o libscudo.$(EXTSO) *.cpp

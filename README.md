@@ -135,8 +135,8 @@ profiles before building.
 ## Current Allocators
 
 Supported allocators are as follow, see
-[build-bench-env.sh](https://github.com/daanx/mimalloc-bench/blob/master/build-bench-env.sh)
-for the versions:
+[VERSIONS](VERSIONS)
+for the pinned versions:
 
 - **dieharder**: The [_DieHarder_](https://github.com/emeryberger/DieHard)
   allocator is an error-resistant memory allocator for Windows, Linux, and Mac
