@@ -541,16 +541,10 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   infile="/dev/null"
 #  outfile="/dev/null"
   case "$1" in
-    lean*)
-      echo "preprocess..."
-      make -C "$leandir/out/release" clean-olean;;
-    mathlib)
-      echo "preprocess..."
-      make -C ../lean/out/release clean-olean;;
+    mathlib|lean*)
+      make -C $leandir/out/release clean-olean > /dev/null 2>&1;;
     lua)
-      pushd "$luadir"
-      make clean
-      popd;;
+      make -C $luadir clean > /dev/null;;
     spec-*)
       readonly spec_subdir="${1#*-}"
       set_spec_bench_dir "$spec_dir/benchspec/CPU/$spec_subdir/run/run_${spec_base}_${spec_bench}_${spec_config}"
@@ -562,10 +556,8 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       infile="$benchdir/barnes/input";;
     linux)
       builddir="/tmp/linux_build"
-      pushd "$linux_dir"
       mkdir -p $builddir
-      make O=$builddir distclean allnoconfig -j $procs
-      popd;;
+      make -C $linux_dir O=$builddir distclean allnoconfig -j $procs > /dev/null;;
   esac
   case "$1" in
     redis*)
