@@ -543,9 +543,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     lean*)
       echo "preprocess..."
-      pushd "../out/release"
-      make clean-olean
-      popd;;
+      make -C "$leandir/out/release" clean-olean;;
     mathlib)
       echo "preprocess..."
       make -C ../lean/out/release clean-olean;;
