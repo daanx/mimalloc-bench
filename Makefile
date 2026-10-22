@@ -25,7 +25,7 @@ ifneq ($(shell grep -e 'ID=alpine' /etc/os-release),)
 SHA256SUM_FLAGS=-c -s
 endif
 
-BENCHMARKS_EXTERN=lean linux lua redis rocksdb
+BENCHMARKS_EXTERN=lean linux lua mathlib redis rocksdb
 ALLOCS = dh ff fg gd hd hm iso je kp lf lp lt mesh mi mi2 mi3 mng nomesh rmalloc rp s sc scudo sg sm sn tbb tc tcg yal
 PDFDOC=extern/large.pdf
 
@@ -320,14 +320,16 @@ extern/yal/.built: extern/yal/.unpacked
 ########################################################################
 # benchmarks residing in ./extern                                      #
 ########################################################################
-# lean: cmake, additional mathlib setup
+# lean: cmake
 extern/lean/.built: extern/lean/.unpacked
 	patch -d $(@D) -p1 -N -r- < patches/lean.patch
 	mkdir -p $(@D)/out/release
 	env CC=gcc CXX="g++" cmake -S $(@D)/src -B $(@D)/out/release -DCUSTOM_ALLOCATORS=OFF -DLEAN_EXTRA_CXX_FLAGS="-w" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 	make -C $(@D)/out/release -j$(PROCS) bin_lean
-	mkdir -p extern/mathlib
-	cp -u $(@D)/leanpkg/leanpkg.toml extern/mathlib
+	touch $@
+
+# mathlib only needs to be fetched; the benchmark itself builds it via leanpkg
+extern/mathlib/.built: extern/mathlib/.unpacked
 	touch $@
 
 # lua only needs to be fetched, not more.

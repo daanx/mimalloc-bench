@@ -13,6 +13,7 @@ linux:   6.6.105,            fe9731e100041bb2cc186717bde3e05ca175623b, https://g
 lp:      38fd6ffa,           38fd6ffa2cc41a0551addec71174c63f7c40648f, https://github.com/WebKit/WebKit
 lt:      d31b0c92,           d31b0c92d37bb0bf6f0c28a6e8dc2b9978bc8ef3, https://github.com/r-lyeh-archived/ltalloc
 lua:     v5.4.7,             1ab3208a1fceb12fca8f24ba57d6e13c5bff15e3, https://github.com/lua/lua
+mathlib: release_812,        9f55d0d4363ae59948c33864cbc52e0b12e0e8ce, https://github.com/leanprover-community/mathlib3
 mesh:    1f298380,           1f298380f4d49ed8852c2ab23d461ef0bd835c92, https://github.com/plasma-umass/mesh
 mi3:     v3.3.2,             30b2d9d89099bee08e9f67a1ffb3e12e7ba45227, https://github.com/microsoft/mimalloc
 mi2:     v2.1.2,             43ce4bd7fd34bcc730c1c7471c99995597415488, https://github.com/microsoft/mimalloc
