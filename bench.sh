@@ -47,6 +47,7 @@ procs=8
 repeats=1          # repeats of all tests
 test_repeats=1     # repeats per test
 sleep=0            # mini sleeps between tests seem to improve stability
+run_limit=0        # time limit per run in seconds (0 = unlimited)
 error=0            # binary marker for errors during the run
 failed_runs=""     # accumulated failed runs
 case "$OSTYPE" in
@@ -377,6 +378,8 @@ while : ; do
             test_repeats="$flag_arg";;
         -s=*|--sleep=*)
             sleep="$flag_arg";;
+        -T=*|--timeout=*)
+            run_limit="$flag_arg";;
         -v|--verbose)
             verbose="yes";;
         -h|--help|-\?|help|\?)
@@ -389,6 +392,7 @@ while : ; do
             echo "  -r=<n>                       number of repeats of the full suite (=$repeats)"
             echo "  -n=<n>                       number of repeats of each individual test (=$test_repeats)"
             echo "  -s=<n>, --sleep=<n>          seconds of sleep between each test (=$sleep)"
+            echo "  -T=<n>, --timeout=<n>        time limit per run in seconds; on expiry the run's whole process group is killed and the run counts as failed (=$run_limit)"
             echo "  --external=<file>            read external allocators from <file>, one per line, in the format <name> <path>"
             echo ""
             echo "  allt                         run all tests"
@@ -456,6 +460,18 @@ while : ; do
   fi
   shift
 done
+
+# the timeout wrapper: timeout runs the command in its own process group and
+# signals that whole group on expiry, so no grandchild (make -j children,
+# lean --make workers, ...) can outlive a capped run
+run_wrap=""
+if test "$run_limit" != "0"; then
+  if test -z "$timeout_cmd"; then
+    warning "-T ignored: no timeout command found (on macOS: brew install coreutils)"
+  else
+    run_wrap="$timeout_cmd -k 10s ${run_limit}s"
+  fi
+fi
 
 echo "benchmarking on $procs cores."
 echo "use '-h' or '--help' for help on configuration options."
@@ -544,7 +560,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     sleep "$sleep"
   fi
   echo
-  echo "run $5: $1 $2: $3 $4"
+  echo "run $5: $1 $2: $3 $run_wrap $4"
   # clear temporary output
   if [ -f "$benchres.line" ]; then
     rm "$benchres.line"
@@ -605,7 +621,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
          wait "$serverjob" 2>/dev/null
          return
        fi
-       $4 >> "$outfile"
+       $run_wrap $4 >> "$outfile"
        $timeout_cmd 10s $redis_dir/redis-cli flushall > /dev/null
        $timeout_cmd 10s $redis_dir/redis-cli shutdown 2> /dev/null
        # a surviving server would silently serve the next allocator's run;
@@ -654,7 +670,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        done
        ;;
     *)
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile"
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $run_wrap $4 < "$infile" > "$outfile"
        if test "$?" != "0"; then
          error="1"
          failed_runs+="$1:$2 "
