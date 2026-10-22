@@ -7,7 +7,7 @@ RUN apt-get install -y --no-install-recommends build-essential git gpg \
   cmake python3 ruby ninja-build libtool autoconf sed ghostscript \
   time curl automake libatomic1 libgflags-dev libsnappy-dev cargo \
   zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libreadline-dev \
-  pkg-config gawk util-linux bsdextrautils
+  pkg-config gawk util-linux bsdextrautils flex bison libelf-dev
 # Install bazel
 RUN apt-get install -y --no-install-recommends apt-transport-https curl gnupg
 RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
@@ -19,7 +19,7 @@ FROM fedora:44 AS fedora
 RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
   dos2unix bc gmp-devel wget gawk cmake python3 ruby ninja-build libtool \
   autoconf git patch time sed ghostscript libatomic libstdc++ which \
-  gflags-devel xz readline-devel snappy-devel rust
+  gflags-devel xz readline-devel snappy-devel rust flex bison elfutils-libelf-devel
 # Install bazel - off for now, only tcg needs it and that's not building anyway
 #RUN dnf -y --quiet copr enable ohadm/bazel
 #RUN dnf -y --quiet --nodocs install bazel8
@@ -30,7 +30,8 @@ RUN apk update
 RUN apk add --no-cache bash
 RUN apk add -q clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
   automake gawk samurai libtool git build-base linux-headers autoconf \
-  util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev cargo
+  util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev cargo \
+  flex bison elfutils-dev
 RUN apk add -q bazel@testing
 
 FROM ${platform} AS bench-env

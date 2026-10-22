@@ -38,7 +38,7 @@ sudo apt-get install --no-install-recommends build-essential git gpg \
   cmake python3 ruby cargo ninja-build libtool autoconf sed ghostscript \
   time curl automake libatomic1 libgflags-dev libsnappy-dev \
   zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libreadline-dev \
-  pkg-config gawk util-linux bsdextrautils bazel-bootstrap
+  pkg-config gawk util-linux bsdextrautils bazel-bootstrap flex bison libelf-dev
 ```
 </details>
 
@@ -46,10 +46,11 @@ sudo apt-get install --no-install-recommends build-essential git gpg \
 	<summary>Fedora</summary>
 
 ```bash
-sudo dnf --nodocs gcc-c++ clang lld llvm-devel unzip dos2unix bc \
+sudo dnf --nodocs install gcc-c++ clang lld llvm-devel unzip dos2unix bc \
   gmp-devel wget gawk cmake python3 ruby ninja-build libtool autoconf \
   git patch time sed ghostscript libatomic libstdc++ which gflags-devel \
-  xz readline-devel snappy-devel rust dnf-plugins-core
+  xz readline-devel snappy-devel rust dnf-plugins-core flex bison \
+  elfutils-libelf-devel
 sudo dnf copr -y enable ohadm/bazel
 sudo dnf --nodocs install bazel8
 ```
@@ -61,7 +62,8 @@ sudo dnf --nodocs install bazel8
 ```bash
 sudo apk add clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
   automake gawk samurai libtool git build-base linux-headers autoconf \
-  util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev cargo
+  util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev cargo \
+  flex bison elfutils-dev
 echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" | sudo tee -a /etc/apk/repositories
 sudo apk add -q bazel@testing
 ```
@@ -72,7 +74,7 @@ sudo apk add -q bazel@testing
 
 ```bash
 sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed \
-  ghostscript bazelisk gflags snappy python-six
+  ghostscript bazelisk gflags snappy python-six flex bison libelf
 ```
 </details>
 
@@ -92,9 +94,6 @@ and build them in the `extern` directory:
 ```
 ~/dev/mimalloc-bench> make all
 ```
-It starts installing packages and you will need to enter the sudo password.
-All other programs are build in the `mimalloc-bench/extern` directory.
-Use `./build-bench-env.sh -h` to see all options.
 
 If everything succeeded, you can run the full benchmark suite (from `out/bench`) as:
 
