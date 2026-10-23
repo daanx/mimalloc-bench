@@ -562,6 +562,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   echo
   echo "run $5: $1 $2: $3 $run_wrap $4"
   # clear temporary output
+  local run_failed=""
   if [ -f "$benchres.line" ]; then
     rm "$benchres.line"
   fi
@@ -634,6 +635,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
          echo "$1 $2: redis server did not shut down" >&2
          error="1"
          failed_runs+="$1:$2 "
+         run_failed="1"
          kill_job_tree "$serverjob"
        fi
        wait "$serverjob" 2>/dev/null
@@ -674,9 +676,18 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        if test "$?" != "0"; then
          error="1"
          failed_runs+="$1:$2 "
+         run_failed="1"
        fi
        ;;
   esac
+
+  case "$1" in spec-*) popd;; esac
+  if test -n "$run_failed"; then
+    # a crashed, cap-killed, or otherwise failed run measured nothing;
+    # it shows up in the "Failed tests:" summary instead of the results
+    rm -f "$benchres.line"
+    return
+  fi
 
   # fixup larson with relative time
   case "$1" in
@@ -703,8 +714,6 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       rtime=`echo "scale=3; (1000000000 / $ops)" | bc`
       echo "$1,$2: iterations: ${ops}, relative time: ${rtime}s"
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
-    spec-*)
-      popd;;
   esac
   test -f "$benchres.line" && cat "$benchres.line" | tee -a $benchres
 }
