@@ -71,7 +71,7 @@ benchmarks: bench/CMakeLists.txt bench/shbench/sh6bench-new.c bench/shbench/sh8b
 PDF_URL=https://raw.githubusercontent.com/geekaaron/Resources/master/resources/Writing_a_Simple_Operating_System--from_Scratch.pdf
 $(PDFDOC):
 	mkdir -p extern
-	wget --no-verbose -O $(PDFDOC) $(PDF_URL)
+	wget --no-verbose -O $(PDFDOC).part $(PDF_URL) && mv -f $(PDFDOC).part $(PDFDOC) || { rm -f $(PDFDOC).part; false; }
 
 bench/shbench/sh6bench-new.c: bench/shbench/sh6bench.patch bench/shbench/sh6bench.c
 	dos2unix $<
@@ -98,7 +98,7 @@ SH8BENCH_SHA256SUM=12a8e75248c9dcbfee28245c12bc937a16ef56ec9cbfab88d0e3482716677
 bench_FILENAME=shbench/bench.zip
 bench_SHA256SUM=506354d66b9eebef105d757e055bc55e8d4aea1e7b51faab3da35b0466c923a1
 bench/shbench/%.zip:
-	@cd $(@D) && wget -nc --no-verbose http://www.microquill.com/smartheap/$($*_FILENAME)
+	@cd $(@D) && wget --no-verbose -O $(@F).part http://www.microquill.com/smartheap/$($*_FILENAME) && mv -f $(@F).part $(@F) || { rm -f $(@F).part; false; }
 	@(echo "$($*_SHA256SUM) $@" | $(SHA256SUM) $(SHA256SUM_FLAGS)) || { echo $(err_msg); exit 1; }
 
 ########################################################################
@@ -134,7 +134,7 @@ clones := $(foreach project,lp scudo,archives/$(project)-$($(project)_LABEL).clo
 
 $(archives): archives/%.tar.gz:
 	mkdir -p $(@D)
-	wget -O $@ $($(firstword $(subst -, ,$*))_URL)/archive/$($(firstword $(subst -, ,$*))_VERSION).tar.gz
+	wget --no-verbose -O $@.part $($(firstword $(subst -, ,$*))_URL)/archive/$($(firstword $(subst -, ,$*))_VERSION).tar.gz && mv -f $@.part $@ || { rm -f $@.part; false; }
 
 $(clones): archives/%.clone:
 	mkdir -p $(@D)
