@@ -10,7 +10,7 @@ RUN apt-get install -y --no-install-recommends build-essential git gpg \
   pkg-config gawk util-linux bsdextrautils flex bison libelf-dev
 # Install bazel
 RUN apt-get install -y --no-install-recommends apt-transport-https curl gnupg
-RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
+RUN curl -fsSL https://releases.bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
 RUN mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
 RUN echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" > /etc/apt/sources.list.d/bazel.list
 RUN apt-get update && apt-get install bazel
