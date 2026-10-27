@@ -61,6 +61,25 @@ Or all allocators (`alla`) and tests (`allt`).
 Use `--procs=<n>` to set the concurrency, and use `--help` to see all supported
 allocators and benchmarks.
 
+## Troubleshooting
+
+**`gs` is failing for every allocator, what am I doing wrong?**
+Recent Ubuntu (26.04 and later) ships an AppArmor profile that confines
+`/usr/bin/gs` (`/etc/apparmor.d/gs`, from the `apparmor` package): it lets `gs`
+read only system directories and owner-owned documents in a few specific places.
+Running `gs` on a file inside the repository checkout then fails ("Unrecoverable
+error, exit code 1") for every allocator, and a preloaded allocator library
+outside the system library directories is silently dropped. To let `gs` run
+unconfined, either unload just that profile:
+```
+sudo apparmor_parser -R /etc/apparmor.d/gs
+```
+or deactivate AppArmor completely:
+```
+sudo aa-teardown
+```
+GitHub CI runners have this profile, so the CI workflow unloads the host
+profiles before building.
 
 ## Current Allocators
 
