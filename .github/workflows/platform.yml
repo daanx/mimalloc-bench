@@ -82,6 +82,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Unload host AppArmor profiles
+        run: sudo aa-teardown || true
+
       - name: Build allocator and run benchmarks in Docker
         id: docker_build
         uses: docker/build-push-action@v7
