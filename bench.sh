@@ -549,7 +549,7 @@ readonly benchfill="           "
 function kill_job_tree { # kill <pid> and its children (e.g. a redis server running under time)
   local p
   for p in $(pgrep -P "$1" 2>/dev/null); do
-    kill -9 $(pgrep -P "$p" 2>/dev/null) 2>/dev/null
+    pkill -9 -P "$p" 2>/dev/null
     kill -9 "$p" 2>/dev/null
   done
   kill -9 "$1" 2>/dev/null
