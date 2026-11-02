@@ -593,7 +593,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        echo "start server"
        tmpfile=$(mktemp)
        (
-         $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"
+         $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %e %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"
          echo $? > "$tmpfile"
        ) &
        local serverjob=$!
@@ -672,7 +672,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        done
        ;;
     *)
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $run_wrap $4 < "$infile" > "$outfile"
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %e %M %U %S %F %R" /usr/bin/env $3 $run_wrap $4 < "$infile" > "$outfile"
        if test "$?" != "0"; then
          error="1"
          failed_runs+="$1:$2 "
