@@ -39,6 +39,7 @@ readonly version_linux=6.5.1
 verbose="no"
 ldpreload="LD_PRELOAD"
 timecmd="$(type -P time)"  # the shell builtin doesn't have all the options we need
+timeout_cmd="$(type -P timeout gtimeout 2>/dev/null | head -1)"  # on macos: brew install coreutils
 sedcmd=sed
 darwin=""
 extso=".so"
@@ -46,6 +47,9 @@ procs=8
 repeats=1          # repeats of all tests
 test_repeats=1     # repeats per test
 sleep=0            # mini sleeps between tests seem to improve stability
+run_limit=0        # time limit per run in seconds (0 = unlimited)
+error=0            # binary marker for errors during the run
+failed_runs=""     # accumulated failed runs
 case "$OSTYPE" in
   darwin*) 
     darwin="1"
@@ -374,6 +378,8 @@ while : ; do
             test_repeats="$flag_arg";;
         -s=*|--sleep=*)
             sleep="$flag_arg";;
+        -T=*|--timeout=*)
+            run_limit="$flag_arg";;
         -v|--verbose)
             verbose="yes";;
         -h|--help|-\?|help|\?)
@@ -386,6 +392,7 @@ while : ; do
             echo "  -r=<n>                       number of repeats of the full suite (=$repeats)"
             echo "  -n=<n>                       number of repeats of each individual test (=$test_repeats)"
             echo "  -s=<n>, --sleep=<n>          seconds of sleep between each test (=$sleep)"
+            echo "  -T=<n>, --timeout=<n>        time limit per run in seconds; on expiry the run's whole process group is killed and the run counts as failed (=$run_limit)"
             echo "  --external=<file>            read external allocators from <file>, one per line, in the format <name> <path>"
             echo ""
             echo "  allt                         run all tests"
@@ -453,6 +460,18 @@ while : ; do
   fi
   shift
 done
+
+# the timeout wrapper: timeout runs the command in its own process group and
+# signals that whole group on expiry, so no grandchild (make -j children,
+# lean --make workers, ...) can outlive a capped run
+run_wrap=""
+if test "$run_limit" != "0"; then
+  if test -z "$timeout_cmd"; then
+    warning "-T ignored: no timeout command found (on macOS: brew install coreutils)"
+  else
+    run_wrap="$timeout_cmd -k 10s ${run_limit}s"
+  fi
+fi
 
 echo "benchmarking on $procs cores."
 echo "use '-h' or '--help' for help on configuration options."
@@ -527,13 +546,23 @@ function set_spec_bench_dir {
 readonly allocfill="     "
 readonly benchfill="           "
 
+function kill_job_tree { # kill <pid> and its children (e.g. a redis server running under time)
+  local p
+  for p in $(pgrep -P "$1" 2>/dev/null); do
+    pkill -9 -P "$p" 2>/dev/null
+    kill -9 "$p" 2>/dev/null
+  done
+  kill -9 "$1" 2>/dev/null
+}
+
 function run_test_env_cmd { # <test name> <allocator name> <environment args> <command> <repeat>
   if ! [ -z "$sleep" ]; then
     sleep "$sleep"
   fi
   echo
-  echo "run $5: $1 $2: $3 $4"
+  echo "run $5: $1 $2: $3 $run_wrap $4"
   # clear temporary output
+  local run_failed=""
   if [ -f "$benchres.line" ]; then
     rm "$benchres.line"
   fi
@@ -562,16 +591,54 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
   case "$1" in
     redis*)
        echo "start server"
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %e %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"  &
-       sleep 1s
-       $redis_dir/redis-cli flushall
-       sleep 1s
-       $4 >> "$outfile"
-       sleep 1s
-       $redis_dir/redis-cli flushall
-       sleep 1s
-       $redis_dir/redis-cli shutdown
-       sleep 1s
+       tmpfile=$(mktemp)
+       (
+         $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $redis_dir/redis-server > "$outfile.server.txt"
+         echo $? > "$tmpfile"
+       ) &
+       local serverjob=$!
+       sleep 0.1
+       if [ -s "$tmpfile" ]; then
+         error="1"
+         failed_runs+="$1:$2 "
+         return
+       fi
+       rm -f "$tmpfile"
+       # wait (bounded) for the server to accept commands: a server that dies
+       # under a preloaded allocator must not hang the whole benchmark
+       local server_ok="" retry
+       for retry in $(seq 1 60); do
+         if $timeout_cmd 10s $redis_dir/redis-cli flushall > /dev/null 2>&1; then
+           server_ok="1"; break
+         fi
+         [ -s "$tmpfile" ] && break   # server exited while waiting
+         sleep 1
+       done
+       if [ -z "$server_ok" ]; then
+         echo "$1 $2: redis server not accepting commands" >&2
+         error="1"
+         failed_runs+="$1:$2 "
+         kill_job_tree "$serverjob"
+         wait "$serverjob" 2>/dev/null
+         return
+       fi
+       $run_wrap $4 >> "$outfile"
+       $timeout_cmd 10s $redis_dir/redis-cli flushall > /dev/null
+       $timeout_cmd 10s $redis_dir/redis-cli shutdown 2> /dev/null
+       # a surviving server would silently serve the next allocator's run;
+       # its measured time is unreliable too
+       for retry in $(seq 1 20); do
+         pgrep -P "$serverjob" > /dev/null || break
+         sleep 0.5
+       done
+       if pgrep -P "$serverjob" > /dev/null; then
+         echo "$1 $2: redis server did not shut down" >&2
+         error="1"
+         failed_runs+="$1:$2 "
+         run_failed="1"
+         kill_job_tree "$serverjob"
+       fi
+       wait "$serverjob" 2>/dev/null
        ;;
     security)
        echo $2 >> $outfile
@@ -605,8 +672,22 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        done
        ;;
     *)
-       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %e %M %U %S %F %R" /usr/bin/env $3 $4 < "$infile" > "$outfile";;
+       $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %E %M %U %S %F %R" /usr/bin/env $3 $run_wrap $4 < "$infile" > "$outfile"
+       if test "$?" != "0"; then
+         error="1"
+         failed_runs+="$1:$2 "
+         run_failed="1"
+       fi
+       ;;
   esac
+
+  case "$1" in spec-*) popd;; esac
+  if test -n "$run_failed"; then
+    # a crashed, cap-killed, or otherwise failed run measured nothing;
+    # it shows up in the "Failed tests:" summary instead of the results
+    rm -f "$benchres.line"
+    return
+  fi
 
   # fixup larson with relative time
   case "$1" in
@@ -633,8 +714,6 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
       rtime=`echo "scale=3; (1000000000 / $ops)" | bc`
       echo "$1,$2: iterations: ${ops}, relative time: ${rtime}s"
       sed -E -i.bak "s/($1  *$2  *)[^ ]*/\10:$rtime/" "$benchres.line";;
-    spec-*)
-      popd;;
   esac
   test -f "$benchres.line" && cat "$benchres.line" | tee -a $benchres
 }
@@ -801,3 +880,8 @@ do
     echo ""
   fi
 done
+
+if test "$error" != "0"; then
+  echo "Failed tests: $failed_runs"
+  exit 1
+fi
