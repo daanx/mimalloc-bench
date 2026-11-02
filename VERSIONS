@@ -15,7 +15,7 @@ lt:      d31b0c92,           d31b0c92d37bb0bf6f0c28a6e8dc2b9978bc8ef3, https://g
 lua:     v5.4.7,             1ab3208a1fceb12fca8f24ba57d6e13c5bff15e3, https://github.com/lua/lua
 mathlib: release_812,        9f55d0d4363ae59948c33864cbc52e0b12e0e8ce, https://github.com/leanprover-community/mathlib3
 mesh:    1f298380,           1f298380f4d49ed8852c2ab23d461ef0bd835c92, https://github.com/plasma-umass/mesh
-mi3:     v3.3.2,             30b2d9d89099bee08e9f67a1ffb3e12e7ba45227, https://github.com/microsoft/mimalloc
+mi3:     v3.6.0,             b18ab4eef383f655e760881b02eff8af02800879, https://github.com/microsoft/mimalloc
 mi2:     v2.1.2,             43ce4bd7fd34bcc730c1c7471c99995597415488, https://github.com/microsoft/mimalloc
 mi:      v1.8.2,             b66e3214d8a104669c2ec05ae91ebc26a8f5ab78, https://github.com/microsoft/mimalloc
 mng:     2ed58817,           2ed58817cca5bc055974e5a0e43c280d106e696b, https://github.com/richfelker/mallocng-draft
