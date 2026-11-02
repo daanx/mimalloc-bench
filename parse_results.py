@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import sys
 import os.path
-from time import sleep
 
 def summarize(alloc):
 	print("{} TOTAL: {:.3}s CPU ovhd ({:>.2%}), {:>8.2f} MB MEM ovhd ({:>.2%})".format( \
@@ -16,10 +15,8 @@ if len(sys.argv) < 2:
 	exit(1)
 
 if not os.path.isfile(sys.argv[1]):
-	print("File not found:", sys.argv[1], "assuming it's still being written, spinning");
-
-while not os.path.isfile(sys.argv[1]):
-	sleep(.1)
+	print("File not found:", sys.argv[1])
+	exit(1)
 
 results = dict()
 
