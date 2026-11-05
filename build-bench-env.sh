@@ -483,7 +483,7 @@ if test "$setup_packages" = "1"; then
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
     echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
     apk update
-    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
+    apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 ruby automake gawk \
       samurai libtool git cargo build-base linux-headers autoconf util-linux sed \
       ghostscript libatomic gflags-dev readline-dev snappy-dev \
       flex bison elfutils-dev"
@@ -492,7 +492,7 @@ if test "$setup_packages" = "1"; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
       ghostscript bazelisk gflags snappy rust"
   elif grep -q 'Arch Linux' /etc/os-release; then
-    sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy rust flex bison libelf
+    sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy rust ruby flex bison libelf
   fi
 fi
 
