@@ -75,7 +75,7 @@ readonly version_lean=21d264a66d53b0a910178ae7d9529cb5886a39b6 # build fix for r
 readonly version_mathlib=release_812
 readonly version_rocksdb=10.10.1
 readonly version_lua=v5.4.7
-readonly version_linux=6.5.1
+readonly version_linux=6.6.105
 readonly version_bazel=8.8.0
 readonly version_rust=1.87.0
 
