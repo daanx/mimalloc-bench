@@ -70,9 +70,8 @@ jobs:
           # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
           - allocator: sm
             predicate: ${{ inputs.platform == 'alpine' }}
-          # tcg: [...] specifies less restrictive attribute than its target [...]
+          # tcg: all platforms: ERROR: no such target '//tcmalloc:tcmalloc': target 'tcmalloc' not declared in package 'tcmalloc' defined by /mimalloc-bench/extern/tcg/tcmalloc/BUILD
           - allocator: tcg
-            predicate: ${{ inputs.platform == 'alpine' }}
       fail-fast: false
     name: ${{ matrix.allocator }} - build and benchmark
     steps:

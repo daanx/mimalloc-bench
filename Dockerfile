@@ -1,14 +1,38 @@
 ARG platform=ubuntu
 
 FROM ubuntu:24.04 AS ubuntu
-
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends build-essential git gpg \
+  g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
+  cmake python3 ruby ninja-build libtool autoconf sed ghostscript \
+  time curl automake libatomic1 libgflags-dev libsnappy-dev cargo \
+  zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libreadline-dev \
+  pkg-config gawk util-linux bsdextrautils flex bison libelf-dev
+# Install bazel
+RUN apt-get install -y --no-install-recommends apt-transport-https curl gnupg
+RUN curl -fsSL https://releases.bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
+RUN mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
+RUN echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" > /etc/apt/sources.list.d/bazel.list
+RUN apt-get update && apt-get install bazel
 
 FROM fedora:44 AS fedora
-
+RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
+  dos2unix bc gmp-devel wget gawk cmake python3 ruby ninja-build libtool \
+  autoconf git patch time sed ghostscript libatomic libstdc++ which \
+  gflags-devel xz readline-devel snappy-devel rust flex bison elfutils-libelf-devel
+# Install bazel - off for now, only tcg needs it and that's not building anyway
+#RUN dnf -y --quiet copr enable ohadm/bazel
+#RUN dnf -y --quiet --nodocs install bazel8
 
 FROM alpine:3.24 AS alpine
+RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN apk update
 RUN apk add --no-cache bash
-
+RUN apk add -q clang lld unzip dos2unix bc gmp-dev wget cmake python3 ruby \
+  automake gawk samurai libtool git build-base linux-headers autoconf \
+  util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev cargo \
+  flex bison elfutils-dev
+RUN apk add -q bazel@testing
 
 FROM ${platform} AS bench-env
 
@@ -17,19 +41,13 @@ RUN mkdir -p /mimalloc-bench
 COPY . /mimalloc-bench
 
 WORKDIR /mimalloc-bench
-# Install dependencies
-RUN ./build-bench-env.sh packages
 
-# Build benchmarks
-RUN ./build-bench-env.sh bench
-
-RUN ./build-bench-env.sh redis
-
-RUN ./build-bench-env.sh rocksdb
-
-RUN ./build-bench-env.sh lean
-
-RUN ./build-bench-env.sh linux
+RUN make benchmarks
+RUN make redis
+RUN make rocksdb
+RUN make lean
+RUN make lua
+RUN make linux
 
 FROM bench-env AS benchmark
 
@@ -39,7 +57,7 @@ ARG allocator=mi
 ARG benchs=cfrac
 ARG repeats=1
 
-RUN ./build-bench-env.sh $allocator
+RUN make $allocator
 
 # Run benchmarks
 WORKDIR /mimalloc-bench/out/bench
