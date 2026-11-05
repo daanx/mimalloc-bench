@@ -28,7 +28,7 @@ FROM alpine:3.24 AS alpine
 RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 RUN apk update
 RUN apk add --no-cache bash
-RUN apk add -q clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
+RUN apk add -q clang lld unzip dos2unix bc gmp-dev wget cmake python3 ruby \
   automake gawk samurai libtool git build-base linux-headers autoconf \
   util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev cargo \
   flex bison elfutils-dev
