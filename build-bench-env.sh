@@ -856,6 +856,11 @@ if test "$setup_rocksdb" = "1"; then
   fi
 
   cd "rocksdb-$version_rocksdb"
+  # musl defines neither _POSIX_C_SOURCE nor _XOPEN_SOURCE by default, so
+  # without this rocksdb allocates its cache shards with plain malloc
+  set +e
+  patch -p1 -N -r- < ../../patches/rocksdb_cacheline_alloc.patch
+  set -e
   DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 make db_bench -j $procs
   [ "$CI" ] && find . -name '*.o' -delete
   popd
