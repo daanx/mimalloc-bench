@@ -23,7 +23,7 @@ pa:      e6c10be6,           e6c10be65e0e916f4befb695779483a44e4a8439, https://g
 redis:   6.2.7,              e6f67092f8d4d81761a60c46011d1ff1dc3c2628, https://github.com/redis/redis
 rmalloc: 3498679f,           3498679f5240c11a9d88b9aa4ef45e79ef5e6eaa, https://github.com/newell-romario/rmalloc
 rocksdb: 11.1.2,             3b446089141659fad25328c5ea3e7ed283df46e4, https://github.com/facebook/rocksdb
-rp:      2.0.0,              305637ceca2f3a19efdf6de038b0ccf2550456a0, https://github.com/mjansson/rpmalloc
+rp:      2.0.1,              beef233c176b235587c0145f765e4316e5ca60d1, https://github.com/mjansson/rpmalloc
 sc:      9ef491c3,           9ef491c391f4d78c23990142ad8b51fa1c1879b8, https://github.com/cksystemsgroup/scalloc
 scudo:   0e42735b,           0e42735b0df2071a34bdee283ec2387c3c7262c3, https://github.com/llvm/llvm-project
 sg:      6d7d065a,           6d7d065ac9ce7203250aa44b4b333b58ca93c803, https://github.com/ssrg-vt/SlimGuard
