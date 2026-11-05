@@ -28,7 +28,7 @@ sc:      9ef491c3,           9ef491c391f4d78c23990142ad8b51fa1c1879b8, https://g
 scudo:   0e42735b,           0e42735b0df2071a34bdee283ec2387c3c7262c3, https://github.com/llvm/llvm-project
 sg:      6d7d065a,           6d7d065ac9ce7203250aa44b4b333b58ca93c803, https://github.com/ssrg-vt/SlimGuard
 sm:      709663fb,           709663fb81ba091b0a78058869a644a272f4163d, https://github.com/kuszmaul/SuperMalloc
-sn:      0.7.5,              526c55bdffa17aae20a9a3d24fe68a7a3b8d9894, https://github.com/Microsoft/snmalloc
+sn:      0.7.6,              f126f1c94d624976d57568d2c6c8a80bc66549bc, https://github.com/Microsoft/snmalloc
 s:       v7.6.0,             4632ddc2930b35eca216dc71f5b75c0321a5fe93, https://github.com/zooko/smalloc
 tbb:     v2023.0.0,          ea2f73b591993e1bd0433a50a2fcfac0a78e0f73, https://github.com/oneapi-src/oneTBB
 tcg:     98fd2430,           98fd24303c7b5ef5e30da625f11fb623a5e038b6, https://github.com/google/tcmalloc
