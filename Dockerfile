@@ -29,6 +29,8 @@ RUN ./build-bench-env.sh rocksdb
 
 RUN ./build-bench-env.sh lean
 
+RUN ./build-bench-env.sh linux
+
 FROM bench-env AS benchmark
 
 WORKDIR /mimalloc-bench
