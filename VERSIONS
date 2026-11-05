@@ -5,7 +5,7 @@ gd:      9e85978a,           9e85978aa2e883010cb5d0c4ae1ae7fe7b8fbe6c, https://g
 hd:      6577c22b,           6577c22b1768656be5e611da67c5bebe65f33c88, https://github.com/emeryberger/Hoard
 hm:      11,                 995ce07d4559460b1060991ada7bca1482e4271b, https://github.com/GrapheneOS/hardened_malloc
 iso:     1.2.5,              2670d5f5e41220e126569e78cb4e3e0379d6cb08, https://github.com/struct/isoalloc
-je:      a47e019e,           a47e019ea93b1767972eec1b648374b51570927e, https://github.com/jemalloc/jemalloc
+je:      5.4.0,              7a34f18502e7b222724097cdcd499b437d189acc, https://github.com/jemalloc/jemalloc
 kp:      v1.1.0,             a26213ab68daa09ed3ab94070e96b0eda7008e85, https://github.com/northriv/kamepoolalloc
 lean:    21d264a6,           21d264a66d53b0a910178ae7d9529cb5886a39b6, https://github.com/leanprover-community/lean
 lf:      915f51b2,           915f51b282c5a31b18fb9b96ef19da410b00a421, https://github.com/Begun/lockfree-malloc
