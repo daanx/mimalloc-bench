@@ -339,3 +339,10 @@ extern/lua/.built: extern/lua/.unpacked
 # linux only needs to be fetched, not more.
 extern/linux/.built: extern/linux/.unpacked
 	touch $@
+
+# rocksdb: musl defines neither _POSIX_C_SOURCE nor _XOPEN_SOURCE by default,
+# which makes rocksdb allocate its cache shards with plain malloc
+extern/rocksdb/.built: extern/rocksdb/.unpacked
+	patch -d $(@D) -p1 -N -r- < patches/rocksdb_cacheline_alloc.patch
+	make -C $(@D) $(rocksdb_ENV) -j$(PROCS)
+	touch $@
