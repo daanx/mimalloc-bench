@@ -1,0 +1,11 @@
+--- a/port/port_posix.cc
++++ b/port/port_posix.cc
+@@ -228,7 +228,7 @@
+ void* cacheline_aligned_alloc(size_t size) {
+ #if __GNUC__ < 5 && defined(__SANITIZE_ADDRESS__)
+   return malloc(size);
+-#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600 || defined(__APPLE__))
++#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600 || defined(__APPLE__) || defined(__linux__))
+   void* m;
+   errno = posix_memalign(&m, CACHE_LINE_SIZE, size);
+   return errno ? nullptr : m;
