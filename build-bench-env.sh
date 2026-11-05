@@ -467,7 +467,8 @@ if test "$setup_packages" = "1"; then
     # no 'apt update' equivalent needed on Fedora
     dnfinstall "gcc-c++ clang lld llvm-devel unzip dos2unix bc gmp-devel wget gawk \
       cmake python3 ruby cargo ninja-build libtool autoconf git patch time sed \
-      ghostscript libatomic libstdc++ libstdc++-static which gflags-devel xz readline-devel snappy-devel"
+      ghostscript libatomic libstdc++ libstdc++-static which gflags-devel xz readline-devel snappy-devel \
+      flex bison elfutils-libelf-devel"
     dnfinstallbazel
   elif grep -q -e 'ID=debian' -e 'ID=ubuntu' /etc/os-release 2>/dev/null; then
     echo "updating package database... ($SUDO apt update)"
@@ -475,7 +476,8 @@ if test "$setup_packages" = "1"; then
     aptinstall "build-essential git gpg g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
       cmake python3 ruby ninja-build libtool autoconf sed ghostscript time \
       curl automake libatomic1 libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
-      liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux"
+      liblz4-dev libzstd-dev libreadline-dev pkg-config gawk util-linux \
+      flex bison libelf-dev"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain $version_rust
     aptinstallbazel
   elif grep -q -e 'ID=alpine' /etc/os-release 2>/dev/null; then
@@ -483,13 +485,14 @@ if test "$setup_packages" = "1"; then
     apk update
     apkinstall "clang lld unzip dos2unix bc gmp-dev wget cmake python3 automake gawk \
       samurai libtool git cargo build-base linux-headers autoconf util-linux sed \
-      ghostscript libatomic gflags-dev readline-dev snappy-dev"
+      ghostscript libatomic gflags-dev readline-dev snappy-dev \
+      flex bison elfutils-dev"
     apkinstall "bazel@testing"
   elif brew --version 2> /dev/null >/dev/null; then
     brewinstall "dos2unix wget cmake ninja automake libtool gnu-time gmp mpir gnu-sed \
       ghostscript bazelisk gflags snappy rust"
   elif grep -q 'Arch Linux' /etc/os-release; then
-    sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy rust
+    sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed ghostscript bazelisk gflags snappy rust flex bison libelf
   fi
 fi
 
