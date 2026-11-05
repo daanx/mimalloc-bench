@@ -32,5 +32,5 @@ sn:      0.7.6,              f126f1c94d624976d57568d2c6c8a80bc66549bc, https://g
 s:       v7.6.0,             4632ddc2930b35eca216dc71f5b75c0321a5fe93, https://github.com/zooko/smalloc
 tbb:     v2023.1.0,          3046c8b0c29df995980003ea24f4d78c80ec0c8d, https://github.com/oneapi-src/oneTBB
 tcg:     98fd2430,           98fd24303c7b5ef5e30da625f11fb623a5e038b6, https://github.com/google/tcmalloc
-tc:      gperftools-2.16.90, 83edb60836d87cf1b406e8846b9059c03031e8f5, https://github.com/gperftools/gperftools
+tc:      gperftools-2.18,    6ed73507dd3970a123e267a50b3ee73392e3b053, https://github.com/gperftools/gperftools
 yal:     d0776466,           d077646672cf5179e4fe120fcd8b28e6309a517b, https://github.com/jorisgeer/yalloc
