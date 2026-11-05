@@ -60,7 +60,7 @@ sudo dnf --nodocs install bazel8
 	<summary>Alpine</summary>
 
 ```bash
-sudo apk add clang lld unzip dos2unix bc gmp-dev wget cmake python3 \
+sudo apk add clang lld unzip dos2unix bc gmp-dev wget cmake python3 ruby \
   automake gawk samurai libtool git build-base linux-headers autoconf \
   util-linux sed ghostscript libatomic gflags-dev readline-dev snappy-dev cargo \
   flex bison elfutils-dev
@@ -74,7 +74,7 @@ sudo apk add -q bazel@testing
 
 ```bash
 sudo pacman -S dos2unix wget cmake ninja automake libtool time gmp sed \
-  ghostscript bazelisk gflags snappy python-six flex bison libelf
+  ghostscript bazelisk gflags snappy python-six ruby flex bison libelf
 ```
 </details>
 
