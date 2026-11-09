@@ -87,7 +87,7 @@ jobs:
 
       # Some tests (e.g. sh6bench) keep tens of thousands of allocations live at
       # once and some allocators (e.g. hardened_malloc) map guard pages per
-      # allocation, so they hit vm.max_map_count. Increase to make them pass.
+      # large allocation, so they hit vm.max_map_count. Increase to make them pass.
       - name: Raise vm.max_map_count for the benchmarks
         run: sudo sysctl -w vm.max_map_count=1048576
 
