@@ -70,8 +70,10 @@ jobs:
           # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
           - allocator: sm
             predicate: ${{ inputs.platform == 'alpine' }}
-          # tcg: all platforms: ERROR: no such target '//tcmalloc:tcmalloc': target 'tcmalloc' not declared in package 'tcmalloc' defined by /mimalloc-bench/extern/tcg/tcmalloc/BUILD
+          # tcg: needs bazel, which is only installed for ubuntu; on alpine
+          # tcmalloc also fails to compile with clang
           - allocator: tcg
+            predicate: ${{ inputs.platform != 'ubuntu' }}
       fail-fast: false
     name: ${{ matrix.allocator }} - build and benchmark
     steps:
