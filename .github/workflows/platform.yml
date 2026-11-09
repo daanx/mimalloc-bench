@@ -84,6 +84,12 @@ jobs:
       - name: Unload host AppArmor profiles
         run: sudo aa-teardown || true
 
+      # Some tests (e.g. sh6bench) keep tens of thousands of allocations live at
+      # once and some allocators (e.g. hardened_malloc) map guard pages per
+      # allocation, so they hit vm.max_map_count. Increase to make them pass.
+      - name: Raise vm.max_map_count for the benchmarks
+        run: sudo sysctl -w vm.max_map_count=1048576
+
       - name: Build allocator and run benchmarks in Docker
         id: docker_build
         uses: docker/build-push-action@v7

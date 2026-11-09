@@ -131,6 +131,18 @@ sudo aa-teardown
 GitHub CI runners have this profile, so the CI workflow unloads the host
 profiles before building.
 
+**`sh6bench` reports "Out of memory" for some allocators although the machine
+has plenty of memory?**
+Some allocators (hardened_malloc `hm` for example) map guard pages around their
+allocations, so every live allocation costs at least one extra kernel mapping,
+and `sh6bench` keeps tens of thousands of them alive at once: with 16 threads it
+measures over 140000 mappings, more than the default `vm.max_map_count` of
+65530. Once the limit is reached, `mprotect` fails and `malloc` returns null.
+Raise the limit:
+```
+sudo sysctl -w vm.max_map_count=1048576
+```
+
 ## Current Allocators
 
 Supported allocators are as follow, see
