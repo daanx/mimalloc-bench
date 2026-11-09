@@ -664,6 +664,9 @@ fi
 
 if test "$setup_hd" = "1"; then
   checkout hd $version_hd https://github.com/emeryberger/Hoard
+  set +e
+  patch -p1 -N -r- < ../../patches/hoard.patch
+  set -e
   cd src
   if [ "`uname -m -s`" = "Darwin x86_64" ] ; then
     sed -i_orig 's/-arch arm64/ /g' GNUmakefile   # fix the makefile    
