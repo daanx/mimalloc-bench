@@ -649,10 +649,15 @@ fi
 
 if test "$setup_tcg" = "1"; then
   checkout tcg $version_tcg https://github.com/google/tcmalloc
+  # tcmalloc only builds static libraries, so add a target for the shared
+  # library that bench.sh preloads
+  set +e
+  patch -p1 -N -r- < ../../patches/tcg.patch
+  set -e
   if command -v bazelisk > /dev/null; then
-    USE_BAZEL_VERSION=$version_bazel bazelisk build -c opt tcmalloc
+    USE_BAZEL_VERSION=$version_bazel bazelisk build -c opt tcmalloc //tcmalloc:libtcmalloc.so
   else
-    bazel build -c opt tcmalloc
+    bazel build -c opt tcmalloc //tcmalloc:libtcmalloc.so
   fi
   popd
 fi
