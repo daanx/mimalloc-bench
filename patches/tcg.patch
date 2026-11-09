@@ -1,0 +1,14 @@
+diff --git a/tcmalloc/BUILD b/tcmalloc/BUILD
+index 47b0f065..cfb1570a 100644
+--- a/tcmalloc/BUILD
++++ b/tcmalloc/BUILD
+@@ -1610,3 +1610,9 @@ cc_library(
+     ],
+     deps = ["@com_google_absl//absl/base:core_headers"],
+ )
++
++cc_binary(
++    name = "libtcmalloc.so",
++    linkshared = 1,
++    deps = [":tcmalloc"],
++)
