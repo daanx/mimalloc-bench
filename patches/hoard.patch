@@ -1,0 +1,17 @@
+diff --git a/src/source/libhoard.cpp b/src/source/libhoard.cpp
+index 0f7567a..0b36a79 100644
+--- a/src/source/libhoard.cpp
++++ b/src/source/libhoard.cpp
+@@ -163,3 +163,12 @@ extern "C" {
+ // include gnuwrapper here to aid inlining of xxmalloc + friends
+ #include "wrappers/gnuwrapper.cpp"
+ #endif
++
++
++// Heap-Layers' macwrapper.cpp defines these as weak defaults; its linux
++// wrapper.cpp calls them but libhoard.cpp did not define them, so libhoard.so
++// ended up with undefined symbols.
++extern "C" {
++  __attribute__((weak)) void xxfree_sized (void * ptr, size_t) { xxfree(ptr); }
++  __attribute__((weak)) void xxfree_aligned_sized (void * ptr, size_t, size_t) { xxfree(ptr); }
++}

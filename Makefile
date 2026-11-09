@@ -165,6 +165,7 @@ extern/dh/.built: extern/dh/.configured
 extern/hd/.built: extern/hd/.unpacked
 	sed -i_orig 's/-arch arm64e//g' $(@D)/src/GNUmakefile
 	sed -i_orig 's/-arch arm64//g' $(@D)/src/GNUmakefile
+	patch -d $(@D) -p1 -N -r- < patches/hoard.patch
 	make -C $(@D) $(hd_ENV) -j$(PROCS)
 	touch $@
 
