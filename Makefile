@@ -304,7 +304,8 @@ extern/tc/configure: extern/tc/.unpacked
 
 #tcg: bazel
 extern/tcg/.built: extern/tcg/.unpacked
-	cd $(@D) && bazel build -c opt tcmalloc
+	patch -d $(@D) -p1 -N -r- < patches/tcg.patch
+	cd $(@D) && bazel build -c opt tcmalloc //tcmalloc:libtcmalloc.so
 	touch $@
 
 #s: rust workspace
