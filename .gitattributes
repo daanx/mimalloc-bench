@@ -5,3 +5,7 @@
 *.sln binary
 *.suo binary
 *.vcproj binary
+
+# ffmalloc.c is CRLF upstream, so a patch against it has to keep those
+# endings to be able to apply
+patches/ff.patch -text
