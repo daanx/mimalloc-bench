@@ -56,11 +56,15 @@ benchmarks_all: benchmarks $(BENCHMARKS_EXTERN)
 ifeq ($(shell uname -m), aarch64)
 # gd uses SSE on x86, but ARC4 on ARM - and arc4 needs a fix
 gd_ENV := ARC4RNG=1
+endif
+
 extern/gd/.built: extern/gd/.unpacked
+	patch -d $(@D) -p1 -N -r- < patches/gd.patch
+ifeq ($(shell uname -m), aarch64)
 	sed -i_orig 's/getentropy(/_getentropy(/g' $(@D)/rng/arc4random.{c,h}
+endif
 	make -C $(@D) $(gd_ENV) -j$(PROCS)
 	touch $@
-endif
 
 .PHONY: all allocs benchmarks benchmarks_all benchmarks_big clean-archives
 
