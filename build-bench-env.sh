@@ -517,6 +517,9 @@ fi
 
 if test "$setup_gd" = "1"; then
   checkout gd $version_gd https://github.com/UTSASRG/Guarder
+  set +e
+  patch -p1 -N -r- < ../../patches/gd.patch
+  set -e
   make -j $procs
   popd
 fi
