@@ -165,6 +165,11 @@ extern/dh/.built: extern/dh/.configured
 	cmake --build $(@D)/build -j $(PROCS)
 	touch $@
 
+extern/ff/.built: extern/ff/.unpacked
+	patch -d $(@D) -p1 -N -r- < patches/ff.patch
+	make -C $(@D) $(ff_ENV) -j$(PROCS)
+	touch $@
+
 #hd: fix in Makefile.
 extern/hd/.built: extern/hd/.unpacked
 	sed -i_orig 's/-arch arm64e//g' $(@D)/src/GNUmakefile
