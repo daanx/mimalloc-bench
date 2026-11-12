@@ -675,7 +675,28 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
        ;;
     *)
        $timecmd -a -o "$benchres.line" -f "$1${benchfill:${#1}} $2${allocfill:${#2}} %e %M %U %S %F %R" /usr/bin/env $3 $run_wrap $4 < "$infile" > "$outfile"
-       if test "$?" != "0"; then
+       local status=$?
+       if test "$status" != "0"; then
+         # the run's own output goes to $outfile, and that file does not survive
+         # a CI job; without this a failing test reports nothing but its name
+         local reason="exited with $status"
+         if test "$status" -gt 128; then
+           local sig=$((status - 128)) name
+           name=$(kill -l "$sig" 2>/dev/null)
+           case "$name" in
+             SIG*) ;;
+             ?*) name="SIG$name";;
+             *)  name="signal $sig";;
+           esac
+           reason="killed by $name"
+         fi
+         echo "$1 $2: $reason" >&2
+         if test -s "$outfile"; then
+           echo "$1 $2: last output" >&2
+           tail -n 15 "$outfile" | sed "s/^/$1 $2 | /" >&2
+         else
+           echo "$1 $2: wrote nothing to $(basename "$outfile")" >&2
+         fi
          error="1"
          failed_runs+="$1:$2 "
          run_failed="1"
