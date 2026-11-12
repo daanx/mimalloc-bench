@@ -41,7 +41,7 @@ lf_ENV=liblite-malloc-shared.so
 lt_ENV=-C gnu.make.lib
 hd_ENV=-C src
 redis_ENV=USE_JEMALLOC=no MALLOC=libc BUILD_TLS=no -C src
-rocksdb_ENV=DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 db_bench
+rocksdb_ENV=DISABLE_WARNING_AS_ERROR=1 DISABLE_JEMALLOC=1 ROCKSDB_DISABLE_TCMALLOC=1 PORTABLE=1 db_bench
 
 # TODO: Mac seems to report 'arm64' here
 ifeq ($(shell uname -m), aarch64)
