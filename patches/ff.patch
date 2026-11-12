@@ -1,0 +1,90 @@
+--- a/ffmalloc.c
++++ b/ffmalloc.c
+@@ -2641,6 +2641,25 @@
+ 	}
+ }
+ 
++// Jumbo pools come straight from the OS and are only page aligned. Ask for
++// the alignment in excess and return an address aligned inside the pool:
++// free(), realloc() and malloc_usable_size() resolve a pointer to the pool
++// that contains it, so any address inside the pool is valid to free.
++static inline void* ffalign_jumbo(size_t alignment, size_t size) {
++	if(alignment > PAGE_SIZE) {
++		if(size + alignment < size) {
++			return NULL;
++		}
++		size += alignment;
++	}
++	void* ptr = ffmalloc_jumbo(size, arenas[0]);
++	if(ptr == NULL) {
++		return NULL;
++	}
++	return (void*)ALIGN_TO((uintptr_t)ptr, alignment);
++}
++
++
+ static inline void* ffmemalign_internal(size_t alignment, size_t size) {
+ #ifdef FF_PROFILE
+ 	FFAtomicIncrement(arenas[0]->profile.posixAlignCount);
+@@ -2671,7 +2690,7 @@
+ 	size = ALIGN_SIZE(size);
+ 
+ 	if(size >= POOL_SIZE) {
+-		return ffmalloc_jumbo(size, arenas[0]);
++		return ffalign_jumbo(alignment, size);
+ 	}
+ 	else {
+ 		return ffmalloc_large(size, alignment, arenas[0]);
+@@ -2698,14 +2717,6 @@
+ 		return EINVAL;
+ 	}
+ 
+-	// Current jumbo allocation code is missing alignment support but all
+-	// jumbo allocations will be at least page aligned. For now it is an
+-	// error to request more than page alignment for a jumbo allocation
+-	if(size + PAGE_SIZE >= POOL_SIZE && alignment > PAGE_SIZE) {
+-		*ptr = NULL;
+-		return EINVAL;
+-	}
+-
+ 	*ptr = ffmemalign_internal(alignment, size);
+ 	if(*ptr == NULL) {
+ 		return ENOMEM;
+@@ -2738,14 +2749,6 @@
+ 		return ffmalloc(size);
+ 	}
+ 
+-	// The jumbo allocation code doesn't support custom alignment right now
+-	// but any jumbo alignment will be page aligned. So, error out if the
+-	// request is bigger than page size otherwise carry on
+-	if(size + PAGE_SIZE >= POOL_SIZE && alignment > PAGE_SIZE) {
+-		errno = EINVAL;
+-		return NULL;
+-	}
+-
+ 	return ffmemalign_internal(alignment, size);
+ }
+ 
+@@ -2773,21 +2776,13 @@
+ 		return NULL;
+ 	}
+ 
+-	// Missing alignment support in jumbo code so forbid greater than page
+-	// alignment for jumbo allocations until that's fixed. All jumbo
+-	// allocations will be page aligned anyways
+-	if(size + PAGE_SIZE >= POOL_SIZE && alignment > PAGE_SIZE) {
+-		errno = EINVAL;
+-		return NULL;
+-	}
+-
+ #ifdef FF_PROFILE
+ 	FFAtomicIncrement(arenas[0]->profile.allocAlignCount);
+ 	FFAtomicAdd(arenas[0]->profile.totalBytesRequested, size);
+ #endif
+ 
+ 	if (size >= POOL_SIZE) {
+-		return ffmalloc_jumbo(size, arenas[0]);
++		return ffalign_jumbo(alignment, size);
+ 	}
+ 	// Allocation can be serviced from the small bin only if both the size
+ 	// and the alignment fit into the small bin

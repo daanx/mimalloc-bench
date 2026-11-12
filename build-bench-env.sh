@@ -535,6 +535,9 @@ fi
 
 if test "$setup_ff" = "1"; then
   checkout ff $version_ff https://github.com/bwickman97/ffmalloc
+  set +e
+  patch -p1 -N -r- < ../../patches/ff.patch
+  set -e
   make -j $procs
   popd
 fi
