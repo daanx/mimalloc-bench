@@ -1,0 +1,19 @@
+--- a/real.cpp
++++ b/real.cpp
+@@ -43,8 +43,15 @@
+ 		INIT_WRAPPER(malloc, RTLD_NEXT);
+ //		INIT_WRAPPER(realloc, RTLD_NEXT);
+ 		
+-		// FIXME about the flags
++		// glibc >= 2.34 moved pthread into libc; libpthread.so.0 is an empty
++		// compatibility stub that nothing loads any more, so this dlopen returns
++		// NULL.  dlsym(NULL, name) is dlsym(RTLD_DEFAULT, name), which searches the
++		// preloaded libraries first and would hand us back our own interposers
++		// below, making every thread creation recurse into itself.  RTLD_NEXT
++		// starts the search after libguarder, i.e. at the real libc.
+ 		void *pthread_handle = dlopen("libpthread.so.0", RTLD_NOW | RTLD_GLOBAL | RTLD_NOLOAD);
++		if (pthread_handle == NULL)
++			pthread_handle = RTLD_NEXT;
+ 		INIT_WRAPPER(pthread_create, pthread_handle);
+ 		INIT_WRAPPER(pthread_join, pthread_handle);
+ 		INIT_WRAPPER(pthread_kill, pthread_handle);
