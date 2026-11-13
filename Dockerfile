@@ -13,7 +13,8 @@ RUN apt-get install -y --no-install-recommends apt-transport-https curl gnupg
 RUN curl -fsSL https://releases.bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
 RUN mv bazel.gpg /etc/apt/trusted.gpg.d/bazel.gpg
 RUN echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" > /etc/apt/sources.list.d/bazel.list
-RUN apt-get update && apt-get install bazel
+RUN apt-get update && apt-get install -y bazel-8.8.0
+RUN ln -sf /usr/bin/bazel-8.8.0 /usr/bin/bazel
 
 FROM fedora:44 AS fedora
 RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
