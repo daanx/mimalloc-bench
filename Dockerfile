@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install bazel
 FROM fedora:44 AS fedora
 RUN dnf -y --quiet --nodocs install gcc-c++ clang lld llvm-devel unzip \
   dos2unix bc gmp-devel wget gawk cmake python3 ruby ninja-build libtool \
-  autoconf git patch time sed ghostscript libatomic libstdc++ which \
+  autoconf git patch time sed ghostscript libatomic libstdc++ libstdc++-static which \
   gflags-devel xz readline-devel snappy-devel rust flex bison elfutils-libelf-devel
 # Install bazel - off for now, only tcg needs it and that's not building anyway
 #RUN dnf -y --quiet copr enable ohadm/bazel
