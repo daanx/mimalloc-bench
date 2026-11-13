@@ -36,7 +36,6 @@ PDFDOC=extern/large.pdf
 
 fg_ENV=SSE2RNG=1
 iso_ENV=library
-mesh_ENV=build
 lf_ENV=liblite-malloc-shared.so
 lt_ENV=-C gnu.make.lib
 hd_ENV=-C src
@@ -220,13 +219,22 @@ extern/mi/.built extern/mi2/.built extern/mi3/.built: extern/%/.built: extern/%/
 	cmake --build $(@D)/out/secure -j$(PROCS)
 	touch $@
 
-# nomesh: built from mesh's source
-nomesh_ENV=DISABLE_MESHING=ON build
+#mesh: cmake, out of tree
+extern/mesh/.built: extern/mesh/.unpacked
+	cmake -S $(@D) -B $(@D)/out
+	# single job: https://github.com/plasma-umass/Mesh/issues/96
+	cmake --build $(@D)/out -j1
+	touch $@
+
+#nomesh: cmake, with meshing switched off, on a second copy of the source
 extern/nomesh/.built: extern/mesh/.unpacked
-	cp -r $(<D) $(@D)
-	make -C $(@D) clean
-	# only single job: https://github.com/plasma-umass/Mesh/issues/96
-	make -C $(@D) $(nomesh_ENV)
+	rm -rf $(@D)
+	mkdir -p $(@D)
+	cp -a $(<D)/. $(@D)/
+	rm -rf $(@D)/out $(@D)/build
+	cmake -S $(@D) -B $(@D)/out -DDISABLE_MESHING=ON
+	# single job: https://github.com/plasma-umass/Mesh/issues/96
+	cmake --build $(@D)/out -j1
 	touch $@
 
 # rmalloc: uses CMake
