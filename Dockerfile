@@ -5,9 +5,11 @@ RUN apt-get update
 RUN apt-get install -y --no-install-recommends build-essential git gpg \
   g++ clang lld llvm-dev unzip dos2unix linuxinfo bc libgmp-dev wget \
   cmake python3 ruby ninja-build libtool autoconf sed ghostscript \
-  time curl automake libatomic1 libgflags-dev libsnappy-dev cargo \
+  time curl automake libatomic1 libgflags-dev libsnappy-dev \
   zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libreadline-dev \
   pkg-config gawk util-linux bsdextrautils flex bison libelf-dev
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.87.0
+ENV PATH="/root/.cargo/bin:${PATH}"
 # Install bazel
 RUN apt-get install -y --no-install-recommends apt-transport-https curl gnupg
 RUN curl -fsSL https://releases.bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
