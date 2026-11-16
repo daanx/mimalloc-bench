@@ -298,7 +298,7 @@ extern/sn/.built: extern/sn/release/build.ninja
 	touch $@
 
 extern/sn/release/build.ninja: extern/sn/.unpacked
-	env CXX=clang++ cmake -S $(@D)/.. -B $(@D) -G Ninja -DCMAKE_BUILD_TYPE=Release
+	env CXX=clang++ cmake -S $(@D)/.. -B $(@D) -G Ninja -DCMAKE_BUILD_TYPE=Release -DSNMALLOC_CLEANUP=CXX11_DESTRUCTORS
 
 #tbb: cmake to configure
 extern/tbb/.built: extern/tbb/.configured
