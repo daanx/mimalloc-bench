@@ -703,7 +703,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
          echo "$1 $2: $reason" >&2
          if test -s "$outfile"; then
            echo "$1 $2: last output" >&2
-           tail -n 15 "$outfile" | sed "s/^/$1 $2 | /" >&2
+           cat "$outfile" | sed "s/^/$1 $2 | /" >&2
          else
            echo "$1 $2: wrote nothing to $(basename "$outfile")" >&2
          fi
