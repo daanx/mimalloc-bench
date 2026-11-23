@@ -596,7 +596,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
     linux)
       builddir="/tmp/linux_build"
       mkdir -p $builddir
-      make -C $linux_dir O=$builddir distclean allnoconfig -j $procs > /dev/null;;
+      make -C $linux_dir O=$builddir distclean tinyconfig -j $procs > /dev/null;;
   esac
   case "$1" in
     redis*)
@@ -784,9 +784,7 @@ function run_test {  # <test>
       popd;;
     linux)
       builddir="/tmp/linux_build"
-      pushd "$linux_dir"
-      run_test_cmd "linux" "make O=$builddir -j $procs"
-      popd;;
+      run_test_cmd "linux" "make -C $linux_dir O=$builddir -j $procs";;
     redis)
       # https://redis.io/docs/reference/optimization/benchmarks/
       redis_tail="1"
