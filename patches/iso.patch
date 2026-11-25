@@ -1,0 +1,131 @@
+diff -ruN a/src/malloc_hook.c b/src/malloc_hook.c
+--- a/src/malloc_hook.c	2022-12-16 15:47:24.000000000 +0100
++++ b/src/malloc_hook.c	2026-11-25 18:02:36.268766001 +0100
+@@ -13,12 +13,16 @@
+  */
+ #if MALLOC_HOOK
+ 
++/* ISO C lets a zero size be a real request: malloc(0) and
++ * realloc(NULL, 0) must return a unique non-NULL pointer, not
++ * NULL or a poison page, or callers like the kernel build's
++ * grep and sed read it as out-of-memory. */
+ EXTERNAL_API void *__libc_malloc(size_t s) {
+-    return iso_alloc(s);
++    return iso_alloc(s ? s : 1);
+ }
+ 
+ EXTERNAL_API void *malloc(size_t s) {
+-    return iso_alloc(s);
++    return iso_alloc(s ? s : 1);
+ }
+ 
+ EXTERNAL_API void __libc_free(void *p) {
+@@ -30,32 +34,62 @@
+ }
+ 
+ EXTERNAL_API void *__libc_calloc(size_t n, size_t s) {
+-    return iso_calloc(n, s);
++    return iso_calloc(n ? n : 1, s ? s : 1);
+ }
+ 
+ EXTERNAL_API void *calloc(size_t n, size_t s) {
+-    return iso_calloc(n, s);
++    return iso_calloc(n ? n : 1, s ? s : 1);
+ }
+ 
+ EXTERNAL_API void *__libc_realloc(void *p, size_t s) {
++    if(p == NULL) {
++        return iso_alloc(s ? s : 1);
++    }
++
++    if(s == 0) {
++        iso_free(p);
++        return NULL;
++    }
++
+     return iso_realloc(p, s);
+ }
+ 
+ EXTERNAL_API void *realloc(void *p, size_t s) {
++    if(p == NULL) {
++        return iso_alloc(s ? s : 1);
++    }
++
++    if(s == 0) {
++        iso_free(p);
++        return NULL;
++    }
++
+     return iso_realloc(p, s);
+ }
+ 
+ EXTERNAL_API void *__libc_reallocarray(void *p, size_t n, size_t s) {
+-    return iso_reallocarray(p, n, s);
++    size_t total;
++
++    if(__builtin_mul_overflow(n, s, &total)) {
++        return NULL;
++    }
++
++    return __libc_realloc(p, total);
+ }
+ 
+ EXTERNAL_API void *reallocarray(void *p, size_t n, size_t s) {
+-    return iso_reallocarray(p, n, s);
++    size_t total;
++
++    if(__builtin_mul_overflow(n, s, &total)) {
++        return NULL;
++    }
++
++    return realloc(p, total);
+ }
+ 
+ EXTERNAL_API int __posix_memalign(void **r, size_t a, size_t s) {
+     /* All iso_alloc allocations are 8 byte aligned */
+-    *r = iso_alloc(s);
++    *r = iso_alloc(s ? s : 1);
+ 
+     if(*r != NULL) {
+         return 0;
+@@ -70,17 +104,17 @@
+ 
+ EXTERNAL_API void *__libc_memalign(size_t alignment, size_t s) {
+     /* All iso_alloc allocations are 8 byte aligned */
+-    return iso_alloc(s);
++    return iso_alloc(s ? s : 1);
+ }
+ 
+ EXTERNAL_API void *aligned_alloc(size_t alignment, size_t s) {
+     /* All iso_alloc allocations are 8 byte aligned */
+-    return iso_alloc(s);
++    return iso_alloc(s ? s : 1);
+ }
+ 
+ EXTERNAL_API void *memalign(size_t alignment, size_t s) {
+     /* All iso_alloc allocations are 8 byte aligned */
+-    return iso_alloc(s);
++    return iso_alloc(s ? s : 1);
+ }
+ 
+ #if __ANDROID__ || __FreeBSD__
+@@ -102,16 +136,16 @@
+ #endif
+ 
+ static void *libc_malloc(size_t s, const void *caller) {
+-    return iso_alloc(s);
++    return iso_alloc(s ? s : 1);
+ }
+ static void *libc_realloc(void *ptr, size_t s, const void *caller) {
+-    return iso_realloc(ptr, s);
++    return __libc_realloc(ptr, s);
+ }
+ static void libc_free(void *ptr, const void *caller) {
+     iso_free(ptr);
+ }
+ static void *libc_memalign(size_t alignment, size_t s, const void *caller) {
+-    return iso_alloc(s);
++    return iso_alloc(s ? s : 1);
+ }
+ 
+ #if !__ANDROID__
