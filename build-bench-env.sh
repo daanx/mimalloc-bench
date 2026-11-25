@@ -855,6 +855,9 @@ fi
 
 if test "$setup_yal" = "1"; then
   checkout yal $version_yal https://github.com/jorisgeer/yalloc
+  set +e
+  patch -p1 -N -r- < ../../patches/yal.patch
+  set -e
   ./build.sh -V
 fi
 

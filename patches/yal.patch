@@ -1,0 +1,12 @@
+diff --git a/realloc.h b/realloc.h
+--- a/realloc.h
++++ b/realloc.h
+@@ -386,7 +386,7 @@
+ 
+   ip = (size_t)np;
+ 
+-  if (likely( (ub4)ip >= Pagesize)) {
++  if (likely( (size_t)ip >= Pagesize)) {
+     ytrace(1,hd,Lreal,tag,0,"- %p len %zu",np,newlen)
+     ypush(hd,Lreal | Lapi,Fln)
+     return np;
