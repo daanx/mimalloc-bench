@@ -41,7 +41,7 @@ readonly version_dh=master
 readonly version_ff=master   # ~unmaintained since 2021
 readonly version_fg=master   # ~unmaintained since 2018
 readonly version_gd=master   # ~unmaintained since 2021
-readonly version_hd=6577c22b # HEAD as of 2025-07-18, no release since 2019
+readonly version_hd=cbcf5f09 # HEAD as of 2026-11-19
 readonly version_hm=11
 readonly version_iso=1.2.5
 readonly version_je=5.4.0
@@ -673,14 +673,8 @@ fi
 
 if test "$setup_hd" = "1"; then
   checkout hd $version_hd https://github.com/emeryberger/Hoard
-  set +e
-  patch -p1 -N -r- < ../../patches/hoard.patch
-  set -e
-  cd src
-  if [ "`uname -m -s`" = "Darwin x86_64" ] ; then
-    sed -i_orig 's/-arch arm64/ /g' GNUmakefile   # fix the makefile    
-  fi
-  make -j $procs
+  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+  cmake --build build -j $procs
   popd
 fi
 
