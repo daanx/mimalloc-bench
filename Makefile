@@ -65,7 +65,7 @@ endif
 	make -C $(@D) $(gd_ENV) -j$(PROCS)
 	touch $@
 
-.PHONY: all allocs benchmarks benchmarks_all benchmarks_big clean-archives
+.PHONY: all allocs benchmarks benchmarks_all benchmarks_big clean-archives download-archives
 
 benchmarks: bench/CMakeLists.txt bench/shbench/sh6bench-new.c bench/shbench/sh8bench-new.c $(PDFDOC)
 	cmake -B out/bench -S bench
@@ -142,6 +142,8 @@ $(archives): archives/%.tar.gz:
 $(clones): archives/%.clone:
 	mkdir -p $(@D)
 	echo $* > $@
+
+download-archives: $(archives)
 
 .SECONDEXPANSION:
 extern/%/.unpacked: archives/%-$$(call label_of,$$*).tar.gz
