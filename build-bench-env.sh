@@ -747,6 +747,9 @@ fi
 
 if test "$setup_sm" = "1"; then
   checkout sm $version_sm https://github.com/kuszmaul/SuperMalloc
+  set +e
+  patch -p1 -N -r- < ../../patches/sm.patch
+  set -e
   rm -rf ./doc ./paper "./short-talk"
   sed -i "s/-Werror//" Makefile.include
   cd release
