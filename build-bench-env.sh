@@ -756,6 +756,9 @@ fi
 
 if test "$setup_mesh" = "1"; then
   checkout mesh $version_mesh https://github.com/plasma-umass/mesh
+  set +e
+  patch -p1 -N -r- < ../../patches/mesh.patch
+  set -e
   cmake .
   make  # https://github.com/plasma-umass/Mesh/issues/96
   popd
