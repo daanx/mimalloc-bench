@@ -65,7 +65,7 @@ readonly version_sn=0.7.6
 readonly version_s=v7.6.0
 readonly version_tbb=v2023.1.0
 readonly version_tc=gperftools-2.18
-readonly version_tcg=81f4e44f23f2936303f9404fee7315119b9df623 # 2026-02-23
+readonly version_tcg=afcf25e3c76f099ca410b994c3621312d438ed10 # 2026-11-24
 readonly version_yal=main
 readonly version_rmalloc=master
 
