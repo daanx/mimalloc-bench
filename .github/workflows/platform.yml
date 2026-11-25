@@ -70,9 +70,6 @@ jobs:
           # sm: ../src/supermalloc.h:10:31: error: expected initializer before '__THROW'
           - allocator: sm
             predicate: ${{ inputs.platform == 'alpine' }}
-          # tcg: [...] specifies less restrictive attribute than its target [...]
-          - allocator: tcg
-            predicate: ${{ inputs.platform == 'alpine' }}
       fail-fast: false
     name: ${{ matrix.allocator }} - build and benchmark
     steps:
