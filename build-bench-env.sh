@@ -547,6 +547,9 @@ fi
 
 if test "$setup_mng" = "1"; then
   checkout mng $version_mng https://github.com/richfelker/mallocng-draft
+  set +e
+  patch -p1 -N -r- < ../../patches/mng.patch
+  set -e
   make -j $procs
   popd
 fi
