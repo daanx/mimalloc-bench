@@ -1,6 +1,136 @@
+diff -ruN a/include/iso_alloc_ds.h b/include/iso_alloc_ds.h
+--- a/include/iso_alloc_ds.h	2022-12-16 15:47:24.000000000 +0100
++++ b/include/iso_alloc_ds.h	2026-11-26 13:27:57.659444615 +0100
+@@ -59,6 +59,7 @@
+     uint64_t canary_a;
+     bool free;
+     uint64_t size;
++    size_t alignment;
+     void *user_pages_start;
+     struct iso_alloc_big_zone_t *next;
+     uint64_t canary_b;
+diff -ruN a/include/iso_alloc_internal.h b/include/iso_alloc_internal.h
+--- a/include/iso_alloc_internal.h	2022-12-16 15:47:24.000000000 +0100
++++ b/include/iso_alloc_internal.h	2026-11-26 13:27:59.055496422 +0100
+@@ -375,7 +375,8 @@
+ INTERNAL_HIDDEN void _iso_alloc_unprotect_root(void);
+ INTERNAL_HIDDEN void *_tag_ptr(void *p, iso_alloc_zone_t *zone);
+ INTERNAL_HIDDEN void *_untag_ptr(void *p, iso_alloc_zone_t *zone);
+-INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_big_alloc(size_t size);
++INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_big_alloc(size_t size, size_t align);
++INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_alloc_aligned(size_t size, size_t align);
+ INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_alloc(iso_alloc_zone_t *zone, size_t size);
+ INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_alloc_bitslot_from_zone(bit_slot_t bitslot, iso_alloc_zone_t *zone);
+ INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_calloc(size_t nmemb, size_t size);
+diff -ruN a/include/iso_alloc_util.h b/include/iso_alloc_util.h
+--- a/include/iso_alloc_util.h	2022-12-16 15:47:24.000000000 +0100
++++ b/include/iso_alloc_util.h	2026-11-26 13:28:00.627554760 +0100
+@@ -25,6 +25,7 @@
+ INTERNAL_HIDDEN INLINE void darwin_reuse(void *p, size_t size);
+ INTERNAL_HIDDEN void unmap_guarded_pages(void *p, size_t size);
+ INTERNAL_HIDDEN ASSUME_ALIGNED void *mmap_guarded_rw_pages(size_t size, bool populate, const char *name);
++INTERNAL_HIDDEN ASSUME_ALIGNED void *mmap_aligned_rw_pages(size_t size, size_t align, bool populate, const char *name);
+ INTERNAL_HIDDEN ASSUME_ALIGNED void *mmap_rw_pages(size_t size, bool populate, const char *name);
+ INTERNAL_HIDDEN ASSUME_ALIGNED void *mmap_pages(size_t size, bool populate, const char *name, int32_t prot);
+ INTERNAL_HIDDEN void mprotect_pages(void *p, size_t size, int32_t protection);
+diff -ruN a/src/iso_alloc.c b/src/iso_alloc.c
+--- a/src/iso_alloc.c	2022-12-16 15:47:24.000000000 +0100
++++ b/src/iso_alloc.c	2026-11-26 13:28:46.685264181 +0100
+@@ -1176,7 +1176,7 @@
+             LOG_AND_ABORT("Allocation size of %d is > %d and cannot use a private zone", size, SMALL_SZ_MAX);
+         }
+ 
+-        return _iso_big_alloc(size);
++        return _iso_big_alloc(size, g_page_size);
+     }
+ }
+ 
+@@ -1759,7 +1759,19 @@
+     UNLOCK_BIG_ZONE();
+ }
+ 
+-INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_big_alloc(size_t size) {
++/* Zone chunks are aligned to their chunk size inside page aligned
++ * zone user pages, so the zone path honors any alignment up to the
++ * page size that fits the chunk size. Larger alignments and larger
++ * sizes go to the big allocation path which aligns the mapping. */
++INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_alloc_aligned(size_t size, size_t align) {
++    if(size <= SMALL_SZ_MAX && align <= g_page_size && (align <= ALIGNMENT || align <= next_pow2(size))) {
++        return _iso_alloc(NULL, size);
++    }
++
++    return _iso_big_alloc(size, align);
++}
++
++INTERNAL_HIDDEN ASSUME_ALIGNED void *_iso_big_alloc(size_t size, size_t align) {
+     const size_t new_size = ROUND_UP_PAGE(size);
+ 
+     if(new_size < size || new_size > BIG_SZ_MAX) {
+@@ -1783,7 +1795,7 @@
+     while(big != NULL) {
+         check_big_canary(big);
+ 
+-        if(big->free == true && big->size >= size) {
++        if(big->free == true && big->size >= size && big->alignment >= align) {
+             break;
+         }
+ 
+@@ -1801,7 +1813,12 @@
+     if(big == NULL) {
+         /* User data is allocated separately from big zone meta
+          * data to prevent an attacker from targeting it */
+-        void *user_pages = mmap_guarded_rw_pages(size, false, BIG_ZONE_UD_NAME);
++        void *user_pages;
++        if(align > g_page_size) {
++            user_pages = mmap_aligned_rw_pages(size, align, false, BIG_ZONE_UD_NAME);
++        } else {
++            user_pages = mmap_guarded_rw_pages(size, false, BIG_ZONE_UD_NAME);
++        }
+ 
+         if(user_pages == NULL) {
+             UNLOCK_BIG_ZONE();
+@@ -1823,6 +1840,7 @@
+         big = (iso_alloc_big_zone_t *) ((void *) big + ((random_offset * s) >> 32));
+         big->free = false;
+         big->size = size;
++        big->alignment = align;
+         big->next = NULL;
+ 
+         if(last_big != NULL) {
+diff -ruN a/src/iso_alloc_util.c b/src/iso_alloc_util.c
+--- a/src/iso_alloc_util.c	2022-12-16 15:47:24.000000000 +0100
++++ b/src/iso_alloc_util.c	2026-11-26 13:28:51.561445177 +0100
+@@ -77,6 +77,27 @@
+     return (p + g_page_size);
+ }
+ 
++/* Same contract as mmap_guarded_rw_pages but the returned user pages
++ * are aligned to the requested alignment. The slack pages between the
++ * guard pages and the aligned user pages stay mapped and are
++ * mprotected so the overflow protection is unchanged. */
++INTERNAL_HIDDEN ASSUME_ALIGNED void *mmap_aligned_rw_pages(size_t size, size_t align, bool populate, const char *name) {
++    const size_t sz = ROUND_UP_PAGE(size);
++    void *p = mmap_rw_pages(sz + align + (g_page_size * 2), populate, name);
++
++    create_guard_page(p);
++    create_guard_page(p + (g_page_size + sz + align));
++
++    void *user = (void *) (((uintptr_t) (p + g_page_size) + (align - 1)) & (~(align - 1)));
++
++    if(user != p + g_page_size) {
++        mprotect_pages(p + g_page_size, (size_t) (user - (p + g_page_size)), PROT_NONE);
++    }
++
++    mprotect_pages(user + sz, (size_t) ((p + g_page_size + sz + align) - (user + sz)), PROT_NONE);
++    return user;
++}
++
+ INTERNAL_HIDDEN ASSUME_ALIGNED void *mmap_rw_pages(size_t size, bool populate, const char *name) {
+     return mmap_pages(size, populate, name, PROT_READ | PROT_WRITE);
+ }
 diff -ruN a/src/malloc_hook.c b/src/malloc_hook.c
 --- a/src/malloc_hook.c	2022-12-16 15:47:24.000000000 +0100
-+++ b/src/malloc_hook.c	2026-11-25 18:02:36.268766001 +0100
++++ b/src/malloc_hook.c	2026-11-26 13:29:02.649856772 +0100
 @@ -13,12 +13,16 @@
   */
  #if MALLOC_HOOK
@@ -20,7 +150,7 @@ diff -ruN a/src/malloc_hook.c b/src/malloc_hook.c
  }
  
  EXTERNAL_API void __libc_free(void *p) {
-@@ -30,32 +34,62 @@
+@@ -30,32 +34,65 @@
  }
  
  EXTERNAL_API void *__libc_calloc(size_t n, size_t s) {
@@ -82,34 +212,63 @@ diff -ruN a/src/malloc_hook.c b/src/malloc_hook.c
  }
  
  EXTERNAL_API int __posix_memalign(void **r, size_t a, size_t s) {
-     /* All iso_alloc allocations are 8 byte aligned */
+-    /* All iso_alloc allocations are 8 byte aligned */
 -    *r = iso_alloc(s);
-+    *r = iso_alloc(s ? s : 1);
++    if(a == 0 || (a & (a - 1)) != 0 || (a % sizeof(void *)) != 0) {
++        return EINVAL;
++    }
++
++    *r = _iso_alloc_aligned(s ? s : 1, a);
  
      if(*r != NULL) {
          return 0;
-@@ -70,17 +104,17 @@
+@@ -69,18 +106,39 @@
+ }
  
  EXTERNAL_API void *__libc_memalign(size_t alignment, size_t s) {
-     /* All iso_alloc allocations are 8 byte aligned */
+-    /* All iso_alloc allocations are 8 byte aligned */
 -    return iso_alloc(s);
-+    return iso_alloc(s ? s : 1);
++    if(alignment < sizeof(void *)) {
++        alignment = sizeof(void *);
++    }
++
++    if((alignment & (alignment - 1)) != 0) {
++        return NULL;
++    }
++
++    return _iso_alloc_aligned(s ? s : 1, alignment);
  }
  
  EXTERNAL_API void *aligned_alloc(size_t alignment, size_t s) {
-     /* All iso_alloc allocations are 8 byte aligned */
+-    /* All iso_alloc allocations are 8 byte aligned */
 -    return iso_alloc(s);
-+    return iso_alloc(s ? s : 1);
++    if(alignment < sizeof(void *)) {
++        alignment = sizeof(void *);
++    }
++
++    if((alignment & (alignment - 1)) != 0) {
++        return NULL;
++    }
++
++    return _iso_alloc_aligned(s ? s : 1, alignment);
  }
  
  EXTERNAL_API void *memalign(size_t alignment, size_t s) {
-     /* All iso_alloc allocations are 8 byte aligned */
+-    /* All iso_alloc allocations are 8 byte aligned */
 -    return iso_alloc(s);
-+    return iso_alloc(s ? s : 1);
++    if(alignment < sizeof(void *)) {
++        alignment = sizeof(void *);
++    }
++
++    if((alignment & (alignment - 1)) != 0) {
++        return NULL;
++    }
++
++    return _iso_alloc_aligned(s ? s : 1, alignment);
  }
  
  #if __ANDROID__ || __FreeBSD__
-@@ -102,16 +136,16 @@
+@@ -102,16 +160,16 @@
  #endif
  
  static void *libc_malloc(size_t s, const void *caller) {
