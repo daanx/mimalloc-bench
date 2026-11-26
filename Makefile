@@ -171,12 +171,10 @@ extern/ff/.built: extern/ff/.unpacked
 	make -C $(@D) $(ff_ENV) -j$(PROCS)
 	touch $@
 
-#hd: fix in Makefile.
+#hd: cmake
 extern/hd/.built: extern/hd/.unpacked
-	sed -i_orig 's/-arch arm64e//g' $(@D)/src/GNUmakefile
-	sed -i_orig 's/-arch arm64//g' $(@D)/src/GNUmakefile
-	patch -d $(@D) -p1 -N -r- < patches/hoard.patch
-	make -C $(@D) $(hd_ENV) -j$(PROCS)
+	cmake -S $(@D) -B $(@D)/build -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(@D)/build -j$(PROCS)
 	touch $@
 
 #hm/hml (hm light): built from the same source, differently configured
@@ -223,20 +221,26 @@ extern/mi/.built extern/mi2/.built extern/mi3/.built: extern/%/.built: extern/%/
 
 #mesh: cmake, out of tree
 extern/mesh/.built: extern/mesh/.unpacked
+	patch -d $(@D) -p1 -N -r- < patches/mesh.patch
 	cmake -S $(@D) -B $(@D)/out
 	# single job: https://github.com/plasma-umass/Mesh/issues/96
 	cmake --build $(@D)/out -j1
 	touch $@
 
-#nomesh: cmake, with meshing switched off, on a second copy of the source
-extern/nomesh/.built: extern/mesh/.unpacked
+#nomesh: cmake, with meshing switched off, on a fresh unpatched copy
+extern/nomesh/.built: archives/mesh-$(mesh_LABEL).tar.gz
 	rm -rf $(@D)
 	mkdir -p $(@D)
-	cp -a $(<D)/. $(@D)/
-	rm -rf $(@D)/out $(@D)/build
+	tar -x --strip-components=1 --overwrite -f $< -C $(@D)
 	cmake -S $(@D) -B $(@D)/out -DDISABLE_MESHING=ON
 	# single job: https://github.com/plasma-umass/Mesh/issues/96
 	cmake --build $(@D)/out -j1
+	touch $@
+
+#mng: make, with a patch
+extern/mng/.built: extern/mng/.unpacked
+	patch -d $(@D) -p1 -N -r- < patches/mng.patch
+	make -C $(@D) $(mng_ENV) -j$(PROCS)
 	touch $@
 
 # rmalloc: uses CMake

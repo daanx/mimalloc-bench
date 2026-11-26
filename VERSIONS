@@ -2,7 +2,7 @@ dh:      4467f2b0,           4467f2b0bacf2e2a4d3a8eb7b89972a4d74ee290, https://g
 ff:      2f24ecf7,           2f24ecf728886dc0ea29b5f2adab2df9c881befa, https://github.com/bwickman97/ffmalloc
 fg:      bfdf6d9a,           bfdf6d9a5b25c3f8f974c6a2ac7bb286e5c2b296, https://github.com/UTSASRG/FreeGuard
 gd:      9e85978a,           9e85978aa2e883010cb5d0c4ae1ae7fe7b8fbe6c, https://github.com/UTSASRG/Guarder
-hd:      6577c22b,           6577c22b1768656be5e611da67c5bebe65f33c88, https://github.com/emeryberger/Hoard
+hd:      cbcf5f09,           cbcf5f094811cfa05efa2a514884587b928ef491, https://github.com/emeryberger/Hoard
 hm:      11,                 995ce07d4559460b1060991ada7bca1482e4271b, https://github.com/GrapheneOS/hardened_malloc
 iso:     1.2.5,              2670d5f5e41220e126569e78cb4e3e0379d6cb08, https://github.com/struct/isoalloc
 je:      5.4.0,              7a34f18502e7b222724097cdcd499b437d189acc, https://github.com/jemalloc/jemalloc
@@ -23,7 +23,7 @@ pa:      e6c10be6,           e6c10be65e0e916f4befb695779483a44e4a8439, https://g
 redis:   6.2.7,              e6f67092f8d4d81761a60c46011d1ff1dc3c2628, https://github.com/redis/redis
 rmalloc: 3498679f,           3498679f5240c11a9d88b9aa4ef45e79ef5e6eaa, https://github.com/newell-romario/rmalloc
 rocksdb: 11.1.2,             3b446089141659fad25328c5ea3e7ed283df46e4, https://github.com/facebook/rocksdb
-rp:      2.0.1,              beef233c176b235587c0145f765e4316e5ca60d1, https://github.com/mjansson/rpmalloc
+rp:      b4dce427,           b4dce427dd5b25a156994bc2cb57ea04c34ff94f, https://github.com/mjansson/rpmalloc
 sc:      9ef491c3,           9ef491c391f4d78c23990142ad8b51fa1c1879b8, https://github.com/cksystemsgroup/scalloc
 scudo:   0e42735b,           0e42735b0df2071a34bdee283ec2387c3c7262c3, https://github.com/llvm/llvm-project
 sg:      6d7d065a,           6d7d065ac9ce7203250aa44b4b333b58ca93c803, https://github.com/ssrg-vt/SlimGuard

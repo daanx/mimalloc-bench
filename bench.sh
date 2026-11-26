@@ -97,7 +97,7 @@ alloc_lib_add "dh"     "$localdevdir/dh/build/libdieharder$extso"
 alloc_lib_add "ff"     "$localdevdir/ff/libffmallocnpmt$extso"
 alloc_lib_add "fg"     "$localdevdir/fg/libfreeguard$extso"
 alloc_lib_add "gd"     "$localdevdir/gd/libguarder$extso"
-alloc_lib_add "hd"     "$localdevdir/hd/src/libhoard$extso"
+alloc_lib_add "hd"     "$localdevdir/hd/build/libhoard$extso"
 alloc_lib_add "hm"     "$localdevdir/hm/out/libhardened_malloc$extso"
 alloc_lib_add "hml"    "$localdevdir/hm/out-light/libhardened_malloc-light$extso"
 alloc_lib_add "iso"    "$localdevdir/iso/build/libisoalloc$extso"
@@ -695,7 +695,7 @@ function run_test_env_cmd { # <test name> <allocator name> <environment args> <c
          echo "$1 $2: $reason" >&2
          if test -s "$outfile"; then
            echo "$1 $2: last output" >&2
-           tail -n 15 "$outfile" | sed "s/^/$1 $2 | /" >&2
+           cat "$outfile" | sed "s/^/$1 $2 | /" >&2
          else
            echo "$1 $2: wrote nothing to $(basename "$outfile")" >&2
          fi

@@ -1,0 +1,38 @@
+diff -ruN a/src/meshable_arena.cc b/src/meshable_arena.cc
+--- a/src/meshable_arena.cc	2026-11-24 03:09:26.000000000 +0100
++++ b/src/meshable_arena.cc	2026-11-25 18:17:22.021649263 +0100
+@@ -6,6 +6,8 @@
+ #include "meshable_arena.h"
+ #include "runtime.h"
+ 
++#include <errno.h>
++
+ namespace mesh {
+ 
+ template <size_t PageSize>
+@@ -37,8 +39,10 @@
+   char buf[8];
+   memset(buf, 0, 8);
+ 
+-  while (read(_forkPipe[0], buf, 4) == EAGAIN) {
+-  }
++  ssize_t r;
++  do {
++    r = read(_forkPipe[0], buf, 4);
++  } while (r == -1 && errno == EINTR);
+   close(_forkPipe[0]);
+ 
+   d_assert(strcmp(buf, "ok") == 0);
+@@ -161,8 +165,10 @@
+ 
+   close(oldFd);
+ 
+-  while (write(_forkPipe[1], "ok", strlen("ok")) == EAGAIN) {
+-  }
++  ssize_t w;
++  do {
++    w = write(_forkPipe[1], "ok", strlen("ok"));
++  } while (w == -1 && errno == EINTR);
+   close(_forkPipe[1]);
+ 
+   _forkPipe[0] = -1;

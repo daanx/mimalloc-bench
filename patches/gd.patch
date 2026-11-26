@@ -1,6 +1,36 @@
---- a/real.cpp
-+++ b/real.cpp
-@@ -43,8 +43,15 @@
+diff -ruN a/libguarder.cpp b/libguarder.cpp
+--- a/libguarder.cpp	2018-10-11 00:22:28.000000000 +0200
++++ b/libguarder.cpp	2026-11-25 17:46:48.838221656 +0100
+@@ -394,3 +394,17 @@
+ int pthread_join(pthread_t tid, void** retval) {
+ 	return xthread::getInstance().thread_join(tid, retval);
+ }
++
++// pthread_exit must land in the trampoline's PTHREADEXIT_CODE handler or
++// the thread's slot leaks; the initial thread's pthread_exit still ends
++// the process.
++void pthread_exit(void *retval) {
++	if(heapInitStatus != E_HEAP_INIT_DONE) {
++			heapinitialize();
++	}
++	if(xthread::getInstance().isInitialThread()) {
++		Real::pthread_exit(retval);
++	}
++	pendingExitRetval = retval;
++	throw PTHREADEXIT_CODE;
++}
+diff -ruN a/real.cpp b/real.cpp
+--- a/real.cpp	2018-10-11 00:22:28.000000000 +0200
++++ b/real.cpp	2026-11-25 17:46:48.838221656 +0100
+@@ -36,6 +36,7 @@
+ 	DEFINE_WRAPPER(pthread_create);
+ 	DEFINE_WRAPPER(pthread_join);
+ 	DEFINE_WRAPPER(pthread_kill);
++	DEFINE_WRAPPER(pthread_exit);
+ 
+ 	void initializer() {
+ 		INIT_WRAPPER(free, RTLD_NEXT);
+@@ -43,10 +44,18 @@
  		INIT_WRAPPER(malloc, RTLD_NEXT);
  //		INIT_WRAPPER(realloc, RTLD_NEXT);
  		
@@ -17,3 +47,86 @@
  		INIT_WRAPPER(pthread_create, pthread_handle);
  		INIT_WRAPPER(pthread_join, pthread_handle);
  		INIT_WRAPPER(pthread_kill, pthread_handle);
++		INIT_WRAPPER(pthread_exit, pthread_handle);
+ 	}
+ }
+diff -ruN a/real.hh b/real.hh
+--- a/real.hh	2018-10-11 00:22:28.000000000 +0200
++++ b/real.hh	2026-11-25 17:46:48.838221656 +0100
+@@ -40,6 +40,7 @@
+   DECLARE_WRAPPER(pthread_create);
+   DECLARE_WRAPPER(pthread_join);
+   DECLARE_WRAPPER(pthread_kill);
++  DECLARE_WRAPPER(pthread_exit);
+ };
+ 
+ #endif
+diff -ruN a/xthread.cpp b/xthread.cpp
+--- a/xthread.cpp	2018-10-11 00:22:28.000000000 +0200
++++ b/xthread.cpp	2026-11-25 17:46:48.838221656 +0100
+@@ -32,3 +32,6 @@
+ 	#endif
+ 	return current->outputBuf;
+ }
++
++// set by the pthread_exit interposer in libguarder.cpp
++__thread void *pendingExitRetval = NULL;
+diff -ruN a/xthread.hh b/xthread.hh
+--- a/xthread.hh	2018-10-11 00:22:28.000000000 +0200
++++ b/xthread.hh	2026-11-25 17:46:48.838221656 +0100
+@@ -45,6 +45,9 @@
+ extern intptr_t globalStackAddr;
+ #endif
+ 
++// Set by the pthread_exit interposer; the trampoline returns it to glibc.
++extern __thread void *pendingExitRetval;
++
+ class xthread {
+ 
+ 	public:
+@@ -227,23 +230,43 @@
+       if(err != PTHREADEXIT_CODE){
+         throw err;
+       }
++      result = pendingExitRetval;
+     }
+ 
++    // Detached threads are never joined; free the slot here.
++    xthread::getInstance().reclaimCurrentThread(current);
++
+  	  return result;
+   }
+ 
++	// True for the process's initial thread, whose pthread_exit ends it.
++	bool isInitialThread() {
++		return pthread_self() == _threads[0].pthreadt;
++	}
++
++	// Frees the calling thread's slot; pthread_join used to be the only path.
++	void reclaimCurrentThread(thread_t * thread) {
++		acquireGlobalLock();
++		if(!thread->available) {
++			thread->available = true;
++			_aliveThreads--;
++		}
++		releaseGlobalLock();
++	}
++
+ 	int thread_join(pthread_t tid, void ** retval) {
+ 		int joinretval;
+ 		if((joinretval = Real::pthread_join(tid, retval)) == 0) {
+ 				int joinee = -1;
+ 
+ 				acquireGlobalLock();
++				// Skip slots freed by the exiting thread itself or recycled since.
+ 				if(!_xmap.find((void *)tid, sizeof(void *), &joinee)) {
+ 						PRERR("Cannot find joinee index for thread %p", (void *)tid);
+-				} else {
++				} else if(_threads[joinee].pthreadt == tid && !_threads[joinee].available) {
+ 						_threads[joinee].available = true;
++						_aliveThreads--;
+ 				}
+-				_aliveThreads--;
+ 				releaseGlobalLock();
+ 		}
+ 		return joinretval;
