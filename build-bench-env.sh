@@ -526,6 +526,9 @@ fi
 
 if test "$setup_iso" = "1"; then
   checkout iso $version_iso https://github.com/struct/isoalloc
+  set +e
+  patch -p1 -N -r- < ../../patches/iso.patch
+  set -e
   make library -j $procs
   popd
 fi
