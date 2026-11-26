@@ -88,6 +88,19 @@ jobs:
       - name: Raise vm.max_map_count for the benchmarks
         run: sudo sysctl -w vm.max_map_count=1048576
 
+      - name: Cache downloaded archives
+        id: archives
+        uses: actions/cache@v6
+        with:
+          path: archives
+          key: archives-${{ hashFiles('VERSIONS', 'Makefile') }}
+          restore-keys: |
+            archives-
+
+      - name: Download archives
+        if: steps.archives.outputs.cache-hit != 'true'
+        run: make clean-archives download-archives
+
       - name: Build allocator and run benchmarks in Docker
         id: docker_build
         uses: docker/build-push-action@v7
