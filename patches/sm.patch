@@ -1,0 +1,11 @@
+diff --git a/src/cache.cc b/src/cache.cc
+--- a/src/cache.cc
++++ b/src/cache.cc
+@@ -93,6 +93,7 @@
+ 	  large_free(head);
+ 	}
+       }
++      cache_for_thread.cb[bin].co[j] = empty_cached_objects;
+     }
+   }
+   //printf("recovered %ld\n", recovered);
