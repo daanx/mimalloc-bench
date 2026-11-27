@@ -12,6 +12,10 @@ on:
   schedule:
     - cron: '0 0 * * 1'
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-run:
     strategy:
