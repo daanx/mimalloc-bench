@@ -18,6 +18,26 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Log in to the container registry
+        uses: docker/login-action@v4
+        continue-on-error: true
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Compute the cache image reference
+        id: cacheref
+        env:
+          WRITE_CACHE: ${{ github.event_name == 'push' || github.event_name == 'schedule' }}
+        run: |
+          ref="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          # only pushes and the cron may write the cache; PR runs restore read-only
+          if test "$WRITE_CACHE" = true; then
+            echo "cache_to=type=registry,ref=$ref:cache-${{ inputs.platform }},mode=max" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build benchmarks in Docker
         id: docker_build
         uses: docker/build-push-action@v7
@@ -29,8 +49,38 @@ jobs:
           target: bench-env
           build-args: |
             platform=${{ inputs.platform }}
-          cache-from: type=gha,scope=buildkit_${{ inputs.platform }}
-          cache-to: type=gha,mode=max,scope=buildkit_${{ inputs.platform }}
+          cache-from: type=registry,ref=${{ steps.cacheref.outputs.ref }}:cache-${{ inputs.platform }}
+          cache-to: ${{ steps.cacheref.outputs.cache_to }}
+
+      - name: Prune superseded cache versions
+        if: steps.cacheref.outputs.cache_to != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref="${{ steps.cacheref.outputs.ref }}"
+          owner="${ref#ghcr.io/}"; owner="${owner%%/*}"
+          package="${ref##*/}"
+          # package owners here are User accounts (daanx, fork owners), so the
+          # packages API lives under /users/ - switch to /orgs/ if that changes
+          if ! gh api --paginate "/users/$owner/packages/container/$package/versions?per_page=100" > "$RUNNER_TEMP/versions.json" 2>/dev/null; then
+            echo "no cache package yet; nothing to prune"
+            exit 0
+          fi
+          # a tag push moves the tag and leaves the superseded version untagged;
+          # delete untagged versions from before this run started
+          ids="$(jq -rs --arg cutoff "$(date -u -d '1 minute ago' +%Y-%m-%dT%H:%M:%SZ)" '
+            map(.[])
+            | map(select((.metadata.container.tags // []) | length == 0))
+            | map(select((.created_at | sub("\\.[0-9]+Z$"; "Z")) < $cutoff))
+            | .[].id
+          ' "$RUNNER_TEMP/versions.json")"
+          for id in $ids; do
+            if gh api -X DELETE "/users/$owner/packages/container/$package/versions/$id" > /dev/null 2>&1; then
+              echo "pruned superseded cache version $id"
+            else
+              echo "warning: could not prune cache version $id"
+            fi
+          done
 
   build-and-benchmark-allocator:
     runs-on: ubuntu-latest
@@ -79,6 +129,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Log in to the container registry
+        uses: docker/login-action@v4
+        continue-on-error: true
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Compute the cache image reference
+        id: cacheref
+        run: echo "ref=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
       - name: Unload host AppArmor profiles
         run: sudo aa-teardown || true
 
@@ -104,4 +166,4 @@ jobs:
             allocator=${{ matrix.allocator }}
             benchs=${{ (contains('lt,lf,gd', matrix.allocator) && 'cfrac espresso barnes larson-sized mstress rptest gs lua') || ('fg' == matrix.allocator && 'cfrac espresso barnes gs lua') || ('ff' == matrix.allocator && 'allt no-sh8bench no-xmalloc-test') || 'allt' }}
             repeats=1
-          cache-from: type=gha,scope=buildkit_${{ inputs.platform }}
+          cache-from: type=registry,ref=${{ steps.cacheref.outputs.ref }}:cache-${{ inputs.platform }}
